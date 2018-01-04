@@ -5,7 +5,7 @@ setup(
     version='0.0.1.dev0',
     keywords='mapper',
     description='A framework for data analysis and visualization',
-    license='TBD',
+    license='UNLICENSED',
     url='https://github.com/yaodong/mapper-core',
     author='Yaodong Zhao',
     author_email='yaodong.zhao@utah.edu',
