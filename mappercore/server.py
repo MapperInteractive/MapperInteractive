@@ -17,23 +17,23 @@ class Server:
         self.init_template_loader()
 
     def serve(self, app):
-        @self.flask.route('/{0}/'.format(app.name))
+        @self.flask.route('/app/{0}/'.format(app.name))
         def app_index():
             return render_template('index.html', app=app)
 
-        @self.flask.route('/{0}/callbacks/<string:name>'.format(app.name), methods=['POST'])
+        @self.flask.route('/app/{0}/callbacks/<string:name>'.format(app.name), methods=['POST'])
         def app_call(name):
             return jsonify(app.trigger(name, request.json))
 
-        @self.flask.route('/{0}/static/<path:filename>'.format(app.name))
+        @self.flask.route('/static/{0}/<path:filename>'.format(app.name))
         def app_static(filename):
             return send_from_directory(path.join(self.cwd, 'static'), filename)
 
-        @self.flask.route('/{0}/scripts/<path:filename>'.format(app.name))
+        @self.flask.route('/scripts/{0}/<path:filename>'.format(app.name))
         def app_scripts(filename):
             return send_from_directory(path.join(self.cwd, 'scripts'), filename)
 
-        @self.flask.route('/_/scripts/<path:filename>')
+        @self.flask.route('/scripts/_/<path:filename>')
         def root_scripts(filename):
             return send_from_directory(path.join(self.flask.root_path, 'scripts'), filename)
 
