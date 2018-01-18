@@ -1,9 +1,10 @@
 class App:
 
-    def __init__(self, name):
+    def __init__(self, name, version=0):
         super().__init__()
 
         self.name = name
+        self.version = version
         self.handlers = {}
 
     def callback(self, func):
