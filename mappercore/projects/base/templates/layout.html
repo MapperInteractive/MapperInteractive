@@ -1,0 +1,62 @@
+<!doctype html>
+<head>
+  <title>Mapper Core</title>
+  <link rel=stylesheet type=text/css href="{{ url_for('base.styles', filename='semantic.min.css') }}">
+  <link rel=stylesheet type=text/css href="{{ url_for('base.styles', filename='styles.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div class="body">
+  {% block body %}{% endblock %}
+</div>
+<script src="{{ url_for('base.components', filename='vendors/require-2.3.5-min.js') }}"></script>
+<script defer>
+  require.config({
+    baseUrl: '/',
+    paths: {
+      jquery: 'base/components/vendors/jquery-3.2.1-min',
+      underscore: 'base/components/vendors/underscore-1.8.3-min',
+      backbone: 'base/components/vendors/backbone-1.3.3-min',
+      semantic: 'base/components/vendors/semantic-2.2.13-min',
+      d3: 'base/components/vendors/d3-4.12.2-min',
+      project: 'base/components/project'
+    },
+    shim: {
+      d3: {
+        exports: 'd3'
+      },
+      jquery: {
+        exports: "$"
+      },
+      underscore: {
+        exports: "_"
+      },
+      backbone: {
+        deps: ['underscore', 'jquery'],
+        exports: 'Backbone'
+      }
+    }
+  });
+  (function () {
+    var load = requirejs.load;
+    requirejs.load = function (context, moduleId, url) {
+      if (!(moduleId in context.config.paths)) {
+        var modules = moduleId.split('/');
+        if (modules.length === 1) {
+          modules.unshift('base');
+        }
+        url = context.config.baseUrl + modules[0] + '/components/' + modules.slice(1).join('/') + '.js';
+      }
+      return load(context, moduleId, url);
+    };
+  }());
+
+  define('{{ project.name }}/project', ['base/project'], function (Project) {
+    var project = new Project;
+    project.name = '{{ project.name }}';
+    return project;
+  });
+
+  require(['{{ project.name }}/main']);
+</script>
+</body>

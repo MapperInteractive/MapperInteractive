@@ -1,48 +1,31 @@
-from os import path, getcwd
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from mappercore.project import Project
+from os import path
+from flask import Flask, render_template
 import jinja2
 
 
 class Server:
-    def __init__(self, name=None, cwd=None):
+    def __init__(self):
         super().__init__()
+        self._projects = dict()
 
-        if name is None:
-            self.name = __name__
+        self.register(Project('base', path=path.join(path.dirname(__file__), 'projects', 'base')))
 
-        if cwd is None:
-            self.cwd = getcwd()
-
-        self.flask = Flask(self.name, static_url_path='/_/static')
-        self.init_template_loader()
-
-    def serve(self, app):
-        @self.flask.route('/app/{0}/'.format(app.name))
-        def app_index():
-            return render_template('index.html', app=app)
-
-        @self.flask.route('/app/{0}/callbacks/<string:name>'.format(app.name), methods=['POST'])
-        def app_call(name):
-            return jsonify(app.trigger(name, request.json))
-
-        @self.flask.route('/static/{0}/<path:filename>'.format(app.name))
-        def app_static(filename):
-            return send_from_directory(path.join(self.cwd, 'static'), filename)
-
-        @self.flask.route('/scripts/{0}/<path:filename>'.format(app.name))
-        def app_scripts(filename):
-            return send_from_directory(path.join(self.cwd, 'scripts'), filename)
-
-        @self.flask.route('/scripts/_/<path:filename>')
-        def root_scripts(filename):
-            return send_from_directory(path.join(self.flask.root_path, 'scripts'), filename)
-
-    def init_template_loader(self):
-        loader = jinja2.ChoiceLoader([
-            self.flask.jinja_loader,
-            jinja2.FileSystemLoader(path.join(self.cwd, 'templates')),
-        ])
-        self.flask.jinja_loader = loader
+    def register(self, project):
+        assert project.name not in self._projects.keys()
+        self._projects[project.name] = project
 
     def run(self):
-        self.flask.run()
+        flask = Flask(__name__, static_folder=None, template_folder=None)
+        flask.jinja_loader = jinja2.PrefixLoader({
+            k: jinja2.FileSystemLoader(path.join(p.path, 'templates'))
+            for k, p in self._projects.items()})
+
+        for k, p in self._projects.items():
+            flask.register_blueprint(p.blueprint)
+
+        @flask.route('/')
+        def index():
+            return render_template('base/welcome.html')
+
+        flask.run(host='0.0.0.0')
