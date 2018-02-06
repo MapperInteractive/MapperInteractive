@@ -1,0 +1,21 @@
+.directed-graph {
+
+}
+
+.directed-graph circle.node {
+  r: 5;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.directed-graph line.link {
+  stroke: #777;
+  stroke-width: 2;
+}
+
+
+/* base/directed-graph/node-selectable */
+.directed-graph .node.selected {
+  stroke: red;
+  fill: yellow;
+}
