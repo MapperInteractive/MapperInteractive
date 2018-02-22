@@ -1,0 +1,43 @@
+.base-graph {
+
+}
+
+.base-graph circle.node {
+  r: 5;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.base-graph line.link {
+  stroke: #777;
+  stroke-width: 2;
+}
+
+/* base/directed-graph/node-selectable */
+.base-graph .node.selected {
+  stroke: red;
+  fill: yellow;
+}
+
+.base-graph .node.path-select-not-allowed {
+  fill-opacity: 0.3;
+  stroke-opacity: 0.3;
+}
+
+.base-graph .node.path-select-anchor {
+  stroke: #0000FF;
+  stroke-width: 4;
+}
+
+.base-graph .node.path-select__potential-anchor {
+  stroke: #068AFF;
+  stroke-width: 3;
+}
+
+.base-graph .node.path-select__potential-select {
+  stroke: red;
+  fill: yellow;
+  stroke-width: 3;
+  stroke-opacity: 0.3;
+  fill-opacity: 0.3;
+}

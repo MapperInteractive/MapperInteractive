@@ -1,0 +1,60 @@
+<!doctype html>
+<head>
+  <title>Mapper Core</title>
+  <link rel=stylesheet type=text/css href="{{ url_for('base.styles', filename='bootstrap-v4.0.0-min.css') }}">
+  <link rel=stylesheet type=text/css href="{{ url_for('base.styles', filename='styles.css') }}">
+  <link rel=stylesheet type=text/css href="{{ url_for('abi.styles', filename='styles.css') }}">
+  <script src="{{ url_for('base.vendors', filename='jquery.min.js') }}"></script>
+  <script src="{{ url_for('base.vendors', filename='bootstrap.bundle.min.js') }}"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div class="container-fluid">
+  {% block body %}{% endblock %}
+</div>
+<script src="{{ url_for('base.vendors', filename='require.min.js') }}"></script>
+<script defer>
+  require.config({
+    baseUrl: '/',
+    paths: {
+      jquery: 'base/vendors/jquery.min',
+      underscore: 'base/vendors/underscore.min',
+      backbone: 'base/vendors/backbone.min',
+      d3: 'base/vendors/d3.min',
+      project: 'base/scripts/project',
+      app: 'base/scripts/app'
+    },
+    shim: {
+      d3: {
+        exports: 'd3'
+      },
+      jquery: {
+        exports: "$"
+      },
+      underscore: {
+        exports: "_"
+      },
+      backbone: {
+        deps: ['underscore', 'jquery'],
+        exports: 'Backbone'
+      }
+    }
+  });
+  (function () {
+    var load = requirejs.load;
+    requirejs.load = function (context, moduleId, url) {
+      if (!(moduleId in context.config.paths)) {
+        var modules = moduleId.split('/');
+        if (modules.length === 1) {
+          modules.unshift('base');
+        }
+        url = context.config.baseUrl + modules[0] + '/scripts/' + modules.slice(1).join('/') + '.js';
+        console.log(url);
+      }
+      return load(context, moduleId, url);
+    };
+  }());
+
+  require(['{{ project.name }}/main']);
+</script>
+</body>

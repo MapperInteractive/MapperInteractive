@@ -20,10 +20,11 @@ class Project:
             static_folder=None)
 
         self.blueprint.route('/')(self.router.index)
-        self.blueprint.route('/components/<path:filename>')(self.router.components)
+        self.blueprint.route('/scripts/<path:filename>')(self.router.scripts)
         self.blueprint.route('/files/<path:filename>')(self.router.files)
         self.blueprint.route('/callback/<path:filename>')(self.router.callback)
         self.blueprint.route('/styles/<path:filename>')(self.router.styles)
+        self.blueprint.route('/vendors/<path:filename>')(self.router.vendors)
 
     def on(self, func):
         self.events[func.__name__] = func

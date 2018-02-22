@@ -9,7 +9,7 @@ class Server:
         super().__init__()
         self._projects = dict()
 
-        self.register(Project('base', path=path.join(path.dirname(__file__), 'projects', 'base')))
+        self.register(Project('base', path=path.join(path.dirname(__file__), 'visualization', 'dist')))
 
     def register(self, project):
         assert project.name not in self._projects.keys()
