@@ -28,13 +28,13 @@ define(function (require) {
     },
 
     render() {
+      d3.select(this.el).html("");
+
       this.container = d3.select(this.el)
         .append('svg')
         .attr('width', this.model.get('width'))
         .attr('height', this.model.get('height'))
         .classed('base-graph', true);
-
-      this.container.html("");
 
       this.sendEvent('graph:willRender');
       this._renderLinks();
