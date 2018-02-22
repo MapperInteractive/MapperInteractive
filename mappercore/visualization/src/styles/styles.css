@@ -15,17 +15,27 @@
 
 /* base/directed-graph/node-selectable */
 .base-graph .node.selected {
-  stroke: red;
-  fill: yellow;
+  stroke: #ffc300;
+  stroke-width: 4;
 }
 
-.base-graph .node.path-select-not-allowed {
+.base-graph .node.path-select__not-allowed {
   fill-opacity: 0.3;
   stroke-opacity: 0.3;
 }
 
-.base-graph .node.path-select-anchor {
-  stroke: #0000FF;
+.base-graph .node.path-select__anchor {
+  stroke: #008fe1;
+  stroke-width: 4;
+}
+
+.base-graph .node.path-select__anchor--first {
+  stroke: #00853e;
+  stroke-width: 4;
+}
+
+.base-graph .node.path-select__anchor--last {
+  stroke: #893301;
   stroke-width: 4;
 }
 
@@ -38,6 +48,11 @@
   stroke: red;
   fill: yellow;
   stroke-width: 3;
+  stroke-opacity: 0.3;
+  fill-opacity: 0.3;
+}
+
+.base-graph .link.path-select__not-allowed {
   stroke-opacity: 0.3;
   fill-opacity: 0.3;
 }

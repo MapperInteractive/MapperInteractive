@@ -36,28 +36,13 @@ define(function (require) {
         .attr('height', this.model.get('height'))
         .classed('base-graph', true);
 
-      this.sendEvent('graph:willRender');
-      this._renderLinks();
-      this._renderNodes();
-      this.sendEvent('graph:didRender');
-    },
+      this.links = null;
+      this.nodes = null;
 
-    _renderLinks() {
-      this.links = this.container
-        .selectAll("line")
-        .data(this.model.get('data').links)
-        .enter()
-        .append("line")
-        .classed('link', true)
-        .on("click", () => {
-          this.sendEvent('link:clicked', d3.event);
-        })
-        .on("mouseover", () => {
-          this.sendEvent('link:mouseover', d3.event);
-        })
-        .on("mouseout", () => {
-          this.sendEvent('link:mouseout', d3.event);
-        });
+      this.sendEvent('graph:willRender');
+      this._renderNodes();
+      this._renderLinks();
+      this.sendEvent('graph:didRender');
     },
 
     _renderNodes() {
@@ -79,9 +64,27 @@ define(function (require) {
         });
     },
 
+    _renderLinks() {
+      this.links = this.container
+        .selectAll("line")
+        .data(this.model.get('data').links)
+        .enter()
+        .append("line")
+        .classed('link', true)
+        .on("click", () => {
+          this.sendEvent('link:clicked', d3.event);
+        })
+        .on("mouseover", () => {
+          this.sendEvent('link:mouseover', d3.event);
+        })
+        .on("mouseout", () => {
+          this.sendEvent('link:mouseout', d3.event);
+        });
+    },
+
     sendEvent(name, context) {
-      this.modes.trigger(name, context);
       this.behaviors.trigger(name, context);
+      this.modes.trigger(name, context);
     }
   });
 });

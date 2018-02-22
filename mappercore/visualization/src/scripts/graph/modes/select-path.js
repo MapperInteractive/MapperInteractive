@@ -3,7 +3,10 @@ define(function (require) {
   const GraphMode = require('../mode');
   const d3 = require('d3');
   const _ = require('underscore');
-  const CLASS_UNSELECTABLE = 'path-select-not-allowed';
+  const CLASS_UNSELECTABLE = 'path-select__not-allowed';
+  const CLASS_ANCHOR = 'path-select__anchor';
+  const CLASS_FIRST_ANCHOR = 'path-select__anchor--first';
+  const CLASS_LAST_ANCHOR = 'path-select__anchor--last';
   const CLASS_POTENTIAL_ANCHOR = 'path-select__potential-anchor';
   const CLASS_POTENTIAL_SELECT = 'path-select__potential-select';
 
@@ -23,9 +26,8 @@ define(function (require) {
 
     didActivate() {
       super.didActivate();
-
       this.markInitialCandidates();
-
+      this.listenTo('graph:didRender', (e) => this.graphDidRender(e));
       this.listenTo('node:clicked', (e) => this.nodeClicked(e));
       this.listenTo('node:mouseover', (e) => this.nodeMouseover(e));
       this.listenTo('node:mouseout', (e) => this.nodeMouseout(e));
@@ -35,11 +37,20 @@ define(function (require) {
       if (this.draggable) {
         this.draggable.resume();
       }
+      this.clear();
+      this.stopListening();
     }
 
     didDeactivate() {
       super.didDeactivate();
       this.stopListening();
+    }
+
+    graphDidRender(e) {
+      this.clear();
+      this.anchors = [];
+      this.preparing();
+      this.markInitialCandidates();
     }
 
     nodeClicked(e) {
@@ -48,16 +59,15 @@ define(function (require) {
         return false;
       }
 
-      target.classed("path-select-anchor", true);
+      target.classed(CLASS_ANCHOR, true);
       let clickedNodeId = target.datum()["id"];
-
-      console.log(['clickedNodeId', clickedNodeId]);
 
       // for the first anchor, only update the shortest paths
       if (this.anchors.length === 0) {
         this.shortestPaths = this.dijkstra(clickedNodeId);
         this.setCandidates(_.flatten(_.pairs(this.shortestPaths)));
         this.anchors.push(clickedNodeId);
+        this.findNodeById(clickedNodeId).classed(CLASS_FIRST_ANCHOR, true);
         return;
       }
 
@@ -66,13 +76,21 @@ define(function (require) {
       let previousAnchorId = this.anchors[this.anchors.length - 1];
       this.selectAlongThePath(previousAnchorId, clickedNodeId);
       this.anchors.push(clickedNodeId);
+      this.findNodeById(previousAnchorId).classed(CLASS_LAST_ANCHOR, false);
+      this.findNodeById(clickedNodeId).classed(CLASS_LAST_ANCHOR, true);
 
       // update shortest paths base on latest anchor
       this.shortestPaths = this.dijkstra(clickedNodeId);
     }
 
     nodeMouseover(e) {
-      let nodeId = d3.select(e.target).datum()["id"];
+      let target = d3.select(e.target);
+
+      if (target.classed(CLASS_UNSELECTABLE)) {
+        return;
+      }
+
+      let nodeId = target.datum()["id"];
       this.highlightPotentialAnchor(nodeId);
 
       if (this.anchors.length > 0) {
@@ -135,6 +153,11 @@ define(function (require) {
       this.graph.nodes.filter((d) => {
         return nodeIdList.indexOf(d["id"]) === -1;
       }).classed(CLASS_UNSELECTABLE, true);
+
+      this.graph.links.filter((d) => {
+        return nodeIdList.indexOf(d['source']['id']) === -1
+          && nodeIdList.indexOf(d['target']['id']) === -1;
+      }).classed(CLASS_UNSELECTABLE, true);
     }
 
     preparing() {
@@ -189,6 +212,11 @@ define(function (require) {
 
     findNodeById(id) {
       return this.graph.nodes.filter((d) => d["id"] === id);
+    }
+
+    clear() {
+      this.clearPotentialSelection();
+      this.graph.nodes.classed(CLASS_UNSELECTABLE, false);
     }
   }
 
