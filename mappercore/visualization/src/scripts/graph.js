@@ -24,10 +24,13 @@ define(function (require) {
       this.behaviors = new BehaviorsHelper(this);
 
       this.modes.add(new NormalMode());
-      this.modes.activate('Normal');
+      this.modes.activate('view');
     },
 
     render() {
+      this.model.set('width', this.$el.width());
+      this.$el.addClass('graph');
+
       d3.select(this.el).html("");
 
       this.container = d3.select(this.el)
@@ -40,8 +43,8 @@ define(function (require) {
       this.nodes = null;
 
       this.sendEvent('graph:willRender');
-      this._renderNodes();
       this._renderLinks();
+      this._renderNodes();
       this.sendEvent('graph:didRender');
     },
 

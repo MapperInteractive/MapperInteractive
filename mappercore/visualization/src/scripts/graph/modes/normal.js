@@ -2,9 +2,17 @@ define(function (require) {
 
   const GraphMode = require('../mode');
 
-  class Normal extends GraphMode {
+  return class View extends GraphMode {
 
-  }
+    constructor() {
+      super();
+      this.name = 'view';
+      this.label = 'view the graph';
+    }
 
-  return Normal;
+    willMount() {
+      super.willMount()
+    }
+
+  };
 });

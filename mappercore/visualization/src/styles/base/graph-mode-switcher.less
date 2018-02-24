@@ -1,0 +1,55 @@
+.layout-classic-graph-mode-switcher {
+  background-color: #474747;
+  max-width: 42px !important;
+  width: 42px;
+  list-style: none;
+  padding: 10px 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.graph-mode-switcher {
+  margin: 0;
+  padding: 0;
+  display: block;
+  list-style: none;
+
+  .graph-mode-switcher__mode {
+    cursor: pointer;
+    height: 35px;
+    width: 35px;
+    margin: 5px auto;
+    padding: 0;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #353535;
+    }
+
+    &.active {
+      background-color: #353535;
+    }
+
+    &--view {
+      background: url("images/graph-view.svg") center center no-repeat;
+      background-size: 20px;
+    }
+
+    &--select-click {
+      background: url("images/graph-select-click.svg") center center no-repeat;
+      background-size: 20px;
+    }
+
+    &--select-cluster {
+      background: url("images/graph-select-cluster.svg") center center no-repeat;
+      background-size: 20px;
+    }
+
+    &--select-path {
+      background: url("images/graph-select-path.svg") center center no-repeat;
+      background-size: 20px;
+    }
+
+  }
+
+}

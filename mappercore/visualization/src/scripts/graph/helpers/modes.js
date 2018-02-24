@@ -10,7 +10,7 @@ define(function (require) {
 
     activate(name) {
       if (this.activated) {
-        if (this.activated.constructor.name === name) {
+        if (this.activated.name === name) {
           return true;
         } else {
           this.activated.willDeactivate();

@@ -7,9 +7,14 @@ define(function (require) {
     constructor() {
       super();
       this.activated = false;
+      this.name = false;
+      this.label = false;
     }
 
     willMount() {
+      if (!this.name || !this.label) {
+        throw "A graph mode should have a name and a label.";
+      }
     }
 
     didMount() {

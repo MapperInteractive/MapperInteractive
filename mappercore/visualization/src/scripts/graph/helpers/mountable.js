@@ -16,7 +16,7 @@ define(function (require) {
     add(mountable) {
       mountable.willMount();
       mountable.setGraph(this.graph);
-      this.mounted[mountable.constructor.name] = mountable;
+      this.mounted[mountable.name] = mountable;
       mountable.didMount();
     }
 
@@ -25,9 +25,7 @@ define(function (require) {
     }
 
     get(name) {
-      if (this.mounted.hasOwnProperty(name)) {
-        return this.mounted[name];
-      }
+      return this.mounted[name];
     }
 
     map(fn) {

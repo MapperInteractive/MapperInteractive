@@ -5,6 +5,16 @@ define(function (require) {
 
   return class SelectClusterMode extends GraphMode {
 
+    constructor() {
+      super();
+      this.name = 'select-cluster';
+      this.label = 'click a cluster to select';
+    }
+
+    willMount() {
+      super.willMount()
+    }
+
     didMount() {
       this.draggable = this.graph.behaviors.get('Draggable');
     }

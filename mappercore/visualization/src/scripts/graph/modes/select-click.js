@@ -5,6 +5,16 @@ define(function (require) {
 
   return class SelectClickMode extends GraphMode {
 
+    constructor() {
+      super();
+      this.name = 'select-click';
+      this.label = 'click to select node';
+    }
+
+    willMount() {
+      super.willMount()
+    }
+
     didMount() {
       this.draggable = this.graph.behaviors.get('Draggable');
     }

@@ -12,6 +12,16 @@ define(function (require) {
 
   return class SelectPathMode extends GraphMode {
 
+    constructor() {
+      super();
+      this.name = 'select-path';
+      this.label = 'click to select paths';
+    }
+
+    willMount() {
+      super.willMount()
+    }
+
     didMount() {
       this.draggable = this.graph.behaviors.get('Draggable');
     }
