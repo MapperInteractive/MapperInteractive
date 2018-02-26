@@ -1,0 +1,42 @@
+@graph-node-fill-color: #F5F5F5;
+@graph-node-radius: 10px;
+@graph-node-stroke-width: 2px;
+
+@graph-link-stroke-color: #8e8e8e;
+@graph-link-stroke-width: 3px;
+@graph-link-hover-stroke-color: #ff7e00;
+
+/* nodes which are current focused */
+@node-focus-stroke-color: #ff7700;
+@node-focus-stroke-width: 5px;
+
+/* nodes which are selected */
+@node-selected-stroke-color: #ff5705;
+@node-selected-stroke-width: 3px;
+
+/* potential selection */
+@node-potential-stroke: #ff5705;
+@node-potential-stroke-width: 3px;
+
+/* nodes which may not be selected or used */
+@node-fade-fill-opacity: 0.3;
+@node-fade-stroke-opacity: 0.3;
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 100;
+  }
+}
+
+/* animation */
+.node-potential() {
+  stroke: @node-potential-stroke;
+  stroke-width: @node-potential-stroke-width;
+  stroke-dasharray: 6.28;
+  animation: dash 10s linear;
+}
+
+.node-fade() {
+  fill-opacity: @node-fade-fill-opacity;
+  stroke-opacity: @node-fade-stroke-opacity;
+}

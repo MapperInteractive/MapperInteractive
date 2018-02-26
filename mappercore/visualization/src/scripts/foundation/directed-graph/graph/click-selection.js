@@ -19,7 +19,7 @@ define(function (require) {
       let selection = this.graph.container.selectAll('.node.selected').data();
 
       target.classed('selected', !target.classed('selected'));
-      this.graph.trigger('nodeSelectionChanged', selection);
+      this.graph.trigger('nodes:select', selection);
     }
 
     reviewContext() {

@@ -4,10 +4,15 @@ define(function (require) {
 
   class Draggable extends GraphBehavior {
 
+    constructor() {
+      super();
+      this.name = 'draggable';
+    }
+
     didMount() {
       super.didMount();
       this.listenTo('graph:didRender', () => {
-        this.forceSimulation = this.graph.behaviors.get('ForceSimulation');
+        this.forceSimulation = this.graph.behaviors.get('force-simulation');
         this.graph.nodes.call(d3.drag()
           .on("start", (d) => {
             this.dragStarted(d);

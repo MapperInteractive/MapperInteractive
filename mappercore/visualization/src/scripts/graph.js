@@ -20,6 +20,8 @@ define(function (require) {
         }
       }))();
 
+      this.$el.addClass('base-graph');
+
       this.modes = new ModesHelper(this);
       this.behaviors = new BehaviorsHelper(this);
 
@@ -36,8 +38,7 @@ define(function (require) {
       this.container = d3.select(this.el)
         .append('svg')
         .attr('width', this.model.get('width'))
-        .attr('height', this.model.get('height'))
-        .classed('base-graph', true);
+        .attr('height', this.model.get('height'));
 
       this.links = null;
       this.nodes = null;
@@ -50,14 +51,15 @@ define(function (require) {
 
     _renderNodes() {
       this.nodes = this.container
+        .append('g')
+        .classed('nodes', true)
         .selectAll("circle")
         .data(this.model.get("data").nodes)
         .enter()
         .append("circle")
         .classed("node", true)
-        .attr("fill", "#777")
         .on("click", () => {
-          this.sendEvent('node:clicked', d3.event);
+          this.sendEvent('node:click', d3.event);
         })
         .on("mouseover", () => {
           this.sendEvent('node:mouseover', d3.event);
@@ -69,13 +71,15 @@ define(function (require) {
 
     _renderLinks() {
       this.links = this.container
+        .append('g')
+        .classed('links', true)
         .selectAll("line")
         .data(this.model.get('data').links)
         .enter()
         .append("line")
         .classed('link', true)
         .on("click", () => {
-          this.sendEvent('link:clicked', d3.event);
+          this.sendEvent('link:click', d3.event);
         })
         .on("mouseover", () => {
           this.sendEvent('link:mouseover', d3.event);

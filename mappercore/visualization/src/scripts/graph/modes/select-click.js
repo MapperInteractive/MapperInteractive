@@ -16,7 +16,7 @@ define(function (require) {
     }
 
     didMount() {
-      this.draggable = this.graph.behaviors.get('Draggable');
+      this.draggable = this.graph.behaviors.get('draggable');
     }
 
     willActivate() {
@@ -27,12 +27,12 @@ define(function (require) {
 
     didActivate() {
       super.didActivate();
-      this.listenTo('node:clicked', (e) => {
+      this.listenTo('node:click', (e) => {
         let target = d3.select(e.target);
-        let selection = this.graph.container.selectAll('.node.selected').data();
-
         target.classed('selected', !target.classed('selected'));
-        this.graph.trigger('node:selected', selection);
+
+        let selection = this.graph.container.selectAll('.node.selected').data();
+        this.graph.trigger('nodes:select', selection);
       });
     }
 

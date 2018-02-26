@@ -16,28 +16,32 @@ define(function (require) {
     }
 
     didMount() {
-      this.draggable = this.graph.behaviors.get('Draggable');
+      this.draggable = this.graph.behaviors.get('draggable');
     }
 
     willActivate() {
       if (this.draggable) {
         this.draggable.pause();
       }
+      this.listenTo('node:mouseover', (e) => this.eventNodeMouseOver(e));
+      this.listenTo('node:mouseout', (e) => this.eventNodeMouseOut(e));
     }
 
     didActivate() {
       super.didActivate();
-      this.listenTo('node:clicked', (e) => {
+      this.listenTo('node:click', (e) => {
         let target = d3.select(e.target);
         let targetId = target.datum()['id'];
         let cluster = this.findClusterNodes(targetId);
 
+        let isSelected = target.classed('selected');
+
         this.graph.nodes.filter((d) => {
           return cluster.indexOf(d['id']) > -1;
-        }).classed('selected', true);
+        }).classed('selected', !isSelected);
 
         let selection = this.graph.container.selectAll('.selected').data();
-        this.graph.trigger('node:selected', selection);
+        this.graph.trigger('nodes:select', selection);
       });
     }
 
@@ -45,6 +49,7 @@ define(function (require) {
       if (this.draggable) {
         this.draggable.resume();
       }
+      this.stopListening();
     }
 
     didDeactivate() {
@@ -77,6 +82,17 @@ define(function (require) {
       finder(nodeId);
 
       return cluster;
+    }
+
+    eventNodeMouseOver(e) {
+      let cluster = this.findClusterNodes(d3.select(e.target).datum()['id']);
+      this.graph.nodes.filter((d) => {
+        return cluster.indexOf(d['id']) > -1;
+      }).classed('graph-node--potential', true);
+    }
+
+    eventNodeMouseOut(e) {
+      this.graph.nodes.classed('graph-node--potential', false);
     }
 
   }

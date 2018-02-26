@@ -1,23 +1,58 @@
+@import "variables";
 
 .base-graph {
+  //background-color: #eeeeee;
+}
 
+@keyframes dash {
+  to {
+    stroke-dashoffset: 100;
+  }
 }
 
 .base-graph circle.node {
-  r: 5;
-  stroke: #fff;
-  stroke-width: 1.5;
+  cursor: pointer;
+  r: @graph-node-radius;
+  fill: @graph-node-fill-color;
+  stroke: none;
+  stroke-width: 0;
+
+  &.graph-node--potential {
+    .node-potential;
+  }
+
+  &:hover {
+    .node-potential;
+    stroke: @node-focus-stroke-color;
+    stroke-width: @node-focus-stroke-width;
+  }
+
+  &.graph-node--fade {
+    .node-fade;
+  }
+
+  &.selected {
+    stroke: @node-selected-stroke-color;
+    stroke-width: @node-selected-stroke-width;
+
+    &:hover {
+      animation: none;
+      stroke-dasharray: none;
+    }
+  }
+
 }
 
-.base-graph line.link {
-  stroke: #777;
-  stroke-width: 2;
-}
-
-/* base/directed-graph/node-selectable */
-.base-graph .node.selected {
-  stroke: #ffc300;
-  stroke-width: 4;
+.base-graph .link {
+  cursor: pointer;
+  stroke: @graph-link-stroke-color;
+  stroke-width: @graph-link-stroke-width;
+  //
+  //    &:hover {
+  //      stroke: @graph-link-hover-stroke-color;
+  //      stroke-width: @graph-node-stroke-width;
+  //    }
+  //  }
 }
 
 .base-graph .node.path-select__not-allowed {

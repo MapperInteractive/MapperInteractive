@@ -2,7 +2,12 @@ define(function (require) {
   const d3 = require('d3');
   const GraphBehavior = require('../behavior');
 
-  class ForceSimulation extends GraphBehavior {
+  return class ForceSimulation extends GraphBehavior {
+
+    constructor() {
+      super();
+      this.name = 'force-simulation';
+    }
 
     didMount() {
       super.didMount();
@@ -12,7 +17,6 @@ define(function (require) {
       });
 
       this.listenTo('graph:didRender', () => {
-        console.log('graph:didRender');
         this._graphDidRender();
       });
     }
@@ -63,8 +67,9 @@ define(function (require) {
         .attr("cy", function (d) {
           return d.y;
         });
+
+      this.graph.sendEvent('nodes:moved');
     }
   }
 
-  return ForceSimulation;
 });

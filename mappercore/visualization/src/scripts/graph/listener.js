@@ -3,6 +3,7 @@ define(function () {
   return class GraphListener {
 
     constructor() {
+      this.name = undefined;
       this._listeningTo = {};
     }
 

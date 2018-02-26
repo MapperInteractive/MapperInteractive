@@ -3,7 +3,7 @@ define(function (require) {
   const GraphMode = require('../mode');
   const d3 = require('d3');
   const _ = require('underscore');
-  const CLASS_UNSELECTABLE = 'path-select__not-allowed';
+  const CLASS_UNSELECTABLE = 'graph-node--fade';
   const CLASS_ANCHOR = 'path-select__anchor';
   const CLASS_FIRST_ANCHOR = 'path-select__anchor--first';
   const CLASS_LAST_ANCHOR = 'path-select__anchor--last';
@@ -23,7 +23,7 @@ define(function (require) {
     }
 
     didMount() {
-      this.draggable = this.graph.behaviors.get('Draggable');
+      this.draggable = this.graph.behaviors.get('draggable');
     }
 
     willActivate() {
@@ -38,7 +38,7 @@ define(function (require) {
       super.didActivate();
       this.markInitialCandidates();
       this.listenTo('graph:didRender', (e) => this.graphDidRender(e));
-      this.listenTo('node:clicked', (e) => this.nodeClicked(e));
+      this.listenTo('node:click', (e) => this.nodeClick(e));
       this.listenTo('node:mouseover', (e) => this.nodeMouseover(e));
       this.listenTo('node:mouseout', (e) => this.nodeMouseout(e));
     }
@@ -63,7 +63,7 @@ define(function (require) {
       this.markInitialCandidates();
     }
 
-    nodeClicked(e) {
+    nodeClick(e) {
       let target = d3.select(e.target);
       if (target.classed(CLASS_UNSELECTABLE)) {
         return false;
