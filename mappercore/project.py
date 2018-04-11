@@ -14,15 +14,19 @@ class Project:
         self.events = {}
         self.router = Router(self)
         self.blueprint = Blueprint(
-            self.name, __name__,
+            self.name,
+            __name__,
             url_prefix='/{0}'.format(self.name),
             template_folder='templates',
-            static_folder=None)
+            static_folder=None,
+            root_path=self.path)
 
         self.blueprint.route('/')(self.router.index)
+
+        self.blueprint.route('/callbacks/<string:name>', methods=['POST'])(self.router.callback)
+
         self.blueprint.route('/scripts/<path:filename>')(self.router.scripts)
         self.blueprint.route('/files/<path:filename>')(self.router.files)
-        self.blueprint.route('/callback/<path:filename>')(self.router.callback)
         self.blueprint.route('/styles/<path:filename>')(self.router.styles)
         self.blueprint.route('/vendors/<path:filename>')(self.router.vendors)
 

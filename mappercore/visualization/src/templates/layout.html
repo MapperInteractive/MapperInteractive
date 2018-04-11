@@ -1,9 +1,8 @@
 <!doctype html>
 <head>
   <title>Mapper Core</title>
-  <link rel=stylesheet type=text/css href="{{ url_for('base.styles', filename='bootstrap-v4.0.0-min.css') }}">
   <link rel=stylesheet type=text/css href="{{ url_for('base.styles', filename='styles.css') }}">
-  <link rel=stylesheet type=text/css href="{{ url_for('abi.styles', filename='styles.css') }}">
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   <script src="{{ url_for('base.vendors', filename='jquery.min.js') }}"></script>
   <script src="{{ url_for('base.vendors', filename='bootstrap.bundle.min.js') }}"></script>
   {% block head %}{% endblock %}
@@ -22,7 +21,8 @@
       backbone: 'base/vendors/backbone.min',
       d3: 'base/vendors/d3.min',
       project: 'base/scripts/project',
-      app: 'base/scripts/app'
+      app: 'base/scripts/app',
+      d3_3d: 'base/scripts/app',
     },
     shim: {
       d3: {
@@ -57,4 +57,7 @@
 
   require(['{{ project.name }}/main']);
 </script>
+<script id="__bs_script__">//<![CDATA[
+document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.23.6'><\/script>".replace("HOST", location.hostname));
+//]]></script>
 </body>

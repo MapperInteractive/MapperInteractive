@@ -16,7 +16,7 @@ class Server:
         self._projects[project.name] = project
 
     def run(self):
-        flask = Flask(__name__, static_folder=None, template_folder=None)
+        flask = Flask(__name__, static_folder=None)
         flask.jinja_loader = jinja2.PrefixLoader({
             k: jinja2.FileSystemLoader(path.join(p.path, 'templates'))
             for k, p in self._projects.items()})

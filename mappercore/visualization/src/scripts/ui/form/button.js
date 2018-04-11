@@ -5,13 +5,13 @@ define(function (require) {
 
   return Backbone.View.extend({
 
-    template: _.template('<button class="ui-form-button__button btn"><%= text %></button>'),
+    template: _.template('<button class="btn btn-block ui-form-button"><%= text %></button>'),
 
     initialize: function () {
       this.model = new ViewModel({
         text: 'Submit',
       });
-      this.$el.addClass('form-group ui-form-button');
+      this.$el.addClass('form-group');
     },
 
     events: {

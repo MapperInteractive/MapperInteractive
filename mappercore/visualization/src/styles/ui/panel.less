@@ -1,15 +1,30 @@
+@import (reference) "../mixins";
+
 .panel {
-  background-color: #303030;
+  background-color: white;
+  ._content_border;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
 
-  .panel-title {
-    background-color: #303030;
-    font-weight: bold;
-    border-bottom: 1px solid #777;
-    padding: 5px 10px;
+.panel__title {
+  font-weight: bold;
+  border-bottom: 1px solid #D3DBE2;
+  padding: 5px 10px;
+  background: white url("images/fold.svg") 98% center no-repeat;
+  background-size: 15px;
+  cursor: pointer;
+
+  &.collapsed {
+    border-bottom: none;
+    background-image: url("images/unfold.svg");
   }
+}
 
-  .panel-body {
-    padding: 10px;
-  }
+.panel__body {
+  font-size: .9em;
+}
 
+.panel__body-inner {
+  padding: 10px;
 }

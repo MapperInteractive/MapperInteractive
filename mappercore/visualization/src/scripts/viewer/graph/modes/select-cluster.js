@@ -34,14 +34,14 @@ define(function (require) {
         let targetId = target.datum()['id'];
         let cluster = this.findClusterNodes(targetId);
 
-        let isSelected = target.classed('selected');
+        let isSelected = target.classed(this.graph.CLASS_NAME_SELECTED);
 
         this.graph.nodes.filter((d) => {
           return cluster.indexOf(d['id']) > -1;
-        }).classed('selected', !isSelected);
+        }).classed(this.graph.CLASS_NAME_SELECTED, !isSelected);
 
-        let selection = this.graph.container.selectAll('.selected').data();
-        this.graph.trigger('nodes:select', selection);
+        let selection = this.graph.nodesContainer.selectAll('.' + this.graph.CLASS_NAME_SELECTED).data();
+        this.graph.trigger('change:selection', selection);
       });
     }
 
@@ -88,11 +88,11 @@ define(function (require) {
       let cluster = this.findClusterNodes(d3.select(e.target).datum()['id']);
       this.graph.nodes.filter((d) => {
         return cluster.indexOf(d['id']) > -1;
-      }).classed('graph-node--potential', true);
+      }).classed(this.graph.CLASS_NAME_CANDIDATE, true);
     }
 
     eventNodeMouseOut(e) {
-      this.graph.nodes.classed('graph-node--potential', false);
+      this.graph.nodes.classed(this.graph.CLASS_NAME_CANDIDATE, false);
     }
 
   }

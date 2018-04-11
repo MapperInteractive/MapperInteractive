@@ -1,0 +1,62 @@
+@import (reference) "../mixins";
+@import (reference) "./defines";
+
+.viewer-graph {
+  background-color: white;
+  ._content_border;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+
+.viewer-graph__toolbar {
+  border-bottom: 1px solid #D3DBE2;
+  padding: 0 10px;
+  height: @toolbar-height;
+  text-align: right;
+}
+
+.viewer-graph__toolbar-item {
+  cursor: pointer;
+  height: @toolbar-item-height;
+  width: @toolbar-item-width;
+  padding: 0;
+  display: inline-block;
+  border: none;
+
+  &:hover {
+    background-color: #DDE1E6;
+  }
+
+  &.active {
+    background-color: #DDE1E6;
+  }
+
+  &--view {
+    background: transparent url("images/graph-view.svg") center center no-repeat;
+    background-size: 20px;
+  }
+
+  &--select-click {
+    background: transparent url("images/graph-select-click.svg") center center no-repeat;
+    background-size: 20px;
+  }
+
+  &--select-cluster {
+    background: transparent url("images/graph-select-cluster.svg") center center no-repeat;
+    background-size: 20px;
+  }
+
+  &--select-path {
+    background: transparent url("images/graph-select-path.svg") center center no-repeat;
+    background-size: 20px;
+  }
+
+}
+
+.viewer-graph__graph {
+  min-height: 100px;
+}
+
+@import "graph/vertex";
+@import "graph/edge";
+@import "graph/label";

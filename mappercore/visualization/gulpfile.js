@@ -6,6 +6,9 @@ const less = require('gulp-less');
 const path = require('path');
 const concat = require('gulp-concat');
 const cssmin = require('gulp-cssmin');
+const browserSync = require('browser-sync').create();
+const gulpMultiProcess = require('gulp-multi-process');
+
 
 const TPL_SRC = 'src/templates/**/*.html';
 const TPL_DEST = 'dist/templates';
@@ -23,14 +26,22 @@ gulp.task('tpl', function () {
     .pipe(gulp.dest(TPL_DEST));
 });
 
-gulp.task('less', function () {
-  return gulp.src('src/styles/**/*.less')
+gulp.task('less:build', function () {
+  return gulp.src('./src/styles/styles.less')
     .on('error', log)
-    .pipe(less())
-    .pipe(concat('bundled.css'))
-    .pipe(cssmin())
-    .pipe(gulp.dest('dist/styles'));
+    .pipe(less({}))
+    // .pipe(cssmin())
+    .pipe(gulp.dest('./dist/styles'));
 });
+
+gulp.task('images:copy', function () {
+  return gulp.src('./src/styles/images/*')
+    .on('error', log)
+    // .pipe(less({}))
+    // .pipe(cssmin())
+    .pipe(gulp.dest('./dist/styles/images'));
+});
+
 
 gulp.task('vendors', function () {
   return gulp.src(VENDORS_SRC)
@@ -42,16 +53,26 @@ gulp.task('vendors', function () {
 gulp.task('js', function () {
   return gulp.src(JS_SRC)
     .on('error', log)
-    .pipe(changed(JS_DEST))
+    // .pipe(changed(JS_DEST))
     .pipe(babel())
     .pipe(gulp.dest(JS_DEST));
 });
 
 gulp.task('build', ['tpl', 'css', 'js', 'vendors']);
 
+
 gulp.task('default', function () {
+  browserSync.init({});
+
+  gulp.watch('./src/styles/**/*.less', function () {
+    gulpMultiProcess(['less:build'], function () {
+      browserSync.reload();
+    })
+  });
+
+  gulp.watch('./src/styles/images/*', ['images:copy']);
+
   gulp.watch(JS_SRC, ['js']);
-  gulp.watch('src/styles/**/*.less', ['less']);
   gulp.watch(TPL_SRC, ['tpl']);
   gulp.watch(VENDORS_SRC, ['vendors']);
 });

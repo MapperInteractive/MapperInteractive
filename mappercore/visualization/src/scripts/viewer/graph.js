@@ -2,13 +2,25 @@ define(function (require) {
   let App = require('app');
   let d3 = App.d3;
 
-  const Backbone = require('backbone');
-  const NormalMode = require('./graph/modes/normal');
+  let _ = require('underscore');
+  let Backbone = require('backbone');
+  let NormalMode = require('./graph/modes/normal');
 
-  const ModesHelper = require('./graph/helpers/modes');
-  const BehaviorsHelper = require('./graph/helpers/behaviors');
+  let ModesHelper = require('./graph/helpers/modes');
+  let BehaviorsHelper = require('./graph/helpers/behaviors');
+
+  let Toolbar = require('./graph/toolbar');
 
   return App.defineComponent({
+
+    template: _.template('<div class="viewer-graph__toolbar" id="<%= id %>--toolbar"></div>' +
+      '<div class="viewer-graph__graph" id="<%= id %>--graph"></div>'),
+
+    CLASS_NAME_VERTEX: 'viewer-graph__vertex',
+    CLASS_NAME_EDGE: 'viewer-graph__edge',
+    CLASS_NAME_SELECTED: '--selected',
+    CLASS_NAME_UNAVAILABLE: '--unavailable',
+    CLASS_NAME_CANDIDATE: '--candidate',
 
     initialize: function () {
       this.model = new (Backbone.Model.extend({
@@ -20,7 +32,16 @@ define(function (require) {
         }
       }))();
 
-      this.$el.addClass('base-graph');
+      this.$el.addClass('viewer-graph');
+
+      let id = this.$el.attr('id');
+      this.$el.html(this.template({id}));
+
+      this.toolbarContainerId = `#${id}--toolbar`;
+      this.graphContainerId = `#${id}--graph`;
+
+      this.toolbar = new Toolbar({el: this.toolbarContainerId});
+      this.toolbar.setGraph(this);
 
       this.modes = new ModesHelper(this);
       this.behaviors = new BehaviorsHelper(this);
@@ -29,13 +50,16 @@ define(function (require) {
       this.modes.activate('view');
     },
 
+
     render() {
-      this.model.set('width', this.$el.width());
-      this.$el.addClass('graph');
+      this.toolbar.render();
 
-      d3.select(this.el).html("");
+      this.model.set('width', this.$(this.graphContainerId).width());
 
-      this.container = d3.select(this.el)
+      let id = this.$el.attr('id');
+
+      d3.select(`#${id}--graph`).html("");
+      this.container = d3.select(`#${id}--graph`)
         .append('svg')
         .attr('width', this.model.get('width'))
         .attr('height', this.model.get('height'));
@@ -47,17 +71,17 @@ define(function (require) {
       this._renderLinks();
       this._renderNodes();
       this.sendEvent('graph:didRender');
-    },
+    }
+    ,
 
     _renderNodes() {
-      this.nodes = this.container
-        .append('g')
-        .classed('nodes', true)
+      this.nodesContainer = this.container.append('g');
+      this.nodes = this.nodesContainer
         .selectAll("circle")
         .data(this.model.get("data").nodes)
         .enter()
         .append("circle")
-        .classed("node", true)
+        .classed(this.CLASS_NAME_VERTEX, true)
         .on("click", () => {
           this.sendEvent('node:click', d3.event);
         })
@@ -67,17 +91,17 @@ define(function (require) {
         .on("mouseout", () => {
           this.sendEvent('node:mouseout', d3.event);
         });
-    },
+    }
+    ,
 
     _renderLinks() {
       this.links = this.container
         .append('g')
-        .classed('links', true)
         .selectAll("line")
         .data(this.model.get('data').links)
         .enter()
         .append("line")
-        .classed('link', true)
+        .classed(this.CLASS_NAME_EDGE, true)
         .on("click", () => {
           this.sendEvent('link:click', d3.event);
         })
@@ -87,11 +111,13 @@ define(function (require) {
         .on("mouseout", () => {
           this.sendEvent('link:mouseout', d3.event);
         });
-    },
+    }
+    ,
 
     sendEvent(name, context) {
       this.behaviors.trigger(name, context);
       this.modes.trigger(name, context);
     }
-  });
+  })
+    ;
 });

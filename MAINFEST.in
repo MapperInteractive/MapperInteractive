@@ -1,2 +1,1 @@
-graft mapper_core/templates
-graft mapper_core/static
+graft mappercore/visualization/dist

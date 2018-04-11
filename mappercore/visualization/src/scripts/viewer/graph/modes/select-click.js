@@ -29,10 +29,10 @@ define(function (require) {
       super.didActivate();
       this.listenTo('node:click', (e) => {
         let target = d3.select(e.target);
-        target.classed('selected', !target.classed('selected'));
+        target.classed(this.graph.CLASS_NAME_SELECTED, !target.classed(this.graph.CLASS_NAME_SELECTED));
 
-        let selection = this.graph.container.selectAll('.node.selected').data();
-        this.graph.trigger('nodes:select', selection);
+        let selection = this.graph.nodesContainer.selectAll('.' + this.graph.CLASS_NAME_SELECTED).data();
+        this.graph.trigger('change:selection', selection);
       });
     }
 

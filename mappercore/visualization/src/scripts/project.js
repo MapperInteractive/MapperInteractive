@@ -1,42 +1,28 @@
-define(['jquery', 'backbone'], function ($, Backbone) {
-  "use strict";
+define(function (require) {
 
-  let ProjectModel = Backbone.Model.extend({
-    name: null
-  });
+  let $ = require('jquery');
 
-  function Project(name) {
-    if (!(this instanceof Project)) {
-      throw new TypeError("Project constructor cannot be called as a function.");
+  return class Project {
+
+    constructor(name) {
+      this.name = name;
+      this.baseURL = '/' + this.name;
     }
-    this.name = name;
-    this.model = new ProjectModel();
-  }
 
-  Project.create = function (name) {
-    return new Project(name);
-  };
+    url(path) {
+      return this.baseURL + '/' + path;
+    }
 
-  Project.prototype = {
-    constructor: Project,
-
-    init: function () {
-      throw new TypeError("Override this method to init your project.");
-    },
-
-    url: function (path) {
-      return '/' + this.name + '/' + path;
-    },
-
-    callback: function (name, data) {
+    callback(name, data) {
       return $.ajax({
         type: "POST",
-        url: this.baseUrl() + '/callbacks/' + name,
-        data: data
+        url: this.baseURL + '/callbacks/' + name,
+        data: JSON.stringify(data),
+        contentType: "application/json",
+        dataType: "json"
       });
     }
   };
 
-  return Project;
 
 });

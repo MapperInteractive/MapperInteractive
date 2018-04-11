@@ -7,9 +7,9 @@ define(function (require) {
 
   return App.defineComponent({
 
-    template: _.template('<li data-mode-name="<%= mode.name %>"' +
-      ' class="graph-mode-switcher__mode graph-mode-switcher__mode--<%= mode.name %> <%if (mode.activated) { %>active<% }%>" ' +
-      ' title="<%= mode.label %>"></li>'),
+    template: _.template('<button data-mode-name="<%= mode.name %>"' +
+      ' class="viewer-graph__toolbar-item viewer-graph__toolbar-item--<%= mode.name %> <%if (mode.activated) { %>active<% }%>" ' +
+      ' title="<%= mode.label %>"></button>'),
 
     initialize: function () {
       this.labels = {
@@ -17,7 +17,7 @@ define(function (require) {
         'SelectClickMode': 'Click Selection',
         'SelectClusterMode': 'Cluster Selection',
         'SelectPathMode': 'Path Selection'
-      }
+      };
     },
 
     setGraph: function (graph) {
@@ -25,16 +25,17 @@ define(function (require) {
     },
 
     render: function () {
-      this.$el.append('<ul class="graph-mode-switcher"></ul>');
-      let container = this.$('ul');
+      this.$el.html("");
+
+      let container = this.$el;
       let modes = this.graph.modes;
 
       modes.map((mode) => {
         container.append(this.template({mode: mode}));
       });
 
-      this.$('li').click((e) => {
-        this.$('li').removeClass('active');
+      this.$('button').click((e) => {
+        this.$('button').removeClass('active');
         e.preventDefault();
         let target = $(e.target);
         modes.activate(target.data('mode-name'));

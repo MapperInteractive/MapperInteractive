@@ -13,6 +13,9 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask==0.12.2'
+        'Flask==0.12.2',
+        'scikit-learn==0.19.1',
+        'numpy==1.14.1',
+        'scipy==1.0.0'
     ],
 )

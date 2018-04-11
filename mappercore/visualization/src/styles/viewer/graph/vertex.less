@@ -1,0 +1,35 @@
+@import (reference) "../defines";
+
+.viewer-graph__vertex {
+  cursor: pointer;
+  r: @vertex-radius;
+  fill: @vertex-fill-color;
+  fill-opacity: @vertex-fill-opacity;
+  stroke: @vertex-stroke;
+  stroke-width: @vertex-stroke-width;
+
+  &:hover {
+    stroke: @vertex-hover-stroke-color;
+    stroke-width: @vertex-hover-stroke-width;
+  }
+
+  &.--unavailable {
+    fill-opacity: 0.3;
+    stroke-opacity: 0.3;
+  }
+
+  &.--selected {
+    stroke: @vertex-selected-stroke-color;
+    stroke-dasharray: none !important;
+  }
+
+  &.--candidate {
+    stroke: @vertex-candidate-stroke-color;
+    stroke-dasharray: @vertex-candidate-stroke-dash;
+  }
+
+  &.--anchor {
+    stroke: @vertex-anchor-stroke-color !important;
+    stroke-width: @vertex-anchor-stroke-width;
+  }
+}

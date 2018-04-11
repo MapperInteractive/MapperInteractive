@@ -1,24 +1,17 @@
-@track-color: #5d5d5d;
-@thumb-color: #F4F4F4;
+@track-color: whitesmoke;
+@thumb-color: #8e969c;
 
-@thumb-radius: 9px;
-@thumb-height: 18px;
-@thumb-width: 18px;
-@thumb-shadow-size: 1px;
-@thumb-shadow-blur: 1px;
-@thumb-shadow-color: #111;
+@thumb-radius: 6.5px;
+@thumb-height: 13px;
+@thumb-width: 13px;
 @thumb-border-width: 1px;
-@thumb-border-color: #808080;
+@thumb-border-color: #72797d;
 
 @track-width: 100%;
-@track-height: 5px;
-@track-shadow-size: 1px;
-@track-shadow-blur: 1px;
-@track-shadow-color: #222;
+@track-height: 1px;
 @track-border-width: 1px;
-@track-border-color: #898989;
+@track-border-color: #A7B0B7;
 
-@track-radius: 3px;
 @contrast: 5%;
 
 .ui-form-range {
@@ -26,10 +19,6 @@
   input[type=range] {
     display: block;
     background: transparent;
-  }
-
-  .shadow(@shadow-size,@shadow-blur,@shadow-color) {
-    box-shadow: @shadow-size @shadow-size @shadow-blur @shadow-color, 0px 0px @shadow-size lighten(@shadow-color, 5%);
   }
 
   .track() {
@@ -40,7 +29,6 @@
   }
 
   .thumb() {
-    .shadow(@thumb-shadow-size, @thumb-shadow-blur, @thumb-shadow-color);
     border: @thumb-border-width solid @thumb-border-color;
     height: @thumb-height;
     width: @thumb-width;
@@ -60,9 +48,7 @@
 
     &::-webkit-slider-runnable-track {
       .track();
-      .shadow(@track-shadow-size, @track-shadow-blur, @track-shadow-color);
       background: @track-color;
-      border-radius: @track-radius;
       border: @track-border-width solid @track-border-color;
     }
 
@@ -78,9 +64,7 @@
 
     &::-moz-range-track {
       .track();
-      .shadow(@track-shadow-size, @track-shadow-blur, @track-shadow-color);
       background: @track-color;
-      border-radius: @track-radius;
       border: @track-border-width solid @track-border-color;
     }
     &::-moz-range-thumb {
@@ -98,14 +82,10 @@
     &::-ms-fill-lower {
       background: darken(@track-color, @contrast);
       border: @track-border-width solid @track-border-color;
-      border-radius: @track-radius*2;
-      .shadow(@track-shadow-size, @track-shadow-blur, @track-shadow-color);
     }
     &::-ms-fill-upper {
       background: @track-color;
       border: @track-border-width solid @track-border-color;
-      border-radius: @track-radius*2;
-      .shadow(@track-shadow-size, @track-shadow-blur, @track-shadow-color);
     }
     &::-ms-thumb {
       .thumb();
@@ -131,7 +111,8 @@
     display: inline-block;
     float: right;
     padding: 3px 5px;
-    background-color: #252525;
+    background-color: #e1e1e1;
+    border-radius: 3px;
     width: 3em;
     text-align: center;
   }
