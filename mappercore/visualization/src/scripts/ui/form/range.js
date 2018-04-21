@@ -8,11 +8,12 @@ define(function (require) {
 
     template: _.template('<label class="ui-form-range__label"><%= label %></label>' +
       '<span class="ui-form-range__value"><%= value %></span>' +
-      '<input class="ui-form-range__input" type="range" value="<%= value %>" max="<%= max %>" min="<%= min %>" step="<%= step %>" />'),
+      '<input class="ui-form-range__input" name="<%= name %>" type="range" value="<%= value %>" max="<%= max %>" min="<%= min %>" step="<%= step %>" />'),
 
     initialize: function () {
       this.model = new ViewModel({
         label: 'range',
+        name: '',
         value: 0,
         max: 100,
         min: 0,

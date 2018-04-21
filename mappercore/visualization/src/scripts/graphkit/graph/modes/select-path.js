@@ -1,6 +1,6 @@
 define(function (require) {
 
-  const app = require('app');
+  const Backbone = require('backbone');
   const GraphMode = require('../mode');
   const d3 = require('d3');
   const _ = require('underscore');
@@ -10,26 +10,16 @@ define(function (require) {
     constructor() {
       super();
       this.name = 'select-path';
-      this.label = 'click to select paths';
+      this.label = 'Select Path';
       this.CLASS_NAME_ANCHOR = '--anchor';
 
-      this.model = app.model({
+      this.model = new Backbone.Model({
         'selection': []
       });
     }
 
-    willMount() {
-      super.willMount()
-    }
-
-    didMount() {
-      this.draggable = this.graph.behaviors.get('draggable');
-    }
-
     willActivate() {
-      if (this.draggable) {
-        this.draggable.pause();
-      }
+      super.willActivate();
       this.anchors = [];
       this.clear();
       this.preparing();
@@ -45,9 +35,7 @@ define(function (require) {
     }
 
     willDeactivate() {
-      if (this.draggable) {
-        this.draggable.resume();
-      }
+      super.willDeactivate();
       this.clear();
       this.stopListening();
     }

@@ -9,9 +9,23 @@ define(function (require) {
 
     initialize: function () {
       this.model = new ViewModel({
+        disable: false,
         text: 'Submit',
       });
       this.$el.addClass('form-group');
+      this.button = $(this.template(this.model.attributes));
+
+      this.listenTo(this.model, 'change:disable', () => {
+        if (this.model.get('disable')) {
+          this.button.addClass('disabled');
+        } else {
+          this.button.removeClass('disabled');
+        }
+      });
+
+      this.listenTo(this.model, 'change:text', () => {
+        this.button.text(this.model.get('text'));
+      });
     },
 
     events: {
@@ -24,7 +38,8 @@ define(function (require) {
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.attributes));
+      this.button.text(this.model.get('text'));
+      this.$el.html(this.button);
     }
   });
 

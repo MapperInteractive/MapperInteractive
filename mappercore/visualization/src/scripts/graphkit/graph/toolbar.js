@@ -1,23 +1,16 @@
 define(function (require) {
 
-  const App = require('app');
   const _ = require('underscore');
   const $ = require('jquery');
+  let Backbone = require('backbone');
 
-
-  return App.defineComponent({
+  return Backbone.View.extend({
 
     template: _.template('<button data-mode-name="<%= mode.name %>"' +
-      ' class="viewer-graph__toolbar-item viewer-graph__toolbar-item--<%= mode.name %> <%if (mode.activated) { %>active<% }%>" ' +
-      ' title="<%= mode.label %>"></button>'),
+      ' class="viewer-graph__toolbar-item <%if (mode.activated) { %>active<% }%>" ' +
+      ' title="<%= mode.label %>"><%= mode.label %></button>'),
 
     initialize: function () {
-      this.labels = {
-        'Normal': 'View',
-        'SelectClickMode': 'Click Selection',
-        'SelectClusterMode': 'Cluster Selection',
-        'SelectPathMode': 'Path Selection'
-      };
     },
 
     setGraph: function (graph) {

@@ -1,0 +1,46 @@
+<script src="{{ url_for('core.vendors', filename='require.min.js') }}"></script>
+<script defer>
+  require.config({
+    baseUrl: '/',
+    paths: {
+      jquery: 'core/vendors/jquery.min',
+      underscore: 'core/vendors/underscore.min',
+      backbone: 'core/vendors/backbone.min',
+      d3: 'core/vendors/d3.min',
+      app: 'core/scripts/app',
+      d3_3d: 'core/scripts/app',
+    },
+    shim: {
+      d3: {
+        exports: 'd3'
+      },
+      jquery: {
+        exports: "$"
+      },
+      underscore: {
+        exports: "_"
+      },
+      backbone: {
+        deps: ['underscore', 'jquery'],
+        exports: 'Backbone'
+      }
+    }
+  });
+  (function () {
+    var load = requirejs.load;
+    requirejs.load = function (context, moduleId, url) {
+      if (!(moduleId in context.config.paths)) {
+        var modules = moduleId.split('/');
+        console.log(modules);
+        if (modules.length === 1) {
+          modules.unshift('app');
+        }
+        url = context.config.baseUrl + modules[0] + '/scripts/' + modules.slice(1).join('/') + '.js';
+        console.log(url);
+      }
+      return load(context, moduleId, url);
+    };
+  }());
+
+  require(['main']);
+</script>

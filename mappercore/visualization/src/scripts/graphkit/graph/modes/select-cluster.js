@@ -8,21 +8,11 @@ define(function (require) {
     constructor() {
       super();
       this.name = 'select-cluster';
-      this.label = 'click a cluster to select';
-    }
-
-    willMount() {
-      super.willMount()
-    }
-
-    didMount() {
-      this.draggable = this.graph.behaviors.get('draggable');
+      this.label = 'Select Cluster';
     }
 
     willActivate() {
-      if (this.draggable) {
-        this.draggable.pause();
-      }
+      super.willActivate();
       this.listenTo('node:mouseover', (e) => this.eventNodeMouseOver(e));
       this.listenTo('node:mouseout', (e) => this.eventNodeMouseOut(e));
     }
@@ -46,9 +36,7 @@ define(function (require) {
     }
 
     willDeactivate() {
-      if (this.draggable) {
-        this.draggable.resume();
-      }
+      super.willDeactivate();
       this.stopListening();
     }
 

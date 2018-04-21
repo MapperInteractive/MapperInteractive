@@ -42,7 +42,6 @@ gulp.task('images:copy', function () {
     .pipe(gulp.dest('./dist/styles/images'));
 });
 
-
 gulp.task('vendors', function () {
   return gulp.src(VENDORS_SRC)
     .on('error', log)
@@ -51,6 +50,7 @@ gulp.task('vendors', function () {
 });
 
 gulp.task('js', function () {
+  console.log(JS_SRC);
   return gulp.src(JS_SRC)
     .on('error', log)
     // .pipe(changed(JS_DEST))
@@ -58,7 +58,7 @@ gulp.task('js', function () {
     .pipe(gulp.dest(JS_DEST));
 });
 
-gulp.task('build', ['tpl', 'css', 'js', 'vendors']);
+gulp.task('build', ['tpl', 'less:build', 'js', 'images:copy', 'vendors']);
 
 
 gulp.task('default', function () {

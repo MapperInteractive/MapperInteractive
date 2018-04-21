@@ -1,14 +1,12 @@
 define(function (require) {
 
-  const App = require('app');
   const _ = require('underscore');
-  const $ = require('jquery');
 
   let Backbone = require('backbone');
   let ViewModel = Backbone.Model.extend();
 
 
-  return App.defineComponent({
+  return Backbone.View.extend({
 
     template: _.template('<a href="#">individuals [<span>0</span>]</a>'),
 
