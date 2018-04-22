@@ -22,6 +22,7 @@ define(function (require) {
       super.willActivate();
       this.anchors = [];
       this.clear();
+      this.clearSelection();
       this.preparing();
     }
 
@@ -37,6 +38,7 @@ define(function (require) {
     willDeactivate() {
       super.willDeactivate();
       this.clear();
+      this.clearSelection();
       this.stopListening();
     }
 
@@ -54,14 +56,15 @@ define(function (require) {
 
     nodeClick(e) {
       let target = d3.select(e.target);
+      let clickedNodeId = target.datum()["id"];
+
       if (target.classed(this.graph.CLASS_NAME_UNAVAILABLE)) {
         return false;
       }
 
-      target.classed(this.CLASS_NAME_ANCHOR, true)
-        .classed(this.graph.CLASS_NAME_SELECTED, true);
+      this.selectNode(clickedNodeId);
 
-      let clickedNodeId = target.datum()["id"];
+      target.classed(this.CLASS_NAME_ANCHOR, true);
 
       // for the first anchor, only update the shortest paths
       if (this.anchors.length === 0) {
@@ -198,18 +201,15 @@ define(function (require) {
 
         let nextId = this.shortestPaths[currentId];
 
-        let endpoints = [currentId, nextId].sort();
-        this.graph.links.filter((d) => {
-          let edgePoints = [d['source']['id'], d['target']['id']].sort();
-          return endpoints[0] === edgePoints[0] && endpoints[1] === edgePoints[1];
-        }).classed(this.graph.CLASS_NAME_SELECTED, true);
+        let endpoints = [currentId, nextId];
+        this.graph.selectLink(endpoints);
 
         currentId = nextId;
       }
     }
 
     selectNode(id) {
-      this.findNodeById(id).classed(this.graph.CLASS_NAME_SELECTED, true);
+      this.graph.selectNode(id);
     }
 
     highlightPotentialAnchor(id) {
@@ -244,6 +244,10 @@ define(function (require) {
       this.graph.nodes.classed(this.CLASS_NAME_ANCHOR, false);
       this.graph.links.classed(this.graph.CLASS_NAME_SELECTED, false);
       this.graph.trigger('change:selection', []);
+    }
+
+    clearSelection() {
+      this.graph.clearSelection();
     }
   }
 

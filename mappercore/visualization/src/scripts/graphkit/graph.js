@@ -44,7 +44,7 @@ define(function (require) {
         width: 800,
         height: 700,
         data: null,
-        selected: null,
+        selection: [],
       });
 
       this.$el.addClass('viewer-graph');
@@ -76,7 +76,11 @@ define(function (require) {
       this.listenTo(this.model, 'change:data', () => {
         this.modes.activate('view');
         this.render();
-      })
+      });
+
+      this.listenTo(this.model, 'change:selection', () => {
+        this.trigger(this.EVENT_GRAPH_CHANGE_SELECT);
+      });
     },
 
     render: function () {
@@ -153,6 +157,56 @@ define(function (require) {
     sendEvent(name, context) {
       this.behaviors.trigger(name, context);
       this.modes.trigger(name, context);
+    },
+
+    selectNode(id) {
+      this.nodes.filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, true);
+      this.updateSelection();
+    },
+
+    selectNodeList(list) {
+      list.map((id) => {
+        this.nodes.filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, true);
+      });
+      this.updateSelection();
+    },
+
+    unselectNode(id) {
+      this.nodes
+        .filter((d) => d['id'] === id)
+        .classed(this.CLASS_NAME_SELECTED, false);
+      this.updateSelection();
+    },
+
+    unselectNodeList(list) {
+      list.map((id) => {
+        this.nodes.filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, false);
+      });
+      this.updateSelection();
+    },
+
+    isNodeSelected(id) {
+      return this.nodes.filter((d) => d['id'] === id)
+        .classed(this.CLASS_NAME_SELECTED);
+    },
+
+    selectLink(targetEndPoints) {
+      targetEndPoints = targetEndPoints.sort();
+
+      this.links.filter((d) => {
+        let testEndPoints = [d['source']['id'], d['target']['id']].sort();
+        return testEndPoints[0] === targetEndPoints[0] && testEndPoints[1] === targetEndPoints[1];
+      }).classed(this.CLASS_NAME_SELECTED, true);
+    },
+
+    updateSelection() {
+      let selection = this.nodesContainer.selectAll('.' + this.CLASS_NAME_SELECTED).data();
+      this.model.set('selection', selection.map((n) => n['id']));
+    },
+
+    clearSelection() {
+      this.nodes.classed(this.CLASS_NAME_SELECTED, false);
+      this.model.set('selection', []);
     }
 
   });

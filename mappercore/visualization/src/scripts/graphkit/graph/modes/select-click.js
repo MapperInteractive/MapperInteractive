@@ -14,11 +14,13 @@ define(function (require) {
     didActivate() {
       super.didActivate();
       this.listenTo('node:click', (e) => {
-        let target = d3.select(e.target);
-        target.classed(this.graph.CLASS_NAME_SELECTED, !target.classed(this.graph.CLASS_NAME_SELECTED));
-
-        let selection = this.graph.nodesContainer.selectAll('.' + this.graph.CLASS_NAME_SELECTED).data();
-        this.graph.trigger('change:selection', selection);
+        let data = d3.select(e.target).datum();
+        let isSelected = this.graph.isNodeSelected(data['id']);
+        if (!isSelected) {
+          this.graph.selectNode(data['id']);
+        } else {
+          this.graph.unselectNode(data['id']);
+        }
       });
     }
 

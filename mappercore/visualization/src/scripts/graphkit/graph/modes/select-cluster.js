@@ -22,16 +22,14 @@ define(function (require) {
       this.listenTo('node:click', (e) => {
         let target = d3.select(e.target);
         let targetId = target.datum()['id'];
-        let cluster = this.findClusterNodes(targetId);
+        let nodesInCluster = this.findClusterNodes(targetId);
+        let isSelected = this.graph.isNodeSelected(targetId);
 
-        let isSelected = target.classed(this.graph.CLASS_NAME_SELECTED);
-
-        this.graph.nodes.filter((d) => {
-          return cluster.indexOf(d['id']) > -1;
-        }).classed(this.graph.CLASS_NAME_SELECTED, !isSelected);
-
-        let selection = this.graph.nodesContainer.selectAll('.' + this.graph.CLASS_NAME_SELECTED).data();
-        this.graph.trigger('change:selection', selection);
+        if (isSelected) {
+          this.graph.unselectNodeList(nodesInCluster);
+        } else {
+          this.graph.selectNodeList(nodesInCluster);
+        }
       });
     }
 

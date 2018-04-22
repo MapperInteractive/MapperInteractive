@@ -4,6 +4,13 @@ define(function (require) {
   let Panels = require('./panels');
   let Graph = require('core/graphkit/graph');
 
+  /**
+   * The layout control graph and attached panels.
+   * It listen to all events from graph and pass them to panels.
+   * Then panels react upon these events.
+   * Panels have directed access to graph object.
+   */
+
   return Backbone.View.extend({
 
     LISTENED_GRAPH_EVENTS: [
@@ -15,9 +22,7 @@ define(function (require) {
     ],
 
     initialize: function () {
-      this.model = new Backbone.Model({
-        'graph': []
-      });
+      this.model = new Backbone.Model({});
 
       this.row = this.appendElement(this.el, '<div class="row" style="margin-top: 20px;"></div>');
 
@@ -25,7 +30,7 @@ define(function (require) {
       this.panelWrapper = this.appendElement(this.row, '<div class="col-md-4 col-sm-12"></div>');
 
       this.graph = new Graph({el: this.appendElement(this.graphWrapper)});
-      this.panels = new Panels({el: this.appendElement(this.panelWrapper)});
+      this.panels = new Panels({el: this.panelWrapper, graph: this.graph});
     },
 
     render() {
@@ -37,17 +42,9 @@ define(function (require) {
 
     startListening() {
       this.LISTENED_GRAPH_EVENTS.map((eventName) => {
-        this.graph.on(eventName, () => {
+        this.listenTo(this.graph, eventName, () => {
           this.panels.trigger(eventName, this.graph);
         });
-      });
-
-      this.panels.on('LOADER:WILL_REQUEST', (...args) => {
-        console.log(['LOADER:WILL_REQUEST', args]);
-      });
-
-      this.panels.on('LOADER:DATA', (data) => {
-        this.graph.model.set('data', data);
       });
     },
 

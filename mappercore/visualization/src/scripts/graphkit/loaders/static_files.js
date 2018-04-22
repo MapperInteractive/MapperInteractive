@@ -14,13 +14,14 @@ define(function (require) {
 
     initialize: function (states) {
       this.model = new Backbone.Model(_.extend({
+        graph: null,
         data: null,
         error: null,
         params: [],
         request: undefined,
       }, states));
 
-      this.graph = undefined;
+      this.graph = this.model.get('graph');
 
       this.listenTo(this.model, 'change:error', () => {
         // pass
@@ -28,7 +29,7 @@ define(function (require) {
 
       this.listenTo(this.model, 'change:data', () => {
         let {data, params} = this.model.attributes;
-        this.trigger('LOADER:DATA', data, params);
+        this.graph.model.set({data, params});
       });
     },
 

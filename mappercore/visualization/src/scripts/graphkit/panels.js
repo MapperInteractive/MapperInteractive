@@ -5,18 +5,21 @@ define(function (require) {
 
   return Backbone.View.extend({
 
-    template: _.template(
+    template: _.template('<div class="panel">' +
       '    <div class="panel__title" data-toggle="collapse"\n' +
       '         for="<%= id %>" href="#<%= id %>"\n' +
       '         aria-expanded="true" aria-controls="<%= id %>"><%= title %></div>\n' +
       '    <div class="panel__body collapse show" id="<%= id %>">\n' +
       '      <div class="panel__body-inner">\n' +
       '      </div>\n' +
-      '    </div>\n'),
+      '    </div>\n' +
+      ' </div>\n'),
 
-    initialize() {
+    initialize(conf) {
+      let {graph} = conf;
+      this.graph = graph;
+
       this.panels = [];
-      this.$el.addClass('panel');
     },
 
     add(conf) {
@@ -28,23 +31,22 @@ define(function (require) {
       wrapper.appendTo(this.el);
 
       let inner = this.$('#' + id + ' .panel__body-inner:first-child');
-      let panel = new constructor({el: inner});
-      this.startListeningPanel(panel);
+      let panel = new constructor({el: inner, graph: this.graph});
 
-      panel.model.set(model);
+      panel.on('all', (...args) => {
+        this.trigger(...args);
+      });
+
+      if (model) {
+        panel.model.set(model);
+      }
+
       this.panels.push(panel);
-
       return panel;
     },
 
     render() {
       this.panels.map((p) => p.render());
-    },
-
-    startListeningPanel(panel) {
-      panel.on('all', (...args) => {
-        this.trigger(...args);
-      });
     },
 
   });
