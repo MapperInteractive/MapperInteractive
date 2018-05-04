@@ -1,5 +1,4 @@
 define(function (require) {
-  const d3 = require('d3');
   const GraphBehavior = require('../behavior');
 
   return class Labeled extends GraphBehavior {
@@ -7,6 +6,7 @@ define(function (require) {
     constructor() {
       super();
       this.name = 'labeled';
+      this.labels = null;
     }
 
     didMount() {

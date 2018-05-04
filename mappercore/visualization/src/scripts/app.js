@@ -1,5 +1,7 @@
 define(function (require) {
 
+  let $ = require('jquery');
+  let Job = require('core/job');
   let Backbone = require('backbone');
   let AppModel = Backbone.Model.extend({});
 
@@ -13,12 +15,10 @@ define(function (require) {
       });
 
       this.listenTo(this.model, 'change:title', () => this.onTitleChange());
-
-      if (params) {
-        this.configure(params);
-      }
-
+      this.configure(params);
       this.baseURL = '';
+
+      window.app = this;
     },
 
     configure: function (params) {
@@ -57,32 +57,9 @@ define(function (require) {
       let model = Backbone.Model.extend();
       return new model(attributes);
     },
+
+    createJob: function (name, params) {
+      return new Job(name, params)
+    }
   });
-
-
-  // // shortcuts
-  //
-  // defineComponent: function (arg) {
-  //   return Backbone.View.extend(arg);
-  // },
-  //
-  // component: function (viewClass, element, model) {
-  //   let view = new viewClass({el: element});
-  //   view.model.set(model);
-  //   return view;
-  // },
-  //
-  // view: function (args) {
-  //   return Backbone.View.extend(args);
-  // },
-  //
-
-  //
-  // render: function (root_component) {
-  //   root_component.setElement();
-  // }
-
-
-  // }
-
 });
