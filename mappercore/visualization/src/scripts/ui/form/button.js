@@ -8,23 +8,23 @@ define(function (require) {
     template: _.template('<button class="btn btn-block ui-form-button"><%= text %></button>'),
 
     initialize: function () {
-      this.model = new ViewModel({
+      this.states = new ViewModel({
         disable: false,
         text: 'Submit',
       });
       this.$el.addClass('form-group');
-      this.button = $(this.template(this.model.attributes));
+      this.button = $(this.template(this.states.attributes));
 
-      this.listenTo(this.model, 'change:disable', () => {
-        if (this.model.get('disable')) {
+      this.listenTo(this.states, 'change:disable', () => {
+        if (this.states.get('disable')) {
           this.button.addClass('disabled');
         } else {
           this.button.removeClass('disabled');
         }
       });
 
-      this.listenTo(this.model, 'change:text', () => {
-        this.button.text(this.model.get('text'));
+      this.listenTo(this.states, 'change:text', () => {
+        this.button.text(this.states.get('text'));
       });
     },
 
@@ -38,7 +38,7 @@ define(function (require) {
     },
 
     render: function () {
-      this.button.text(this.model.get('text'));
+      this.button.text(this.states.get('text'));
       this.$el.html(this.button);
     }
   });
