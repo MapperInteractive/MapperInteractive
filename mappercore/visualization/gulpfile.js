@@ -12,14 +12,14 @@ const paths = {
   'dist': 'dist/*',
   'tpl.src': 'src/templates/**/*.html',
   'tpl.dest': 'dist/templates',
-  'js.src': 'src/scripts/**/*.js',
-  'js.dest': 'dist/scripts',
+  'js.src': 'src/modules/**/*.js',
+  'js.dest': 'dist/modules',
   'vendor.src': 'src/vendors/**/*',
   'vendor.dest': 'dist/vendors',
   'less.src': './src/styles/styles.less',
   'less.dest': './dist/styles',
   'image.src': './src/styles/images/*',
-  'image.dest': './dist/styles/images',
+  'image.dest': './dist/styles/images'
 };
 
 gulp.task('dist:clean', function () {

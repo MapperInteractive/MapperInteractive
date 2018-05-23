@@ -7,8 +7,8 @@
       underscore: 'core/vendors/underscore.min',
       backbone: 'core/vendors/backbone.min',
       d3: 'core/vendors/d3.min',
-      app: 'core/scripts/app',
-      d3_3d: 'core/scripts/app',
+      app: 'core/modules/app',
+      d3_3d: 'core/modules/app',
     },
     shim: {
       d3: {
@@ -31,12 +31,10 @@
     requirejs.load = function (context, moduleId, url) {
       if (!(moduleId in context.config.paths)) {
         var modules = moduleId.split('/');
-        console.log(modules);
         if (modules.length === 1) {
           modules.unshift('app');
         }
-        url = context.config.baseUrl + modules[0] + '/scripts/' + modules.slice(1).join('/') + '.js';
-        console.log(url);
+        url = context.config.baseUrl + modules[0] + '/modules/' + modules.slice(1).join('/') + '.js';
       }
       return load(context, moduleId, url);
     };
