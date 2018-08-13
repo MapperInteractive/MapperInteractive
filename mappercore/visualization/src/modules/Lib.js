@@ -9,10 +9,10 @@
  */
 define((require) => {
 
-  const d3 = require('d3'),
-    underscore = require('underscore'),
-    $ = require('jquery'),
-    Backbone = require('backbone');
+  const d3 = require('core/vendors/d3.min'),
+    underscore = require('core/vendors/underscore.min'),
+    $ = require('core/vendors/jquery.min'),
+    Backbone = require('core/vendors/backbone.min');
 
   const _ = underscore.mixin({
     guard: function (variable, fallback) {

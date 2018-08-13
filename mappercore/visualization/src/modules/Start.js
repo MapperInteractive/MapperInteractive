@@ -15,11 +15,6 @@ window.jQuery(function () {
   require.config({
     baseUrl: '/',
     paths: {
-
-      d3: 'core/vendors/d3.min',
-      jquery: 'core/vendors/jquery.min',
-      underscore: 'core/vendors/underscore.min',
-      backbone: 'core/vendors/backbone.min',
       'd3-scale-chromatic': 'core/vendors/d3-scale-chromatic.min',
       'd3-interpolate': 'core/vendors/d3-interpolate.min',
       'd3-color': 'core/vendors/d3-color.min',

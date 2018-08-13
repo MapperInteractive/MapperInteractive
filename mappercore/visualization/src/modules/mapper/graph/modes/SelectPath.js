@@ -5,10 +5,8 @@
  */
 define(function (require) {
 
-  const Backbone = require('backbone');
   const GraphMode = require('../Mode');
-  const d3 = require('d3');
-  const _ = require('underscore');
+  const { _, Backbone, d3 } = require('core/Lib');
 
   return class SelectPathMode extends GraphMode {
 
@@ -185,7 +183,7 @@ define(function (require) {
 
     preparing() {
       this.nodes = _.object(this.graph.nodes.data().map((n) => {
-        return [n["id"], {"id": n["id"], "neighbors": []}];
+        return [n["id"], { "id": n["id"], "neighbors": [] }];
       }));
 
       this.graph.links.data().forEach((link) => {
