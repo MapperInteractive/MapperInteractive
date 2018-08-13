@@ -1,15 +1,19 @@
+/**
+ * This is a registry for built-in modes and behaviors.
+ * It's more convenient to use names instead of module paths.
+ */
 define(function (require) {
   return {
     'modes': {
-      'select-node': require('./graph/modes/select-node'),
-      'select-cluster': require('./graph/modes/select-cluster'),
-      'select-path': require('./graph/modes/select-path')
+      'select-node': require('./graph/modes/SelectNode'),
+      'select-cluster': require('./graph/modes/SelectCluster'),
+      'select-path': require('./graph/modes/SelectPath')
     },
     'behaviors': {
-      'force-simulation': require('./graph/behaviors/force-simulation'),
-      'draggable': require('./graph/behaviors/draggable'),
-      'labeled': require('./graph/behaviors/labeled'),
-      'popover': require('./graph/behaviors/popover'),
+      'force-simulation': require('./graph/behaviors/ForceSimulation'),
+      'draggable': require('./graph/behaviors/Draggable'),
+      'labeled': require('./graph/behaviors/Labeled'),
+      'popover': require('./graph/behaviors/Popover'),
     }
   };
 });

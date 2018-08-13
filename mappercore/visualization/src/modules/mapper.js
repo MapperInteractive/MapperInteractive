@@ -1,20 +1,28 @@
+"use strict";
+
+/**
+ * Mapper class.
+ *
+ * Use this class to create a mapper instance.
+ * This class will create a instance for graph and aside.
+ */
 define(function (require) {
 
-  let App = require('./app');
-  let Aside = require('./mapper/aside');
-  let Graph = require('./mapper/graph');
+  let App = require('./App');
+  let Aside = require('./mapper/Aside');
+  let Graph = require('./mapper/Graph');
 
   return App.extend({
 
     template: '<div class="row" style="margin-top: 20px;" id="app">' +
-    '<div class="col-md-8 col-sm-12"><div id="app-graph"></div></div>' +
-    '<div class="col-md-4 col-sm-12"><div id="app-aside"></div></div>' +
-    '</div>',
+      '<div class="col-md-8 col-sm-12"><div id="app-graph"></div></div>' +
+      '<div class="col-md-4 col-sm-12"><div id="app-aside"></div></div>' +
+      '</div>',
 
     didMount() {
       this.$el.append($(this.template));
-      this.graph = new Graph({el: '#app-graph', app: this});
-      this.aside = new Aside({el: '#app-aside', app: this});
+      this.graph = new Graph({ el: '#app-graph', app: this });
+      this.aside = new Aside({ el: '#app-aside', app: this });
     },
 
     render() {
@@ -22,8 +30,8 @@ define(function (require) {
       this.aside.render();
     },
 
-    createPanel(config) {
-      return this.aside.createPanel(config);
+    createPanel(module, config = {}) {
+      return this.aside.createPanel(module, config);
     }
   });
 });

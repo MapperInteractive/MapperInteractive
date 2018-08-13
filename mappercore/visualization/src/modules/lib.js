@@ -1,9 +1,31 @@
+"use strict";
+
+/**
+ * Provides shortcuts for built-in libraries
+ *
+ * For example:
+ *
+ *    let { _, Backbone } = require('core/Lib');
+ */
 define((require) => {
 
-  let d3 = require('d3'),
-    _ = require('underscore_remix'),
+  const d3 = require('d3'),
+    underscore = require('underscore'),
     $ = require('jquery'),
     Backbone = require('backbone');
 
-  return {d3, _, $, Backbone};
+  const _ = underscore.mixin({
+    guard: function (variable, fallback) {
+      if (!variable) {
+        if (typeof fallback === 'function') {
+          return fallback();
+        } else {
+          return fallback;
+        }
+      }
+      return variable;
+    }
+  });
+
+  return { d3, _, $, Backbone };
 });
