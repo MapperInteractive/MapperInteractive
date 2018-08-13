@@ -22,7 +22,7 @@ const paths = {
   'image.dest': './dist/styles/images'
 };
 
-gulp.task('dist:clean', function () {
+gulp.task('clean', function () {
   return gulp.src(paths['dist'], {read: false})
     .pipe(clean());
 });
@@ -64,8 +64,7 @@ gulp.task('js:build', function () {
 });
 
 gulp.task('build', ['tpl:copy', 'less:build', 'js:build', 'images:copy', 'vendors:copy']);
-gulp.task('build:clean', ['dist:clean', 'build']);
-
+gulp.task('dist', ['clean', 'build']);
 
 gulp.task('default', function () {
   browserSync.init({});
