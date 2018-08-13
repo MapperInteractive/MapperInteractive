@@ -17,26 +17,38 @@ define(function (require) {
    * All MapperCore modules are defined under namespace `core`.
    * So to create a mapper instance, we need to import the class first.
    */
-  let Mapper = require('core/mapper');
+  let Mapper = require('core/Mapper');
 
   /**
    * With class `Mapper`, let create our instance with title "Random Graphs".
    */
   let mapperInstance = new Mapper({
-    title: "Random Graphs"
+    title: "Random Graphs",
+    enabledBehaviors: [
+      'force-simulation'
+    ],
   });
 
   /**
-   * START: your project code
+   * We use a built-in function to convert edge list to a D3 graph data set.
    */
+  let EdgeList2Graph = require('core/utils/EdgelistToGraph');
 
-  /**
-   * END: your project code
-   */
+  mapperInstance.createPanel(
+    require('core/mapper/panels/FormDataLoader'),
+    {
+      loader: function (panel) {
+        let url = mapperInstance.url('files/edgelist.txt');
+        d3.text(url, function (txt) {
+          panel.trigger('data', EdgeList2Graph(txt));
+        })
+      }
+    }
+  );
 
   /**
    * Render the web page after you have finished build your mapper.
    * This line must be the last line of this module.
    */
-  // mapperInstance.render();
+  mapperInstance.render();
 });

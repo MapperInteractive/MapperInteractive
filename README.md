@@ -40,7 +40,6 @@ define(function (require) {
   // custom your mapper before rendering
  
   app.render();
-    
 ```
 
 ### Backend Server
