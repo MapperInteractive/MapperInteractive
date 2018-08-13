@@ -1,31 +1,35 @@
+"use strict";
+
+
+/**
+ * This file bootstrap the UI
+ */
 window.jQuery(function () {
 
+  // noinspection JSFileReferences
+  /**
+   * Set aliases for modules.
+   *
+   * You can add your aliases but don't delete anyone before you understand the code below.
+   */
   require.config({
     baseUrl: '/',
     paths: {
-      // these libraries are for accessing point
-      app: 'core/modules/app',
-      lib: 'core/modules/lib',
 
-      // these libraries are required by core only,
-      // use require('core') to access these library,
-      // because we may need to customize them
       d3: 'core/vendors/d3.min',
       jquery: 'core/vendors/jquery.min',
       underscore: 'core/vendors/underscore.min',
-      underscore_remix: 'core/modules/underscore',
       backbone: 'core/vendors/backbone.min',
-
-      // these libraries are built-in vendors
-      // require them by the name when needed
       'd3-scale-chromatic': 'core/vendors/d3-scale-chromatic.min',
       'd3-interpolate': 'core/vendors/d3-interpolate.min',
       'd3-color': 'core/vendors/d3-color.min',
     }
   });
 
-  // Since we use two blueprints in Flask
-  // We need to route the js modules
+  /**
+   * Since we use two blueprints in Flask,
+   *  we need to let RequireJS know how to load core modules and project modules correctly.
+   */
   let load = require.load;
   require.load = function (context, moduleId, url) {
     if (!(moduleId in context.config.paths)) {
@@ -38,5 +42,9 @@ window.jQuery(function () {
     return load(context, moduleId, url);
   };
 
+  /**
+   * Keep this line as the last statement in this function.
+   * It will require and execute your project `main.js` module.
+   */
   require(['main']);
 });

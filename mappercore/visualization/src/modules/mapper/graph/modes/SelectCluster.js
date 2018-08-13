@@ -1,7 +1,12 @@
+"use strict";
+
+/**
+ * A mode to select a cluster in a graph.
+ */
 define(function (require) {
 
-  const GraphMode = require('../mode');
-  const d3 = require('d3');
+  const GraphMode = require('../Mode');
+  const { d3 } = require('core/Lib');
 
   return class SelectClusterMode extends GraphMode {
 

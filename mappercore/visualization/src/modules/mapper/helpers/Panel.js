@@ -1,7 +1,11 @@
+"use strict";
+
+/**
+ * Base class for the Panel.
+ */
 define(function (require) {
 
-  let _ = require('underscore');
-  let $ = require('underscore');
+  let { _, $ } = require('core/Lib');
 
   class PanelWrapper {
     constructor(app, title, module) {
@@ -22,13 +26,13 @@ define(function (require) {
 
     render() {
       let id = 'panel-' + (this.app.panels.length + 1);
-      let wrapper = $(this.template({id: id, title: this.title}));
+      let wrapper = $(this.template({ id: id, title: this.title }));
 
       wrapper.appendTo(this.el);
 
       let inner = $('#' + id + ' .panel__body-inner:first-child');
       let constructor = this.module;
-      let panel = new constructor({el: inner, graph: this.graph, app: this.app});
+      let panel = new constructor({ el: inner, graph: this.graph, app: this.app });
 
       panel.on('all', (...args) => {
         this.trigger(...args);

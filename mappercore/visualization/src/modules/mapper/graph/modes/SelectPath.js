@@ -1,7 +1,12 @@
+"use strict";
+
+/**
+ * A mode to select a path in a graph.
+ */
 define(function (require) {
 
   const Backbone = require('backbone');
-  const GraphMode = require('../mode');
+  const GraphMode = require('../Mode');
   const d3 = require('d3');
   const _ = require('underscore');
 

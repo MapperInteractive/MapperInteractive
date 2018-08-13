@@ -1,6 +1,11 @@
+"use strict";
+
+/**
+ * Base class for mode classes.
+ */
 define(function (require) {
 
-  const MountableHelper = require('./mountable');
+  const MountableHelper = require('./Mountable');
 
   return class ModesHelper extends MountableHelper {
 

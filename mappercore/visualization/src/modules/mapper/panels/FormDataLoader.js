@@ -1,8 +1,13 @@
+"use strict";
+
+/**
+ * Panel for building a form to load graph data.
+ */
 define(function (require) {
-  let {_} = require('lib');
-  let Range = require('core/ui/form/range');
-  let Button = require('core/ui/form/button');
-  let Panel = require('../panel');
+  let { _ } = require('core/Lib');
+  let Range = require('core/ui/form/Range');
+  let Button = require('core/ui/form/Button');
+  let Panel = require('../Panel');
 
   const FORM_CONTROLS = {
     'range': Range
@@ -13,7 +18,7 @@ define(function (require) {
     name: 'Graph Loader',
 
     didMount() {
-      this.filters = this.model.get('filters');
+      this.controls = this.model.get('controls');
       this.loader = this.model.get('loader');
 
       this.on('data', (data) => {
@@ -26,19 +31,19 @@ define(function (require) {
     },
 
     render() {
-      if (!this.filters || !this.loader) {
+      if (!this.controls || !this.loader) {
         return this.$el.html(this._notConfiguredError());
       }
 
       let controls = [];
 
-      this.filters.map((param) => {
+      this.controls.map((param) => {
         let container = $('<div></div>');
         container.appendTo(this.$el);
 
         let controlClass = FORM_CONTROLS[param['type']];
         delete param['type'];
-        let control = new controlClass({el: container});
+        let control = new controlClass({ el: container });
         control.states.set(param);
         controls.push(control);
         control.render();
@@ -46,14 +51,14 @@ define(function (require) {
 
       let container = $('<div></div>');
       container.appendTo(this.$el);
-      let button = new Button({el: container});
+      let button = new Button({ el: container });
       this.button = button;
 
-      button.states.set({text: 'Load Graph'});
+      button.states.set({ text: 'Load Graph' });
 
       button.on('click', () => {
         let values = _.object(controls.map((control) => {
-          let {name, value} = control.states.attributes;
+          let { name, value } = control.states.attributes;
           return [name, value];
         }));
 
@@ -65,8 +70,8 @@ define(function (require) {
     _notConfiguredError() {
       return '<div class="alert alert-danger">' +
         'Panel not configured. Please check configuration: ' +
-        '<code>filters</code> and ' +
-        '<code>loaders</code>' +
+        '<code>controls</code> and ' +
+        '<code>loader</code>' +
         '</div>';
     }
   });

@@ -1,5 +1,10 @@
+"use strict";
+
+/**
+ * Enable graph show labels on nodes.
+ */
 define(function (require) {
-  const GraphBehavior = require('../behavior');
+  const GraphBehavior = require('../Behavior');
 
   return class Labeled extends GraphBehavior {
 

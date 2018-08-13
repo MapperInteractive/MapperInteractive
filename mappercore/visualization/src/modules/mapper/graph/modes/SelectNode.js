@@ -1,6 +1,11 @@
+"use strict";
+
+/**
+ * A mode to select a single node in a graph.
+ */
 define(function (require) {
 
-  const GraphMode = require('../mode');
+  const GraphMode = require('../Mode');
   const d3 = require('d3');
 
   return class SelectClickMode extends GraphMode {

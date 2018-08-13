@@ -1,8 +1,12 @@
+"use strict";
+
+/**
+ * Enable graph show arrows on edges.
+ */
 define(function (require) {
 
-  const GraphMode = require('../mode');
+  const GraphMode = require('../Behavior');
 
-  // TODO
   return class MarkerEnd extends GraphMode {
 
     didMount() {

@@ -1,6 +1,11 @@
+"use strict";
+
+/**
+ * A read only mode.
+ */
 define(function (require) {
 
-  const Mode = require('../mode');
+  const Mode = require('../Mode');
 
   return class ViewMode extends Mode {
 

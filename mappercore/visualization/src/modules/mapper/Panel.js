@@ -1,10 +1,16 @@
-define(function (require) {
-  let {Backbone} = require('lib');
+"use strict";
 
-  return Backbone.View.extend({
+/**
+ * The base class for panel classes.
+ */
+define(function (require) {
+
+  let { Backbone: { Model, View } } = require('core/Lib');
+
+  return View.extend({
 
     initialize: function (config) {
-      this.model = new Backbone.Model(config);
+      this.model = new Model(config);
 
       // you can use the following shortcuts in your panel
       this.app = this.model.get('app');

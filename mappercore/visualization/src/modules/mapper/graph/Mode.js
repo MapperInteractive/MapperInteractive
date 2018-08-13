@@ -1,6 +1,11 @@
+"use strict";
+
+/**
+ * Base class for a graph mode.
+ */
 define(function (require) {
 
-  let {_, Backbone} = require('lib');
+  let {_, Backbone} = require('core/Lib');
 
   return class Mode {
 

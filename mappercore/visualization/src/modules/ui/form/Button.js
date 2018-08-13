@@ -1,14 +1,18 @@
+"use strict";
+
+/**
+ * Component class for HTML button.
+ */
 define(function (require) {
 
-  let Backbone = require('backbone');
-  let ViewModel = Backbone.Model.extend();
+  const { Backbone: { View, Model } } = require('core/Lib');
 
-  return Backbone.View.extend({
+  return View.extend({
 
     template: _.template('<button class="btn btn-block ui-form-button"><%= text %></button>'),
 
     initialize: function () {
-      this.states = new ViewModel({
+      this.states = new Model({
         disable: false,
         text: 'Submit',
       });

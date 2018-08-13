@@ -1,11 +1,16 @@
-define(function (require) {
-  let {d3, $, _, Backbone: {View, Model}} = require('lib');
+"use strict";
 
-  let Toolbar = require('./graph/toolbar');
-  let ModesHelper = require('./graph/helpers/modes');
-  let BehaviorsHelper = require('./graph/helpers/behaviors');
-  let ViewMode = require('./graph/modes/view');
-  let registry = require('./registry');
+/**
+ * Create a set of graph UI elements include graph structure, toolbar and popovers.
+ */
+define(function (require) {
+  let { d3, $, _, Backbone: { View, Model } } = require('core/Lib');
+
+  let Toolbar = require('./graph/Toolbar');
+  let ModesHelper = require('./graph/helpers/Modes');
+  let BehaviorsHelper = require('./graph/helpers/Behaviors');
+  let ViewMode = require('./graph/modes/View');
+  let Registry = require('./Registry');
 
 
   return View.extend({
@@ -28,8 +33,8 @@ define(function (require) {
     EVENT_WILL_LOAD: 'didLoad',
     EVENT_DID_LOAD: 'didLoad',
     EVENT_DID_LAYOUT: 'didLayout',
-    CONFIG_ENABLE_MODES: 'enable.modes',
-    CONFIG_ENABLE_BEHAVIORS: 'enable.behaviors',
+    CONFIG_ENABLE_MODES: 'enableModes',
+    CONFIG_ENABLE_BEHAVIORS: 'enabledBehaviors',
 
     EVENT_MODE_ACTIVATED: 'activate:mode',
 
@@ -46,7 +51,7 @@ define(function (require) {
       this.$el.addClass('viewer-graph');
 
       // init toolbar
-      this.toolbar = new Toolbar({el: d3.select(this.el).append('div').classed('viewer-graph__toolbar', true).node()});
+      this.toolbar = new Toolbar({ el: d3.select(this.el).append('div').classed('viewer-graph__toolbar', true).node() });
       this.toolbar.setGraph(this);
 
       // init graph container
@@ -222,10 +227,10 @@ define(function (require) {
 
     _parseScript(category, name) {
       if ((typeof name) === 'string') {
-        if (!registry[category][name]) {
+        if (!Registry[category][name]) {
           throw "Unknown " + category + ': ' + name;
         }
-        return registry[category][name];
+        return Registry[category][name];
       } else {
         return name;
       }

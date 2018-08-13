@@ -1,6 +1,11 @@
+"use strict";
+
+/**
+ * Right side bar, contains all panel instances.
+ */
 define(function (require) {
 
-  let {Backbone: {Model, View}, _} = require('lib');
+  let { Backbone: { Model, View }, _ } = require('core/Lib');
 
   return View.extend({
 
@@ -23,20 +28,15 @@ define(function (require) {
       this._panels = [];
     },
 
-    createPanel(config) {
-      let Module = null;
-
-      if (typeof config === 'function') {
-        Module = config;
-      } else {
-        Module = _.guard(config['module'], () => {
-          throw "panels module is required"
-        });
+    createPanel(module, config) {
+      if (typeof module !== 'function') {
+        throw "panels module is required"
       }
 
+      console.log(config);
       let id = 'panel-' + this._panels.length + 1;
-      let title = _.guard(config['title'], () => Module.prototype.name);
-      let template = this.template({id: id, title: title});
+      let title = _.guard(config['title'], () => module.prototype.name);
+      let template = this.template({ id: id, title: title });
 
       this.$el.append(template);
 
@@ -46,7 +46,7 @@ define(function (require) {
         title: title,
       });
 
-      this._panels.push(new Module(config));
+      this._panels.push(new module(config));
     },
 
     render() {

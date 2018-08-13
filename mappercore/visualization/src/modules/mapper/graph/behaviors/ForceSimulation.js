@@ -1,6 +1,11 @@
+"use strict";
+
+/**
+ * Enable graph using force layout.
+ */
 define(function (require) {
-  const d3 = require('d3');
-  const GraphBehavior = require('../behavior');
+  const { d3 } = require('core/Lib');
+  const GraphBehavior = require('../Behavior');
 
   return class ForceSimulation extends GraphBehavior {
 
@@ -28,7 +33,7 @@ define(function (require) {
         .force("x", d3.forceX().strength(0.2))
         .force("y", d3.forceY().strength(0.2));
 
-      let {nodes, links} = this.graph.model.get('data');
+      let { nodes, links } = this.graph.model.get('data');
 
       this.simulation
         .nodes(nodes)

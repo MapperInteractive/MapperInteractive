@@ -1,17 +1,20 @@
+"use strict";
+
+/**
+ * Component class for HTML range.
+ */
 define(function (require) {
 
-  let _ = require('underscore');
-  let Backbone = require('backbone');
-  let ViewModel = Backbone.Model.extend();
+  const { Backbone: { View, Model }, _ } = require('core/Lib');
 
-  return Backbone.View.extend({
+  return View.extend({
 
     template: _.template('<label class="ui-form-range__label"><%= label %></label>' +
       '<span class="ui-form-range__value"><%= value %></span>' +
       '<input class="ui-form-range__input" name="<%= name %>" type="range" value="<%= value %>" max="<%= max %>" min="<%= min %>" step="<%= step %>" />'),
 
     initialize: function () {
-      this.states = new ViewModel({
+      this.states = new Model({
         label: 'range',
         name: '',
         value: 0,

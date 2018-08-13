@@ -1,6 +1,11 @@
+"use strict";
+
+/**
+ * The toolbar above the graph structure on UI.
+ */
 define(function (require) {
 
-  let {Backbone, $, _} = require('lib');
+  let {Backbone, $, _} = require('core/Lib');
 
   return Backbone.View.extend({
 

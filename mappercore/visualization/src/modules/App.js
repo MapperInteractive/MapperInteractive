@@ -1,23 +1,24 @@
+"use strict";
+
+/**
+ * This App provides a class for creating different kinds of analysis tools.
+ *  Do not use this class directly, extend it instead.
+ */
+
 define(function (require) {
 
-  let Job = require('core/job');
-  let {Backbone: {View, Model}, _} = require('lib');
+  const { Backbone: { View, Model }, _ } = require('core/Lib');
 
-  /**
-   * This App provides a class for creating different kinds of analysis tools
-   * Do not use this class directly, extend it instead.
-   */
   return View.extend({
 
     initialize(config) {
       this.model = new Model(_.extend({
-        'e': '#root',
         'baseUrl': '',
         'title': 'Mapper'
       }, config));
 
       this.willMount();
-      this.setElement(_.guard(this.model.get('root'), '#root'));
+      this.setElement(_.guard(this.model.get('element'), '#root'));
       this.didMount();
     },
 
@@ -42,8 +43,16 @@ define(function (require) {
       // abstract method
     },
 
-    createJob(name, params) {
-      return new Job(this, name, params)
+    serverSideFunction(name, params, onData) {
+      $.ajax({
+        type: 'POST',
+        url: this.app.url('sop'),
+        data: JSON.stringify({ name: name, params: params }),
+        contentType: "application/json",
+        dataType: "json",
+      }).done((res) => {
+        onData(res);
+      });
     }
   });
 });

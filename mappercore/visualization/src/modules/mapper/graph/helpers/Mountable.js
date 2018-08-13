@@ -1,6 +1,13 @@
+"use strict";
+
+/**
+ * Common part for Behavior and Mode.
+ *
+ * You can create a new mechanism which can be mount to a graph.
+ */
 define(function (require) {
 
-  const _ = require('underscore');
+  const { _ } = require('lib/Core');
 
   return class MountableHelper {
 

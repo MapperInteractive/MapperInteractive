@@ -1,7 +1,11 @@
+"use strict";
+
+/**
+ * Base class for a graph behavior.
+ */
 define(function (require) {
 
-  let _ = require('underscore');
-  const {Events} = require('backbone');
+  const { Backbone: { Events }, _ } = require('core/Lib');
 
   return class GraphBehavior {
 

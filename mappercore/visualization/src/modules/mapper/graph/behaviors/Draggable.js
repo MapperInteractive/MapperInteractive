@@ -1,6 +1,12 @@
+"use strict";
+
+/**
+ * Enable graph draggable.
+ */
 define(function (require) {
-  const d3 = require('d3');
-  const GraphBehavior = require('../behavior');
+
+  const { d3 } = require('core/Lib');
+  const GraphBehavior = require('../Behavior');
 
   class Draggable extends GraphBehavior {
 
