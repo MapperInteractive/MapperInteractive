@@ -5,6 +5,5 @@ _*
 .python-version
 __pycache__
 *.egg-info
-dist/
-build/
-local/
+/build/
+/local/
