@@ -17,14 +17,14 @@ define(function (require) {
 
     name: 'Color Functions',
 
-    COLOR_MAPS: [{ name: '- None -', map: null }, { name: 'Rainbow', map: 'interpolateRainbow' }, { name: 'Yellow, Red', map: 'interpolateYlOrRd' }, { name: 'Yellow, Blue', map: 'interpolateYlOrBr' }, { name: 'Yellow, Green', map: 'interpolateYlGn' }, { name: 'Yellow, Green, Blue', map: 'interpolateYlGnBu' }, { name: 'Purple, Red', map: 'interpolatePuRd' }, { name: 'Purple, Blue', map: 'interpolatePuBu' }, { name: 'Purple, Blue, Green', map: 'interpolatePuBuGn' }, { name: 'Green, Blue', map: 'interpolateGnBu' }, { name: 'Red', map: 'interpolateOrRd' }, { name: 'Red, Blue', map: 'interpolateRdPu' }, { name: 'Blue', map: 'interpolateBlues' }, { name: 'Blue, Purple', map: 'interpolateBuPu' }],
+    COLOR_MAPS: [{ colormapName: '- None -', colormapFunc: null }, { colormapName: 'Rainbow', colormapFunc: 'interpolateRainbow' }, { colormapName: 'Yellow, Red', colormapFunc: 'interpolateYlOrRd' }, { colormapName: 'Yellow, Blue', colormapFunc: 'interpolateYlOrBr' }, { colormapName: 'Yellow, Green', colormapFunc: 'interpolateYlGn' }, { colormapName: 'Yellow, Green, Blue', colormapFunc: 'interpolateYlGnBu' }, { colormapName: 'Purple, Red', colormapFunc: 'interpolatePuRd' }, { colormapName: 'Purple, Blue', colormapFunc: 'interpolatePuBu' }, { colormapName: 'Purple, Blue, Green', colormapFunc: 'interpolatePuBuGn' }, { colormapName: 'Green, Blue', colormapFunc: 'interpolateGnBu' }, { colormapName: 'Red', colormapFunc: 'interpolateOrRd' }, { colormapName: 'Red, Blue', colormapFunc: 'interpolateRdPu' }, { colormapName: 'Blue', colormapFunc: 'interpolateBlues' }, { colormapName: 'Blue, Purple', colormapFunc: 'interpolateBuPu' }],
 
     didMount: function didMount() {
       var _this = this;
 
       this.graph = this.app.graph;
 
-      this.model.set('colorFunctions', this.model.get('functions'));
+      this.model.set('valueFunctions', this.model.get('valueFunctions'));
       this.model.set('colorMaps', this._generateColorMaps());
 
       this.listenTo(this.graph.model, 'change:data', function () {
@@ -33,8 +33,8 @@ define(function (require) {
       this.listenTo(this.model, 'change:currentColorMap', function () {
         return _this._onChangeColorMap();
       });
-      this.listenTo(this.model, 'change:currentColorFunction', function () {
-        return _this._onChangeColorFunction();
+      this.listenTo(this.model, 'change:currentValueFunction', function () {
+        return _this._onChangeValueFunction();
       });
 
       d3.select(this.el).append('form').classed('form', true);
@@ -43,28 +43,28 @@ define(function (require) {
       this.svg = d3.select(this.el).append('svg');
     },
     render: function render() {
-      this._renderColorFunctionSelect();
+      this._renderValueFunctionSelect();
       this._renderColorMapSelect();
       this._renderColorMapFigure();
     },
     _generateColorMaps: function _generateColorMaps() {
-      return this.COLOR_MAPS.map(function (map) {
-        var scale = null;
-        if (map['map']) {
-          scale = d3.scaleSequential(d3ScaleChromatic[map['map']]);
+      return this.COLOR_MAPS.map(function (one) {
+        var func = null;
+        if (one['colormapFunc']) {
+          func = d3.scaleSequential(d3ScaleChromatic[one['colormapFunc']]);
         }
         return {
-          label: map['name'],
-          scale: scale
+          colormapName: one['colormapName'],
+          colormapFunc: func
         };
       });
     },
     getCurrentColorMap: function getCurrentColorMap() {
-      var map = this.model.get('currentColorMap');
-      if (!map) {
+      var current = this.model.get('currentColorMap');
+      if (!current) {
         return this.model.get('colorMaps')[0];
       } else {
-        return map;
+        return current;
       }
     },
 
@@ -72,19 +72,19 @@ define(function (require) {
     /**
      * return {label: feature, evaluate: f}
      */
-    getCurrentColorFunction: function getCurrentColorFunction() {
-      var map = this.model.get('currentColorFunction');
-      if (!map) {
-        return this.model.get('colorFunctions')[0];
+    getCurrentValueFunction: function getCurrentValueFunction() {
+      var current = this.model.get('currentValueFunction');
+      if (!current) {
+        return this.model.get('valueFunctions')[0];
       } else {
-        return map;
+        return current;
       }
     },
     _renderColorMapFigure: function _renderColorMapFigure() {
       this.svg.html("");
 
       var colorMap = this.getCurrentColorMap();
-      var colorScale = colorMap['scale'];
+      var colorScale = colorMap['colormapFunc'];
       if (!colorScale) {
         this.svg.attr('width', 0).attr('height', 0);
         return false;
@@ -121,29 +121,29 @@ define(function (require) {
 
       return svg;
     },
-    _renderColorFunctionSelect: function _renderColorFunctionSelect() {
+    _renderValueFunctionSelect: function _renderValueFunctionSelect() {
       var _this2 = this;
 
-      var colorFunctions = this.model.get('colorFunctions');
-      var options = colorFunctions.map(function (fn) {
-        return fn['name'];
+      var valueFunctions = this.model.get('valueFunctions');
+      var options = valueFunctions.map(function (fn) {
+        return fn['valueName'];
       });
       var onClick = function onClick(index) {
-        return _this2.model.set('currentColorFunction', colorFunctions[index]);
+        return _this2.model.set('currentValueFunction', valueFunctions[index]);
       };
-      this.$form.append(this._generateDropDown('colorFunction', options, onClick));
+      this.$form.append(this._generateDropDown('value', options, onClick));
     },
     _renderColorMapSelect: function _renderColorMapSelect() {
       var _this3 = this;
 
       var colorMaps = this.model.get('colorMaps');
       var options = colorMaps.map(function (map) {
-        return map['name'];
+        return map['colormapName'];
       });
       var onClick = function onClick(index) {
         return _this3.model.set('currentColorMap', colorMaps[index]);
       };
-      this.$form.append(this._generateDropDown('colorMap', options, onClick));
+      this.$form.append(this._generateDropDown('map', options, onClick));
     },
     _generateDropDown: function _generateDropDown(name, options, onClick) {
       var $html = $('<div class="form-group row">' + '<label class="col-sm-2 col-form-label" style="font-size:1.2em;font-weight:lighter;">' + name + '</label>' + '<div class="col-sm-10"><div class="btn-group" style="margin-right:1em;">' + '<button class="btn btn-outline-secondary dropdown-toggle btn-sm" ' + 'role="button" data-toggle="dropdown" aria-haspopup="true" ' + 'aria-expanded="false">' + options[0] + '</button>' + '<div class="dropdown-menu"></div>' + '</div></div></div>');
@@ -172,14 +172,14 @@ define(function (require) {
       this._renderColorMapFigure();
       this._updateGraphColor();
     },
-    _onChangeColorFunction: function _onChangeColorFunction() {
+    _onChangeValueFunction: function _onChangeValueFunction() {
       this._renderColorMapFigure();
       this._updateGraphColor();
     },
     _updateGraphColor: function _updateGraphColor() {
       var graph = this.graph;
       var colorMap = this.getCurrentColorMap();
-      var colorScale = colorMap['scale'];
+      var colorScale = colorMap['colormapFunc'];
 
       if (!colorScale || !graph.nodes) {
         if (graph.nodes) {
@@ -191,21 +191,21 @@ define(function (require) {
 
       colorScale.domain(this._getCurrentAxisDomain());
 
-      var colorFunctionSettings = this.getCurrentColorFunction();
-      var colorFunction = function colorFunction(d) {
-        return colorScale(colorFunctionSettings.func(d));
+      var currentValueFunction = this.getCurrentValueFunction();
+      var d3ValueFunction = function d3ValueFunction(d) {
+        return colorScale(currentValueFunction['valueFunc'](d));
       };
-      graph.nodes.style('fill', colorFunction);
+      graph.nodes.style('fill', d3ValueFunction);
 
-      this._invertLabelColors(graph, colorFunction);
+      this._invertLabelColors(graph, d3ValueFunction);
     },
     _getCurrentAxisDomain: function _getCurrentAxisDomain() {
       var graph = this.graph;
       var data = graph.model.get('data');
-      var colorFunction = this.getCurrentColorFunction();
+      var valueFunction = this.getCurrentValueFunction();
       if (data) {
         return d3.extent(data['nodes'], function (d) {
-          return colorFunction.func(d);
+          return valueFunction['valueFunc'](d);
         });
       } else {
         return [0, 1];

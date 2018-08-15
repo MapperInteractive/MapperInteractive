@@ -37,7 +37,7 @@ define(function (require) {
     EVENT_WILL_LOAD: 'didLoad',
     EVENT_DID_LOAD: 'didLoad',
     EVENT_DID_LAYOUT: 'didLayout',
-    CONFIG_ENABLE_MODES: 'enableModes',
+    CONFIG_ENABLE_MODES: 'enabledModes',
     CONFIG_ENABLE_BEHAVIORS: 'enabledBehaviors',
 
     EVENT_MODE_ACTIVATED: 'activate:mode',
