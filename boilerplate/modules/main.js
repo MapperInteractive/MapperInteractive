@@ -11,7 +11,8 @@ define(function (require) {
    * MapperCore includes some useful libraries, you can get their references by module `lib`.
    *
    */
-  let { _, d3 } = require('core/Lib');
+  const _ = require('underscore');
+  const d3 = require(d3);
 
   /**
    * All MapperCore modules are defined under namespace `core`.
