@@ -1,19 +1,15 @@
 "use strict";
 
 /**
- * Provides shortcuts for built-in libraries
- *
- * For example:
- *
- *    let { _, Backbone } = require('core/Lib');
+ * Provides helper functions
  */
 
 define(function (require) {
 
-  var d3 = require('core/vendors/d3.min'),
-      underscore = require('core/vendors/underscore.min'),
-      $ = require('core/vendors/jquery.min'),
-      Backbone = require('core/vendors/backbone.min');
+  var d3 = require('d3'),
+      underscore = require('underscore'),
+      $ = require('jquery'),
+      Backbone = require('backbone');
 
   var _ = underscore.mixin({
     guard: function guard(variable, fallback) {

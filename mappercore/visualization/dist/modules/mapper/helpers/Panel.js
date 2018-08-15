@@ -9,9 +9,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      _ = _require._,
-      $ = _require.$;
+
+  var _ = require('underscore');
+  var $ = require('jquery');
 
   var PanelWrapper = function () {
     function PanelWrapper(app, title, module) {

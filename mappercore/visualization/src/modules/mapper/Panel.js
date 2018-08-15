@@ -5,7 +5,7 @@
  */
 define(function (require) {
 
-  let { Backbone: { Model, View } } = require('core/Lib');
+  const { View, Model } = require('backbone');
 
   return View.extend({
 

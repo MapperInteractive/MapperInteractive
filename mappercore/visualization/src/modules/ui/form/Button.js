@@ -5,7 +5,9 @@
  */
 define(function (require) {
 
-  const { Backbone: { View, Model } } = require('core/Lib');
+  const _ = require('underscore');
+  const $ = require('jquery');
+  const { View, Model } = require('backbone');
 
   return View.extend({
 

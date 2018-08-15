@@ -5,13 +5,14 @@
  */
 define(function (require) {
 
-  let {_, Backbone} = require('core/Lib');
+  const _ = require('underscore');
+  const { Events } = require('backbone');
 
   return class Mode {
 
     constructor() {
       this.activated = false;
-      this.events = _.extend({}, Backbone.Events);
+      this.events = _.extend({}, Events);
 
       // this.graph and this.app is available after mount
       this.graph = undefined;

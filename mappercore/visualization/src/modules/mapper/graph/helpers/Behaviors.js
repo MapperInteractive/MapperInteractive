@@ -5,7 +5,7 @@
  */
 define(function (require) {
 
-  const { _ } = require('core/Lib');
+  const _ = require('underscore');
   const MountableHelper = require('./Mountable');
 
   return class BehaviorsHelper extends MountableHelper {

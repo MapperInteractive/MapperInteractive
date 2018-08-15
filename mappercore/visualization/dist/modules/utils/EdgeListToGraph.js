@@ -4,8 +4,8 @@
  * Convert a edge list to graph structure for D3.js
  */
 define(function (require) {
-  var _require = require('utils'),
-      d3 = _require.d3;
+
+  var d3 = require('d3');
 
   return function (edgeList) {
     var nodeSet = new Set([]);

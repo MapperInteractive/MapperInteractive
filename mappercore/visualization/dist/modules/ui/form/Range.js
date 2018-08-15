@@ -5,11 +5,12 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      _require$Backbone = _require.Backbone,
-      View = _require$Backbone.View,
-      Model = _require$Backbone.Model,
-      _ = _require._;
+
+  var _ = require('underscore');
+
+  var _require = require('backbone'),
+      View = _require.View,
+      Model = _require.Model;
 
   return View.extend({
 

@@ -7,9 +7,9 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      d3 = _require.d3;
 
+  var d3 = require('d3');
+  var $ = require('jquery');
   var d3ScaleChromatic = require('d3-scale-chromatic');
   var Panel = require('core/mapper/Panel');
 

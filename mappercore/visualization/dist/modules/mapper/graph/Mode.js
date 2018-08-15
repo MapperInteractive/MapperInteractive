@@ -9,16 +9,18 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      _ = _require._,
-      Backbone = _require.Backbone;
+
+  var _ = require('underscore');
+
+  var _require = require('backbone'),
+      Events = _require.Events;
 
   return function () {
     function Mode() {
       _classCallCheck(this, Mode);
 
       this.activated = false;
-      this.events = _.extend({}, Backbone.Events);
+      this.events = _.extend({}, Events);
 
       // this.graph and this.app is available after mount
       this.graph = undefined;
@@ -33,14 +35,14 @@ define(function (require) {
     }
 
     _createClass(Mode, [{
-      key: "listenTo",
+      key: 'listenTo',
       value: function listenTo() {
         var _events;
 
         (_events = this.events).listenTo.apply(_events, arguments);
       }
     }, {
-      key: "stopListening",
+      key: 'stopListening',
       value: function stopListening() {
         this.events.stopListening();
       }
@@ -48,42 +50,42 @@ define(function (require) {
       // put your initialization codes here
 
     }, {
-      key: "initialize",
+      key: 'initialize',
       value: function initialize() {}
     }, {
-      key: "willMount",
+      key: 'willMount',
       value: function willMount() {
         if (!this.name || !this.label) {
           throw "A graph mode should have a name and a label.";
         }
-        console.log("[" + this.name + "] willMount");
+        console.log('[' + this.name + '] willMount');
       }
     }, {
-      key: "didMount",
+      key: 'didMount',
       value: function didMount() {
-        console.log("[" + this.name + "] didMount");
+        console.log('[' + this.name + '] didMount');
       }
     }, {
-      key: "willActivate",
+      key: 'willActivate',
       value: function willActivate() {
-        console.log("[" + this.name + "] willActivate");
+        console.log('[' + this.name + '] willActivate');
       }
     }, {
-      key: "didActivate",
+      key: 'didActivate',
       value: function didActivate() {
         this.activated = true;
-        console.log("[" + this.name + "] didActivate");
+        console.log('[' + this.name + '] didActivate');
       }
     }, {
-      key: "willDeactivate",
+      key: 'willDeactivate',
       value: function willDeactivate() {
-        console.log("[" + this.name + "] willDeactivate");
+        console.log('[' + this.name + '] willDeactivate');
       }
     }, {
-      key: "didDeactivate",
+      key: 'didDeactivate',
       value: function didDeactivate() {
         this.activated = false;
-        console.log("[" + this.name + "] didDeactivate");
+        console.log('[' + this.name + '] didDeactivate');
       }
     }]);
 

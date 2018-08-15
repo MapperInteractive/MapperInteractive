@@ -5,7 +5,8 @@
  */
 define(function (require) {
 
-  let { _, $ } = require('core/Lib');
+  const _ = require('underscore');
+  const $ = require('jquery');
 
   class PanelWrapper {
     constructor(app, title, module) {

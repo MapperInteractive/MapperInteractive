@@ -35,7 +35,7 @@ define(function (require) {
   let EdgeList2Graph = require('core/utils/EdgelistToGraph');
 
   mapperInstance.createPanel(
-    require('core/mapper/panels/FormDataLoader'),
+    require('core/mapper/panels/FixedDataLoader'),
     {
       loader: function (panel) {
         let url = mapperInstance.url('files/edgelist.txt');

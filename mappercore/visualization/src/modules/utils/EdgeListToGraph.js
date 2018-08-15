@@ -3,7 +3,7 @@
  */
 define(function (require) {
 
-  let { d3 } = require('utils');
+  const d3 = require('d3');
 
   return function (edgeList) {
     const nodeSet = new Set([]);

@@ -5,7 +5,9 @@
  */
 define(function (require) {
 
-  let { Backbone: { Model, View }, _ } = require('core/Lib');
+  const _ = require('underscore');
+  const { Model, View } = require('backbone');
+  const { guard } = require('core/Helper');
 
   return View.extend({
 
@@ -33,9 +35,8 @@ define(function (require) {
         throw "panels module is required"
       }
 
-      console.log(config);
       let id = 'panel-' + this._panels.length + 1;
-      let title = _.guard(config['title'], () => module.prototype.name);
+      let title = guard(config['title'], () => module.prototype.name);
       let template = this.template({ id: id, title: title });
 
       this.$el.append(template);

@@ -6,7 +6,9 @@
 define(function (require) {
 
   const GraphMode = require('../Mode');
-  const { _, Backbone, d3 } = require('core/Lib');
+  const d3 = require('d3');
+  const _ = require('underscore');
+  const { View, Model } = require('backbone');
 
   return class SelectPathMode extends GraphMode {
 
@@ -16,7 +18,7 @@ define(function (require) {
       this.label = 'Select Path';
       this.CLASS_NAME_ANCHOR = '--anchor';
 
-      this.model = new Backbone.Model({
+      this.model = new Model({
         'selection': []
       });
     }

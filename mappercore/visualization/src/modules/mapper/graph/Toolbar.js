@@ -5,9 +5,11 @@
  */
 define(function (require) {
 
-  let {Backbone, $, _} = require('core/Lib');
+  const $ = require('jquery');
+  const _ = require('underscore');
+  const { View } = require('backbone');
 
-  return Backbone.View.extend({
+  return View.extend({
 
     template: _.template('<button data-mode-name="<%= mode.name %>"' +
       ' class="viewer-graph__toolbar-item btn disabled <%if (mode.activated) { %>active<% }%>" ' +

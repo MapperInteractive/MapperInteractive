@@ -8,9 +8,9 @@
  */
 define(function (require) {
 
-  let App = require('./App');
-  let Aside = require('./mapper/Aside');
-  let Graph = require('./mapper/Graph');
+  const App = require('./App');
+  const Aside = require('./mapper/Aside');
+  const Graph = require('./mapper/Graph');
 
   return App.extend({
 

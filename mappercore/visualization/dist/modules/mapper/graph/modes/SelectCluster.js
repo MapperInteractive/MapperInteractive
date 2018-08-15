@@ -17,9 +17,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 define(function (require) {
 
   var GraphMode = require('../Mode');
-
-  var _require = require('core/Lib'),
-      d3 = _require.d3;
+  var d3 = require('d3');
 
   return function (_GraphMode) {
     _inherits(SelectClusterMode, _GraphMode);

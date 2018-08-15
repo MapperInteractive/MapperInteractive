@@ -5,12 +5,14 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      Backbone = _require.Backbone,
-      $ = _require.$,
-      _ = _require._;
 
-  return Backbone.View.extend({
+  var $ = require('jquery');
+  var _ = require('underscore');
+
+  var _require = require('backbone'),
+      View = _require.View;
+
+  return View.extend({
 
     template: _.template('<button data-mode-name="<%= mode.name %>"' + ' class="viewer-graph__toolbar-item btn disabled <%if (mode.activated) { %>active<% }%>" ' + ' title="<%= mode.label %>" disabled><%= mode.label %></button>'),
 

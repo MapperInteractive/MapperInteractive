@@ -5,7 +5,8 @@
  */
 define(function (require) {
 
-  const { $, d3 } = require('core/Lib');
+  const d3 = require('d3');
+  const $ = require('jquery');
   const GraphBehavior = require('../Behavior');
 
   return class Popover extends GraphBehavior {

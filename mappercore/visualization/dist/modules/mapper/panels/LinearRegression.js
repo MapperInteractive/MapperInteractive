@@ -5,10 +5,9 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      d3 = _require.d3,
-      _ = _require._;
-
+  var d3 = require('d3');
+  var _ = require('underscore');
+  var $ = require('jquery');
   var Panel = require('../Panel');
 
   return Panel.extend({

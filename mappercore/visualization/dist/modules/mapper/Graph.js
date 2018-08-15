@@ -5,13 +5,16 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      d3 = _require.d3,
-      $ = _require.$,
-      _ = _require._,
-      _require$Backbone = _require.Backbone,
-      View = _require$Backbone.View,
-      Model = _require$Backbone.Model;
+  var d3 = require('d3');
+  var _ = require('underscore');
+  var $ = require('jquery');
+
+  var _require = require('backbone'),
+      View = _require.View,
+      Model = _require.Model;
+
+  var _require2 = require('core/Helper'),
+      guard = _require2.guard;
 
   var Toolbar = require('./graph/Toolbar');
   var ModesHelper = require('./graph/helpers/Modes');
@@ -202,12 +205,12 @@ define(function (require) {
     _initConfig: function _initConfig() {
       var _this6 = this;
 
-      _.guard(this.app.model.get(this.CONFIG_ENABLE_BEHAVIORS), []).map(function (item) {
+      guard(this.app.model.get(this.CONFIG_ENABLE_BEHAVIORS), []).map(function (item) {
         var Module = _this6._parseScript('behaviors', item);
         _this6.behaviors.add(new Module());
       });
 
-      _.guard(this.app.model.get(this.CONFIG_ENABLE_MODES), []).map(function (item) {
+      guard(this.app.model.get(this.CONFIG_ENABLE_MODES), []).map(function (item) {
         var Module = _this6._parseScript('modes', item);
         _this6.modes.add(new Module());
       });

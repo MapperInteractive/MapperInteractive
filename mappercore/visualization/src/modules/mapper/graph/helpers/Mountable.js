@@ -7,7 +7,7 @@
  */
 define(function (require) {
 
-  const { _ } = require('lib/Core');
+  const _ = require('underscore');
 
   return class MountableHelper {
 

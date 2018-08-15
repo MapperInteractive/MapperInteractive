@@ -4,10 +4,11 @@
  * Panel for building a form to load graph data.
  */
 define(function (require) {
-  let { _ } = require('core/Lib');
-  let Range = require('core/ui/form/Range');
-  let Button = require('core/ui/form/Button');
-  let Panel = require('../Panel');
+  const _ = require('underscore');
+  const $ = require('jquery');
+  const Range = require('core/ui/form/Range');
+  const Button = require('core/ui/form/Button');
+  const Panel = require('../Panel');
 
   const FORM_CONTROLS = {
     'range': Range

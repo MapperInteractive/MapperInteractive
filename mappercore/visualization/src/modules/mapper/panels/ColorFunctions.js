@@ -7,9 +7,10 @@
  */
 define(function (require) {
 
-  let { d3 } = require('core/Lib');
-  let d3ScaleChromatic = require('d3-scale-chromatic');
-  let Panel = require('core/mapper/Panel');
+  const d3 = require('d3');
+  const $ = require('jquery');
+  const d3ScaleChromatic = require('d3-scale-chromatic');
+  const Panel = require('core/mapper/Panel');
 
   return Panel.extend({
 

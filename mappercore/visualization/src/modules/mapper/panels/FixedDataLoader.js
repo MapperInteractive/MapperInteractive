@@ -14,7 +14,7 @@
  */
 define(function (require) {
 
-  let Panel = require('../Panel');
+  const Panel = require('../Panel');
 
   return Panel.extend({
 

@@ -4,13 +4,17 @@
  * Create a set of graph UI elements include graph structure, toolbar and popovers.
  */
 define(function (require) {
-  let { d3, $, _, Backbone: { View, Model } } = require('core/Lib');
+  const d3 = require('d3');
+  const _ = require('underscore');
+  const $ = require('jquery');
+  const { View, Model } = require('backbone');
+  const { guard } = require('core/Helper');
 
-  let Toolbar = require('./graph/Toolbar');
-  let ModesHelper = require('./graph/helpers/Modes');
-  let BehaviorsHelper = require('./graph/helpers/Behaviors');
-  let ViewMode = require('./graph/modes/View');
-  let Registry = require('./Registry');
+  const Toolbar = require('./graph/Toolbar');
+  const ModesHelper = require('./graph/helpers/Modes');
+  const BehaviorsHelper = require('./graph/helpers/Behaviors');
+  const ViewMode = require('./graph/modes/View');
+  const Registry = require('./Registry');
 
 
   return View.extend({
@@ -214,12 +218,12 @@ define(function (require) {
     },
 
     _initConfig() {
-      _.guard(this.app.model.get(this.CONFIG_ENABLE_BEHAVIORS), []).map((item) => {
+      guard(this.app.model.get(this.CONFIG_ENABLE_BEHAVIORS), []).map((item) => {
         let Module = this._parseScript('behaviors', item);
         this.behaviors.add(new Module());
       });
 
-      _.guard(this.app.model.get(this.CONFIG_ENABLE_MODES), []).map((item) => {
+      guard(this.app.model.get(this.CONFIG_ENABLE_MODES), []).map((item) => {
         let Module = this._parseScript('modes', item);
         this.modes.add(new Module());
       });

@@ -5,11 +5,15 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      _require$Backbone = _require.Backbone,
-      Model = _require$Backbone.Model,
-      View = _require$Backbone.View,
-      _ = _require._;
+
+  var _ = require('underscore');
+
+  var _require = require('backbone'),
+      Model = _require.Model,
+      View = _require.View;
+
+  var _require2 = require('core/Helper'),
+      guard = _require2.guard;
 
   return View.extend({
 
@@ -28,9 +32,8 @@ define(function (require) {
         throw "panels module is required";
       }
 
-      console.log(config);
       var id = 'panel-' + this._panels.length + 1;
-      var title = _.guard(config['title'], function () {
+      var title = guard(config['title'], function () {
         return module.prototype.name;
       });
       var template = this.template({ id: id, title: title });

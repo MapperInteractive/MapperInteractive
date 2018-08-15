@@ -6,11 +6,14 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      _require$Backbone = _require.Backbone,
-      View = _require$Backbone.View,
-      Model = _require$Backbone.Model,
-      _ = _require._;
+  var _require = require('backbone'),
+      View = _require.View,
+      Model = _require.Model;
+
+  var _ = require('underscore');
+
+  var _require2 = require('core/Helper'),
+      guard = _require2.guard;
 
   return View.extend({
     initialize: function initialize(config) {
@@ -20,7 +23,7 @@ define(function (require) {
       }, config));
 
       this.willMount();
-      this.setElement(_.guard(this.model.get('element'), '#root'));
+      this.setElement(guard(this.model.get('element'), '#root'));
       this.didMount();
     },
     willMount: function willMount() {},

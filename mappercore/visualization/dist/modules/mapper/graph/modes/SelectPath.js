@@ -17,11 +17,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 define(function (require) {
 
   var GraphMode = require('../Mode');
+  var d3 = require('d3');
+  var _ = require('underscore');
 
-  var _require = require('core/Lib'),
-      _ = _require._,
-      Backbone = _require.Backbone,
-      d3 = _require.d3;
+  var _require = require('backbone'),
+      View = _require.View,
+      Model = _require.Model;
 
   return function (_GraphMode) {
     _inherits(SelectPathMode, _GraphMode);
@@ -35,7 +36,7 @@ define(function (require) {
       _this.label = 'Select Path';
       _this.CLASS_NAME_ANCHOR = '--anchor';
 
-      _this.model = new Backbone.Model({
+      _this.model = new Model({
         'selection': []
       });
       return _this;

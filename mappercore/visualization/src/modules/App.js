@@ -7,7 +7,9 @@
 
 define(function (require) {
 
-  const { Backbone: { View, Model }, _ } = require('core/Lib');
+  const { View, Model } = require('backbone');
+  const _ = require('underscore');
+  const { guard } = require('core/Helper');
 
   return View.extend({
 
@@ -18,7 +20,7 @@ define(function (require) {
       }, config));
 
       this.willMount();
-      this.setElement(_.guard(this.model.get('element'), '#root'));
+      this.setElement(guard(this.model.get('element'), '#root'));
       this.didMount();
     },
 

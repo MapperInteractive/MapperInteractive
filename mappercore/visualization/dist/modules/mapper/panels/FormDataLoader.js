@@ -5,9 +5,8 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      _ = _require._;
-
+  var _ = require('underscore');
+  var $ = require('jquery');
   var Range = require('core/ui/form/Range');
   var Button = require('core/ui/form/Button');
   var Panel = require('../Panel');

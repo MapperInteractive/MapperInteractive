@@ -5,10 +5,9 @@
  */
 
 define(function (require) {
-  var _require = require('core/Lib'),
-      _require$Backbone = _require.Backbone,
-      Model = _require$Backbone.Model,
-      View = _require$Backbone.View;
+  var _require = require('backbone'),
+      View = _require.View,
+      Model = _require.Model;
 
   return View.extend({
 

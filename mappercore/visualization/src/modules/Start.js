@@ -15,9 +15,16 @@ window.jQuery(function () {
   require.config({
     baseUrl: '/',
     paths: {
-      'd3-scale-chromatic': 'core/vendors/d3-scale-chromatic.min',
-      'd3-interpolate': 'core/vendors/d3-interpolate.min',
+      // you should register all vendors here
+      'backbone': 'core/vendors/backbone.min',
+      'bootstrap': 'core/vendors/bootstrap.bundle.min',
+      'd3': 'core/vendors/d3.min',
       'd3-color': 'core/vendors/d3-color.min',
+      'd3-interpolate': 'core/vendors/d3-interpolate.min',
+      'd3-scale-chromatic': 'core/vendors/d3-scale-chromatic.min',
+      'jquery': 'core/vendors/jquery.min',
+      'require': 'core/vendors/require.min',
+      'underscore': 'core/vendors/underscore.min'
     }
   });
 
@@ -25,8 +32,9 @@ window.jQuery(function () {
    * Since we use two blueprints in Flask,
    *  we need to let RequireJS know how to load core modules and project modules correctly.
    */
-  let load = require.load;
+  const load = require.load;
   require.load = function (context, moduleId, url) {
+    console.log('[require] ' + moduleId);
     if (!(moduleId in context.config.paths)) {
       let modules = moduleId.split('/');
       if (modules[0] !== 'core') {

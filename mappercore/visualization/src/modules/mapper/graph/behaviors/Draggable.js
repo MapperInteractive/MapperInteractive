@@ -5,7 +5,7 @@
  */
 define(function (require) {
 
-  const { d3 } = require('core/Lib');
+  const d3 = require('d3');
   const GraphBehavior = require('../Behavior');
 
   class Draggable extends GraphBehavior {

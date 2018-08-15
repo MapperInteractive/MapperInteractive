@@ -5,7 +5,8 @@
  */
 define(function (require) {
 
-  const { Backbone: { Events }, _ } = require('core/Lib');
+  const _ = require('underscore');
+  const { Events } = require('backbone');
 
   return class GraphBehavior {
 

@@ -4,8 +4,10 @@
  * Linear Regression Panel
  */
 define(function (require) {
-  let { d3, _ } = require('core/Lib');
-  let Panel = require('../Panel');
+  const d3 = require('d3');
+  const _ = require('underscore');
+  const $ = require('jquery');
+  const Panel = require('../Panel');
 
   return Panel.extend({
 
