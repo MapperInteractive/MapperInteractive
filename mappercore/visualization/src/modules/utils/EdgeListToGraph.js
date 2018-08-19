@@ -19,12 +19,12 @@ define(function (require) {
         let nodeId = +value;
         if (!nodeSet.has(nodeId)) {
           nodeSet.add(nodeId);
-          graph.nodes.push({id: nodeId});
+          graph.nodes.push({ id: nodeId });
         }
         return nodeId;
       });
 
-      graph.links.push({ source: pair[0], target: pair[1]});
+      graph.links.push({ source: pair[0], target: pair[1] });
     });
 
     return graph;

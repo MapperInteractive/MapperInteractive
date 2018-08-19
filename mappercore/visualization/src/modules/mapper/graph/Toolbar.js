@@ -30,7 +30,7 @@ define(function (require) {
       let modes = this.graph.modes;
 
       modes.map((mode) => {
-        container.append(this.template({mode: mode}));
+        container.append(this.template({ mode: mode }));
       });
 
       this.$('button').click((e) => {
