@@ -1,12 +1,12 @@
-# Mapper Core
+# MapperCore
 
-Mapper core is a framework to create resuable visualization projects.
+MapperCore is a framework to create analysis and visualization with high-dimensional data.
 
 ## Installation
 
-Current we haven't publish mappercore to pypi, so you need to copy all files into your project.
+Current we have not published MapperCore to pypi, so a user will need to copy all files into his/her project.
 
-When mappercore is avaliable as a python project, the installation would be
+When MapperCore is avaliable as a python project, the installation would be
 
 ```py
 pip install mappercore
@@ -57,4 +57,4 @@ if __name__ == '__main__':
 
 ## Contribute
 
-Base on mappercore, you can create your visualization of graph data, time series data, table data, etc. Everyone is encouraged to share their customized `Layout` .
+Base on MapperCore, you can create your visualization of graph data, time series data, table data, etc. Everyone is encouraged to share their customized `Layout` .
