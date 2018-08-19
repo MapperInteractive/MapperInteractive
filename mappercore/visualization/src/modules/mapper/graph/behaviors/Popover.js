@@ -37,7 +37,10 @@ define(function (require) {
         let target = d3.select(e.target);
         let datum = target.datum();
 
-        let contentFunction = this.app.model.get('behavior.popover.content');
+        let contentFunction = this.app.getOption('behavior.popover.content');
+        if (!contentFunction) {
+          return null;
+        }
         let html = contentFunction(datum);
 
         this.popover.find('.popover-body').html(html);

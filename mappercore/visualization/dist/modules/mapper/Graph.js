@@ -17,8 +17,8 @@ define(function (require) {
       guard = _require2.guard;
 
   var Toolbar = require('./graph/Toolbar');
-  var ModesHelper = require('./graph/helpers/Modes');
-  var BehaviorsHelper = require('./graph/helpers/Behaviors');
+  var ModesManager = require('./graph/helpers/Modes');
+  var BehaviorsManager = require('./graph/helpers/Behaviors');
   var ViewMode = require('./graph/modes/View');
   var Registry = require('./Registry');
 
@@ -42,9 +42,6 @@ define(function (require) {
     EVENT_WILL_LOAD: 'didLoad',
     EVENT_DID_LOAD: 'didLoad',
     EVENT_DID_LAYOUT: 'didLayout',
-    CONFIG_ENABLE_MODES: 'enabledModes',
-    CONFIG_ENABLE_BEHAVIORS: 'enabledBehaviors',
-
     EVENT_MODE_ACTIVATED: 'activate:mode',
 
     initialize: function initialize(states) {
@@ -68,8 +65,8 @@ define(function (require) {
       this.$container = $(this.container);
 
       // init modes & behaviors
-      this.modes = new ModesHelper(this);
-      this.behaviors = new BehaviorsHelper(this);
+      this.modes = new ModesManager(this);
+      this.behaviors = new BehaviorsManager(this);
 
       // init customizations
       this.modes.add(new ViewMode());
@@ -79,11 +76,8 @@ define(function (require) {
       this._initEvents();
     },
 
-    loadData: function loadData(data) {
+    updateData: function updateData(data) {
       this.model.set('data', data);
-    },
-    config: function config(name, value) {
-      this._config.set(name, value);
     },
 
 
@@ -205,17 +199,17 @@ define(function (require) {
     _initConfig: function _initConfig() {
       var _this6 = this;
 
-      guard(this.app.model.get(this.CONFIG_ENABLE_BEHAVIORS), []).map(function (item) {
-        var Module = _this6._parseScript('behaviors', item);
+      guard(this.app.getOption('behaviors'), []).map(function (item) {
+        var Module = _this6._parseModule('behaviors', item);
         _this6.behaviors.add(new Module());
       });
 
-      guard(this.app.model.get(this.CONFIG_ENABLE_MODES), []).map(function (item) {
-        var Module = _this6._parseScript('modes', item);
+      guard(this.app.getOption('modes'), []).map(function (item) {
+        var Module = _this6._parseModule('modes', item);
         _this6.modes.add(new Module());
       });
     },
-    _parseScript: function _parseScript(category, name) {
+    _parseModule: function _parseModule(category, name) {
       if (typeof name === 'string') {
         if (!Registry[category][name]) {
           throw "Unknown " + category + ': ' + name;

@@ -15,18 +15,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 define(function (require) {
 
   var _ = require('underscore');
-  var MountableHelper = require('./Mountable');
+  var MountableManager = require('./Mountable');
 
-  return function (_MountableHelper) {
-    _inherits(BehaviorsHelper, _MountableHelper);
+  return function (_MountableManager) {
+    _inherits(BehaviorsManager, _MountableManager);
 
-    function BehaviorsHelper() {
-      _classCallCheck(this, BehaviorsHelper);
+    function BehaviorsManager() {
+      _classCallCheck(this, BehaviorsManager);
 
-      return _possibleConstructorReturn(this, (BehaviorsHelper.__proto__ || Object.getPrototypeOf(BehaviorsHelper)).apply(this, arguments));
+      return _possibleConstructorReturn(this, (BehaviorsManager.__proto__ || Object.getPrototypeOf(BehaviorsManager)).apply(this, arguments));
     }
 
-    _createClass(BehaviorsHelper, [{
+    _createClass(BehaviorsManager, [{
       key: 'trigger',
       value: function trigger(event, context) {
         _.mapObject(this.mounted, function (b) {
@@ -35,6 +35,6 @@ define(function (require) {
       }
     }]);
 
-    return BehaviorsHelper;
-  }(MountableHelper);
+    return BehaviorsManager;
+  }(MountableManager);
 });

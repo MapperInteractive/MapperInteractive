@@ -9,19 +9,28 @@ define(function (require) {
 
   const { View, Model } = require('backbone');
   const _ = require('underscore');
+  const $ = require('jquery');
   const { guard } = require('core/Helper');
 
   return View.extend({
 
-    initialize(config) {
+    initialize(states) {
       this.model = new Model(_.extend({
         'baseUrl': '',
         'title': 'Mapper'
-      }, config));
+      }, states));
 
       this.willMount();
       this.setElement(guard(this.model.get('element'), '#root'));
       this.didMount();
+    },
+
+    hasOption(name) {
+      return this.getOption(name) !== undefined;
+    },
+
+    getOption(name) {
+      return guard(this.model.get('options'), {})[name];
     },
 
     willMount() {
@@ -45,11 +54,11 @@ define(function (require) {
       // abstract method
     },
 
-    serverSideFunction(name, params, onData) {
+    serverSideFunction(name, data, onData) {
       $.ajax({
         type: 'POST',
-        url: this.app.url('sop'),
-        data: JSON.stringify({ name: name, params: params }),
+        url: `${this.url('call')}/${name}`,
+        data: JSON.stringify(data),
         contentType: "application/json",
         dataType: "json",
       }).done((res) => {

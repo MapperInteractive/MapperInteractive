@@ -23,7 +23,7 @@ define(function (require) {
       this.loader = this.model.get('loader');
 
       this.on('data', (data) => {
-        this.graph.loadData(data);
+        this.graph.updateData(data);
       });
 
       this.on('error', (error) => {

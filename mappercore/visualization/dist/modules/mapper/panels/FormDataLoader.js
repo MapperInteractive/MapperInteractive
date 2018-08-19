@@ -26,7 +26,7 @@ define(function (require) {
       this.loader = this.model.get('loader');
 
       this.on('data', function (data) {
-        _this.graph.loadData(data);
+        _this.graph.updateData(data);
       });
 
       this.on('error', function (error) {

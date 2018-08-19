@@ -5,9 +5,9 @@
  */
 define(function (require) {
 
-  const MountableHelper = require('./Mountable');
+  const MountableManager = require('./Mountable');
 
-  return class ModesHelper extends MountableHelper {
+  return class ModesManager extends MountableManager {
 
     init() {
       this.activated = null;

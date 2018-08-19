@@ -65,7 +65,10 @@ define(function (require) {
           var target = d3.select(e.target);
           var datum = target.datum();
 
-          var contentFunction = _this3.app.model.get('behavior.popover.content');
+          var contentFunction = _this3.app.getOption('behavior.popover.content');
+          if (!contentFunction) {
+            return null;
+          }
           var html = contentFunction(datum);
 
           _this3.popover.find('.popover-body').html(html);

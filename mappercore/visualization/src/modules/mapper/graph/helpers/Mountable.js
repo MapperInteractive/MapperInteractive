@@ -9,7 +9,7 @@ define(function (require) {
 
   const _ = require('underscore');
 
-  return class MountableHelper {
+  return class MountableManager {
 
     constructor(graph) {
       this.graph = graph;

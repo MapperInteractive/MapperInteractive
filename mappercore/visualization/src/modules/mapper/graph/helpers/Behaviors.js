@@ -6,9 +6,9 @@
 define(function (require) {
 
   const _ = require('underscore');
-  const MountableHelper = require('./Mountable');
+  const MountableManager = require('./Mountable');
 
-  return class BehaviorsHelper extends MountableHelper {
+  return class BehaviorsManager extends MountableManager {
 
     trigger(event, context) {
       _.mapObject(this.mounted, (b) => {

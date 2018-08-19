@@ -19,8 +19,9 @@ define(function (require) {
     didMount: function didMount() {
       var _this = this;
 
-      this.algorithms = this.model.get('algorithms'); //[{ name: 'linear_regression', label: 'Linear Regression' }];
-      this.attributes = this.model.get('attributes'); //['DAP', 'Humidity', 'Solar.Rad', 'Temperature'];
+      this.payloadBuilder = this.model.get('payloadBuilder');
+      this.algorithms = this.model.get('algorithms');
+      this.attributes = this.model.get('attributes');
 
       this.listenTo(this.graph.model, 'change:selection', function () {
         return _this.onSelectionChanged();
@@ -56,54 +57,14 @@ define(function (require) {
       this.$el.html(html);
 
       html.find('button').on('click', function () {
-
-        var job = _this2.app.createJob('linear_regression', _.object([['algorithm', select.val()], ['params', _this2.buildData()]]));
-
-        job.on('sent', function () {
-          return console.log('sent');
-        });
-
-        job.on('finished', function (res) {
+        _this2.app.serverSideFunction('linear_regression', {
+          'algorithm': select.val(),
+          'payload': _this2.payloadBuilder(_this2.graph)
+        }, function (res) {
           _this2.draw(res['result']);
         });
-
-        job.send();
       });
     },
-
-    transform: function transform(selection) {
-      var _this3 = this;
-
-      var individuals = this.app.model.get('individuals');
-      var featureData = [],
-          targetValues = [];
-
-      selection = selection.map(function (d) {
-        return parseInt(d);
-      });
-
-      individuals.forEach(function (item) {
-        var clusters = item['cluster.ids'].trim().split(',').map(function (d) {
-          return parseInt(d);
-        });
-        var isSelected = _.intersection(clusters, selection).length > 0;
-
-        if (isSelected) {
-          featureData.push(_.map(_this3.attributes, function (attr) {
-            return parseFloat(item[attr]);
-          }));
-          targetValues.push(parseFloat(item['GrowthRate']));
-        }
-      });
-
-      return {
-        'features': featureData,
-        'targets': {
-          'Growth Rate': targetValues
-        }
-      };
-    },
-
 
     buildData: function buildData() {
       var selection = this.graph.model.get('selection');
@@ -112,12 +73,12 @@ define(function (require) {
     },
 
     draw: function draw(data) {
-      var _this4 = this;
+      var _this3 = this;
 
       d3.select(this.el).selectAll('svg').remove();
       _.keys(data).map(function (key) {
-        var svg = d3.select(_this4.el).append('svg').attr('width', _this4.UIWidth).attr('height', _this4.SVGHeight);
-        _this4.drawFig(svg, data[key], key);
+        var svg = d3.select(_this3.el).append('svg').attr('width', _this3.UIWidth).attr('height', _this3.SVGHeight);
+        _this3.drawFig(svg, data[key], key);
       });
     },
 

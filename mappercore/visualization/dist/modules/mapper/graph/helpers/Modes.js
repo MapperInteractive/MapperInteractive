@@ -14,18 +14,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 define(function (require) {
 
-  var MountableHelper = require('./Mountable');
+  var MountableManager = require('./Mountable');
 
-  return function (_MountableHelper) {
-    _inherits(ModesHelper, _MountableHelper);
+  return function (_MountableManager) {
+    _inherits(ModesManager, _MountableManager);
 
-    function ModesHelper() {
-      _classCallCheck(this, ModesHelper);
+    function ModesManager() {
+      _classCallCheck(this, ModesManager);
 
-      return _possibleConstructorReturn(this, (ModesHelper.__proto__ || Object.getPrototypeOf(ModesHelper)).apply(this, arguments));
+      return _possibleConstructorReturn(this, (ModesManager.__proto__ || Object.getPrototypeOf(ModesManager)).apply(this, arguments));
     }
 
-    _createClass(ModesHelper, [{
+    _createClass(ModesManager, [{
       key: "init",
       value: function init() {
         this.activated = null;
@@ -58,6 +58,6 @@ define(function (require) {
       }
     }]);
 
-    return ModesHelper;
-  }(MountableHelper);
+    return ModesManager;
+  }(MountableManager);
 });

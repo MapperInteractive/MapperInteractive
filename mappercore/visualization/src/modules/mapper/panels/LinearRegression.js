@@ -19,8 +19,9 @@ define(function (require) {
       '</div></form>'),
 
     didMount() {
-      this.algorithms = this.model.get('algorithms'); //[{ name: 'linear_regression', label: 'Linear Regression' }];
-      this.attributes = this.model.get('attributes'); //['DAP', 'Humidity', 'Solar.Rad', 'Temperature'];
+      this.payloadBuilder = this.model.get('payloadBuilder');
+      this.algorithms = this.model.get('algorithms');
+      this.attributes = this.model.get('attributes');
 
       this.listenTo(this.graph.model, 'change:selection', () => this.onSelectionChanged());
 
@@ -51,47 +52,15 @@ define(function (require) {
       this.$el.html(html);
 
       html.find('button').on('click', () => {
-
-        let job = this.app.createJob('linear_regression', _.object([
-          ['algorithm', select.val()],
-          ['params', this.buildData()]
-        ]));
-
-        job.on('sent', () => console.log('sent'));
-
-        job.on('finished', (res) => {
-          this.draw(res['result'])
-        });
-
-        job.send();
-
+        this.app.serverSideFunction('linear_regression',
+          {
+            'algorithm': select.val(),
+            'payload': this.payloadBuilder(this.graph)
+          },
+          (res) => {
+            this.draw(res['result'])
+          });
       });
-    },
-
-    transform(selection) {
-      let individuals = this.app.model.get('individuals');
-      let featureData = [], targetValues = [];
-
-      selection = selection.map((d) => parseInt(d));
-
-      individuals.forEach((item) => {
-        let clusters = item['cluster.ids'].trim().split(',').map((d) => parseInt(d));
-        let isSelected = _.intersection(clusters, selection).length > 0;
-
-        if (isSelected) {
-          featureData.push(_.map(this.attributes, (attr) => {
-            return parseFloat(item[attr]);
-          }));
-          targetValues.push(parseFloat(item['GrowthRate']));
-        }
-      });
-
-      return {
-        'features': featureData,
-        'targets': {
-          'Growth Rate': targetValues,
-        },
-      };
     },
 
     buildData: function () {

@@ -15,14 +15,14 @@ define(function (require) {
   var _ = require('underscore');
 
   return function () {
-    function MountableHelper(graph) {
-      _classCallCheck(this, MountableHelper);
+    function MountableManager(graph) {
+      _classCallCheck(this, MountableManager);
 
       this.graph = graph;
       this.mounted = {};
     }
 
-    _createClass(MountableHelper, [{
+    _createClass(MountableManager, [{
       key: "add",
       value: function add(mountable) {
         mountable.willMount();
@@ -48,6 +48,6 @@ define(function (require) {
       }
     }]);
 
-    return MountableHelper;
+    return MountableManager;
   }();
 });
