@@ -1,13 +1,17 @@
 from sklearn import linear_model
 
 
-def run(request):
-    algorithm = request['algorithm']
-    params = request['params']
-    features = params['features']
+def linear_regression(payload):
+    print(payload)
+    algorithm = payload['algorithm']
+    data = payload['data']
+
+    features = data['features']
+    targets = data['targets']
+
     results = {}
 
-    for target_name, target_data in params['targets'].items():
+    for target_name, target_data in targets.items():
         if algorithm == 'linear_regression':
             reg = linear_model.LinearRegression()
         elif algorithm == 'lasso_regression':

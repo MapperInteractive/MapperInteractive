@@ -19,7 +19,7 @@ define(function (require) {
       '</div></form>'),
 
     didMount() {
-      this.payloadBuilder = this.model.get('payloadBuilder');
+      this.dataBuilder = this.model.get('dataBuilder');
       this.algorithms = this.model.get('algorithms');
       this.attributes = this.model.get('attributes');
 
@@ -55,10 +55,10 @@ define(function (require) {
         this.app.serverSideFunction('linear_regression',
           {
             'algorithm': select.val(),
-            'payload': this.payloadBuilder(this.graph)
+            'data': this.dataBuilder(this.graph)
           },
           (res) => {
-            this.draw(res['result'])
+            this.draw(res)
           });
       });
     },
