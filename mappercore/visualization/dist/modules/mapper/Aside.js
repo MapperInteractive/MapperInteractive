@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Right side bar, contains all panel instances.
+ * Right side bar, contains all pane instances.
  */
 
 define(function (require) {
@@ -17,7 +17,7 @@ define(function (require) {
 
   return View.extend({
 
-    template: _.template('<div class="panel">' + '    <div class="panel__title" data-toggle="collapse"\n' + '         for="<%= id %>" href="#<%= id %>"\n' + '         aria-expanded="true" aria-controls="panel-<%= id %>"><%= title %></div>\n' + '    <div class="panel__body collapse show" id="<%= id %>">\n' + '      <div class="panel__body-inner" id="panel-<%= id %>-body">\n' + '      </div>\n' + '    </div>\n' + ' </div>\n'),
+    template: _.template('<div class="pane">' + '    <div class="pane__title" data-toggle="collapse"\n' + '         for="<%= id %>" href="#<%= id %>"\n' + '         aria-expanded="true" aria-controls="pane-<%= id %>"><%= title %></div>\n' + '    <div class="pane__body collapse show" id="<%= id %>">\n' + '      <div class="pane__body-inner" id="pane-<%= id %>-body">\n' + '      </div>\n' + '    </div>\n' + ' </div>\n'),
 
     initialize: function initialize(states) {
       this.states = new Model(_.extend({
@@ -25,14 +25,14 @@ define(function (require) {
       }, states));
 
       this.app = this.states.get('app');
-      this._panels = [];
+      this._panes = [];
     },
-    createPanel: function createPanel(module, config) {
+    createPane: function createPane(module, config) {
       if (typeof module !== 'function') {
-        throw "panels module is required";
+        throw "panes module is required";
       }
 
-      var id = 'panel-' + this._panels.length + 1;
+      var id = 'pane-' + this._panes.length + 1;
       var title = guard(config['title'], function () {
         return module.prototype.name;
       });
@@ -41,15 +41,15 @@ define(function (require) {
       this.$el.append(template);
 
       config = _.extend(config, {
-        el: '#panel-' + id + '-body',
+        el: '#pane-' + id + '-body',
         app: this.app,
         title: title
       });
 
-      this._panels.push(new module(config));
+      this._panes.push(new module(config));
     },
     render: function render() {
-      _.map(this._panels, function (p) {
+      _.map(this._panes, function (p) {
         return p.render();
       });
     }

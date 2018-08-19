@@ -1,15 +1,15 @@
 "use strict";
 
 /**
- * Linear Regression Panel
+ * Linear Regression Pane
  */
 define(function (require) {
   const d3 = require('d3');
   const _ = require('underscore');
   const $ = require('jquery');
-  const Panel = require('../Panel');
+  const Pane = require('../Pane');
 
-  return Panel.extend({
+  return Pane.extend({
 
     name: 'Linear Regression',
 

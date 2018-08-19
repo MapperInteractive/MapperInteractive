@@ -1,18 +1,18 @@
 "use strict";
 
 /**
- * Color Functions Panel.
+ * Color Functions Pane.
  *
- * This class can create panel for set color of nodes base on customized functions and color maps.
+ * This class can create pane for set color of nodes base on customized functions and color maps.
  */
 define(function (require) {
 
   const d3 = require('d3');
   const $ = require('jquery');
   const d3ScaleChromatic = require('d3-scale-chromatic');
-  const Panel = require('core/mapper/Panel');
+  const Pane = require('core/mapper/Pane');
 
-  return Panel.extend({
+  return Pane.extend({
 
     name: 'Color Functions',
 

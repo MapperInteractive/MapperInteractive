@@ -1,20 +1,20 @@
 "use strict";
 
 /**
- * Panel for building a form to load graph data.
+ * Pane for building a form to load graph data.
  */
 define(function (require) {
   const _ = require('underscore');
   const $ = require('jquery');
   const Range = require('core/ui/form/Range');
   const Button = require('core/ui/form/Button');
-  const Panel = require('../Panel');
+  const Pane = require('../Pane');
 
   const FORM_CONTROLS = {
     'range': Range
   };
 
-  return Panel.extend({
+  return Pane.extend({
 
     name: 'Graph Loader',
 
@@ -70,7 +70,7 @@ define(function (require) {
 
     _notConfiguredError() {
       return '<div class="alert alert-danger">' +
-        'Panel not configured. Please check configuration: ' +
+        'Pane not configured. Please check configuration: ' +
         '<code>controls</code> and ' +
         '<code>loader</code>' +
         '</div>';

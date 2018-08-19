@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * The base class for panel classes.
+ * The base class for pane classes.
  */
 define(function (require) {
 
@@ -12,7 +12,7 @@ define(function (require) {
     initialize: function (config) {
       this.model = new Model(config);
 
-      // you can use the following shortcuts in your panel
+      // you can use the following shortcuts in your pane
       this.app = this.model.get('app');
       this.graph = this.app.graph;
 

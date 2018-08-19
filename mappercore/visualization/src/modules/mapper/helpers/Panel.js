@@ -1,54 +1,54 @@
 "use strict";
 
 /**
- * Base class for the Panel.
+ * Base class for the Pane.
  */
 define(function (require) {
 
   const _ = require('underscore');
   const $ = require('jquery');
 
-  class PanelWrapper {
+  class PaneWrapper {
     constructor(app, title, module) {
       this.app = app;
       this.module = module;
       this.title = title;
 
-      this.template = _.template('<div class="panel">' +
-        '    <div class="panel__title" data-toggle="collapse"\n' +
+      this.template = _.template('<div class="pane">' +
+        '    <div class="pane__title" data-toggle="collapse"\n' +
         '         for="<%= id %>" href="#<%= id %>"\n' +
         '         aria-expanded="true" aria-controls="<%= id %>"><%= title %></div>\n' +
-        '    <div class="panel__body collapse show" id="<%= id %>">\n' +
-        '      <div class="panel__body-inner">\n' +
+        '    <div class="pane__body collapse show" id="<%= id %>">\n' +
+        '      <div class="pane__body-inner">\n' +
         '      </div>\n' +
         '    </div>\n' +
         ' </div>\n');
     }
 
     render() {
-      let id = 'panel-' + (this.app.panels.length + 1);
+      let id = 'pane-' + (this.app.panes.length + 1);
       let wrapper = $(this.template({ id: id, title: this.title }));
 
       wrapper.appendTo(this.el);
 
-      let inner = $('#' + id + ' .panel__body-inner:first-child');
+      let inner = $('#' + id + ' .pane__body-inner:first-child');
       let constructor = this.module;
-      let panel = new constructor({ el: inner, graph: this.graph, app: this.app });
+      let pane = new constructor({ el: inner, graph: this.graph, app: this.app });
 
-      panel.on('all', (...args) => {
+      pane.on('all', (...args) => {
         this.trigger(...args);
       });
 
       if (model) {
-        panel.states.set(model);
+        pane.states.set(model);
       }
 
-      this.panels.push(panel);
-      return panel;
+      this.panes.push(pane);
+      return pane;
     }
   }
 
-  return class PanelRegister {
+  return class PaneRegister {
 
     constructor(app) {
       this.app = app;
@@ -65,8 +65,8 @@ define(function (require) {
     }
 
     show() {
-      let panel = new PanelWrapper(this.app, this._title, this._module);
-      this.app.panels.push();
+      let pane = new PaneWrapper(this.app, this._title, this._module);
+      this.app.panes.push();
     }
 
     hiden() {
@@ -77,12 +77,12 @@ define(function (require) {
 
   // return Backbone.View.extend({
   //
-  //   template: _.template('<div class="panel">' +
-  //     '    <div class="panel__title" data-toggle="collapse"\n' +
+  //   template: _.template('<div class="pane">' +
+  //     '    <div class="pane__title" data-toggle="collapse"\n' +
   //     '         for="<%= id %>" href="#<%= id %>"\n' +
   //     '         aria-expanded="true" aria-controls="<%= id %>"><%= title %></div>\n' +
-  //     '    <div class="panel__body collapse show" id="<%= id %>">\n' +
-  //     '      <div class="panel__body-inner">\n' +
+  //     '    <div class="pane__body collapse show" id="<%= id %>">\n' +
+  //     '      <div class="pane__body-inner">\n' +
   //     '      </div>\n' +
   //     '    </div>\n' +
   //     ' </div>\n'),
@@ -92,34 +92,34 @@ define(function (require) {
   //     let {graph} = conf;
   //     this.graph = graph;
   //
-  //     this.panels = [];
+  //     this.panes = [];
   //   },
   //
   //   add(conf) {
   //     let {title, constructor, model} = conf;
   //
-  //     let id = 'panel-' + (this.panels.length + 1);
+  //     let id = 'pane-' + (this.panes.length + 1);
   //     let wrapper = $(this.template({id: id, title: title}));
   //
   //     wrapper.appendTo(this.el);
   //
-  //     let inner = this.$('#' + id + ' .panel__body-inner:first-child');
-  //     let panel = new constructor({el: inner, graph: this.graph, app: this.app});
+  //     let inner = this.$('#' + id + ' .pane__body-inner:first-child');
+  //     let pane = new constructor({el: inner, graph: this.graph, app: this.app});
   //
-  //     panel.on('all', (...args) => {
+  //     pane.on('all', (...args) => {
   //       this.trigger(...args);
   //     });
   //
   //     if (model) {
-  //       panel.states.set(model);
+  //       pane.states.set(model);
   //     }
   //
-  //     this.panels.push(panel);
-  //     return panel;
+  //     this.panes.push(pane);
+  //     return pane;
   //   },
   //
   //   render() {
-  //     this.panels.map((p) => p.render());
+  //     this.panes.map((p) => p.render());
   //   },
   //
   // });

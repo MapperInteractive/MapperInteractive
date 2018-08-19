@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Base class for the Panel.
+ * Base class for the Pane.
  */
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -13,55 +13,55 @@ define(function (require) {
   var _ = require('underscore');
   var $ = require('jquery');
 
-  var PanelWrapper = function () {
-    function PanelWrapper(app, title, module) {
-      _classCallCheck(this, PanelWrapper);
+  var PaneWrapper = function () {
+    function PaneWrapper(app, title, module) {
+      _classCallCheck(this, PaneWrapper);
 
       this.app = app;
       this.module = module;
       this.title = title;
 
-      this.template = _.template('<div class="panel">' + '    <div class="panel__title" data-toggle="collapse"\n' + '         for="<%= id %>" href="#<%= id %>"\n' + '         aria-expanded="true" aria-controls="<%= id %>"><%= title %></div>\n' + '    <div class="panel__body collapse show" id="<%= id %>">\n' + '      <div class="panel__body-inner">\n' + '      </div>\n' + '    </div>\n' + ' </div>\n');
+      this.template = _.template('<div class="pane">' + '    <div class="pane__title" data-toggle="collapse"\n' + '         for="<%= id %>" href="#<%= id %>"\n' + '         aria-expanded="true" aria-controls="<%= id %>"><%= title %></div>\n' + '    <div class="pane__body collapse show" id="<%= id %>">\n' + '      <div class="pane__body-inner">\n' + '      </div>\n' + '    </div>\n' + ' </div>\n');
     }
 
-    _createClass(PanelWrapper, [{
+    _createClass(PaneWrapper, [{
       key: 'render',
       value: function render() {
         var _this = this;
 
-        var id = 'panel-' + (this.app.panels.length + 1);
+        var id = 'pane-' + (this.app.panes.length + 1);
         var wrapper = $(this.template({ id: id, title: this.title }));
 
         wrapper.appendTo(this.el);
 
-        var inner = $('#' + id + ' .panel__body-inner:first-child');
+        var inner = $('#' + id + ' .pane__body-inner:first-child');
         var constructor = this.module;
-        var panel = new constructor({ el: inner, graph: this.graph, app: this.app });
+        var pane = new constructor({ el: inner, graph: this.graph, app: this.app });
 
-        panel.on('all', function () {
+        pane.on('all', function () {
           _this.trigger.apply(_this, arguments);
         });
 
         if (model) {
-          panel.states.set(model);
+          pane.states.set(model);
         }
 
-        this.panels.push(panel);
-        return panel;
+        this.panes.push(pane);
+        return pane;
       }
     }]);
 
-    return PanelWrapper;
+    return PaneWrapper;
   }();
 
   return function () {
-    function PanelRegister(app) {
-      _classCallCheck(this, PanelRegister);
+    function PaneRegister(app) {
+      _classCallCheck(this, PaneRegister);
 
       this.app = app;
     }
 
-    _createClass(PanelRegister, [{
+    _createClass(PaneRegister, [{
       key: 'title',
       value: function title(text) {
         this._title = text;
@@ -76,25 +76,25 @@ define(function (require) {
     }, {
       key: 'show',
       value: function show() {
-        var panel = new PanelWrapper(this.app, this._title, this._module);
-        this.app.panels.push();
+        var pane = new PaneWrapper(this.app, this._title, this._module);
+        this.app.panes.push();
       }
     }, {
       key: 'hiden',
       value: function hiden() {}
     }]);
 
-    return PanelRegister;
+    return PaneRegister;
   }();
 
   // return Backbone.View.extend({
   //
-  //   template: _.template('<div class="panel">' +
-  //     '    <div class="panel__title" data-toggle="collapse"\n' +
+  //   template: _.template('<div class="pane">' +
+  //     '    <div class="pane__title" data-toggle="collapse"\n' +
   //     '         for="<%= id %>" href="#<%= id %>"\n' +
   //     '         aria-expanded="true" aria-controls="<%= id %>"><%= title %></div>\n' +
-  //     '    <div class="panel__body collapse show" id="<%= id %>">\n' +
-  //     '      <div class="panel__body-inner">\n' +
+  //     '    <div class="pane__body collapse show" id="<%= id %>">\n' +
+  //     '      <div class="pane__body-inner">\n' +
   //     '      </div>\n' +
   //     '    </div>\n' +
   //     ' </div>\n'),
@@ -104,34 +104,34 @@ define(function (require) {
   //     let {graph} = conf;
   //     this.graph = graph;
   //
-  //     this.panels = [];
+  //     this.panes = [];
   //   },
   //
   //   add(conf) {
   //     let {title, constructor, model} = conf;
   //
-  //     let id = 'panel-' + (this.panels.length + 1);
+  //     let id = 'pane-' + (this.panes.length + 1);
   //     let wrapper = $(this.template({id: id, title: title}));
   //
   //     wrapper.appendTo(this.el);
   //
-  //     let inner = this.$('#' + id + ' .panel__body-inner:first-child');
-  //     let panel = new constructor({el: inner, graph: this.graph, app: this.app});
+  //     let inner = this.$('#' + id + ' .pane__body-inner:first-child');
+  //     let pane = new constructor({el: inner, graph: this.graph, app: this.app});
   //
-  //     panel.on('all', (...args) => {
+  //     pane.on('all', (...args) => {
   //       this.trigger(...args);
   //     });
   //
   //     if (model) {
-  //       panel.states.set(model);
+  //       pane.states.set(model);
   //     }
   //
-  //     this.panels.push(panel);
-  //     return panel;
+  //     this.panes.push(pane);
+  //     return pane;
   //   },
   //
   //   render() {
-  //     this.panels.map((p) => p.render());
+  //     this.panes.map((p) => p.render());
   //   },
   //
   // });

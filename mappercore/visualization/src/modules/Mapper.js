@@ -30,8 +30,8 @@ define(function (require) {
       this.aside.render();
     },
 
-    createPanel(module, config = {}) {
-      return this.aside.createPanel(module, config);
+    createPane(module, config = {}) {
+      return this.aside.createPane(module, config);
     }
   });
 });

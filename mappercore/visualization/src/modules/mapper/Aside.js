@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Right side bar, contains all panel instances.
+ * Right side bar, contains all pane instances.
  */
 define(function (require) {
 
@@ -11,12 +11,12 @@ define(function (require) {
 
   return View.extend({
 
-    template: _.template('<div class="panel">' +
-      '    <div class="panel__title" data-toggle="collapse"\n' +
+    template: _.template('<div class="pane">' +
+      '    <div class="pane__title" data-toggle="collapse"\n' +
       '         for="<%= id %>" href="#<%= id %>"\n' +
-      '         aria-expanded="true" aria-controls="panel-<%= id %>"><%= title %></div>\n' +
-      '    <div class="panel__body collapse show" id="<%= id %>">\n' +
-      '      <div class="panel__body-inner" id="panel-<%= id %>-body">\n' +
+      '         aria-expanded="true" aria-controls="pane-<%= id %>"><%= title %></div>\n' +
+      '    <div class="pane__body collapse show" id="<%= id %>">\n' +
+      '      <div class="pane__body-inner" id="pane-<%= id %>-body">\n' +
       '      </div>\n' +
       '    </div>\n' +
       ' </div>\n'),
@@ -27,31 +27,31 @@ define(function (require) {
       }, states));
 
       this.app = this.states.get('app');
-      this._panels = [];
+      this._panes = [];
     },
 
-    createPanel(module, config) {
+    createPane(module, config) {
       if (typeof module !== 'function') {
-        throw "panels module is required"
+        throw "panes module is required"
       }
 
-      let id = 'panel-' + this._panels.length + 1;
+      let id = 'pane-' + this._panes.length + 1;
       let title = guard(config['title'], () => module.prototype.name);
       let template = this.template({ id: id, title: title });
 
       this.$el.append(template);
 
       config = _.extend(config, {
-        el: '#panel-' + id + '-body',
+        el: '#pane-' + id + '-body',
         app: this.app,
         title: title,
       });
 
-      this._panels.push(new module(config));
+      this._panes.push(new module(config));
     },
 
     render() {
-      _.map(this._panels, (p) => p.render());
+      _.map(this._panes, (p) => p.render());
     }
 
   });

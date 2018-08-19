@@ -26,10 +26,10 @@ define(function (require) {
       this.graph.render();
       this.aside.render();
     },
-    createPanel: function createPanel(module) {
+    createPane: function createPane(module) {
       var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-      return this.aside.createPanel(module, config);
+      return this.aside.createPane(module, config);
     }
   });
 });
