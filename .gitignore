@@ -1,7 +1,6 @@
 .idea
 .DS_Store
 ~*
-_*
 .python-version
 __pycache__
 *.egg-info
