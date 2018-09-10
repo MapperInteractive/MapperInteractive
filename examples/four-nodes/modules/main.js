@@ -25,9 +25,10 @@ define(function (require) {
    */
   let mapperInstance = new Mapper({
     title: "Random Graphs",
-    enabledBehaviors: [
-      'force-simulation'
-    ],
+    options: {
+      // default options
+      'behaviors': ['force-simulation', 'draggable'],
+    }
   });
 
   /**
@@ -35,8 +36,8 @@ define(function (require) {
    */
   let EdgeList2Graph = require('core/utils/EdgelistToGraph');
 
-  mapperInstance.createPanel(
-    require('core/mapper/panels/FixedDataLoader'),
+  mapperInstance.createPane(
+    require('core/mapper/panes/FixedDataLoader'),
     {
       loader: function (panel) {
         let url = mapperInstance.url('files/edgelist.txt');
