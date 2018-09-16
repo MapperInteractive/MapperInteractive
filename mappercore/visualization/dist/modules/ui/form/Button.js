@@ -20,23 +20,23 @@ define(function (require) {
     initialize: function initialize() {
       var _this = this;
 
-      this.states = new Model({
+      this.model = new Model({
         disable: false,
         text: 'Submit'
       });
       this.$el.addClass('form-group');
-      this.button = $(this.template(this.states.attributes));
+      this.button = $(this.template(this.model.attributes));
 
-      this.listenTo(this.states, 'change:disable', function () {
-        if (_this.states.get('disable')) {
+      this.listenTo(this.model, 'change:disable', function () {
+        if (_this.model.get('disable')) {
           _this.button.addClass('disabled');
         } else {
           _this.button.removeClass('disabled');
         }
       });
 
-      this.listenTo(this.states, 'change:text', function () {
-        _this.button.text(_this.states.get('text'));
+      this.listenTo(this.model, 'change:text', function () {
+        _this.button.text(_this.model.get('text'));
       });
     },
 
@@ -50,7 +50,7 @@ define(function (require) {
     },
 
     render: function render() {
-      this.button.text(this.states.get('text'));
+      this.button.text(this.model.get('text'));
       this.$el.html(this.button);
     }
   });

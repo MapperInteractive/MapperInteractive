@@ -12,7 +12,7 @@ define(function (require) {
    *
    */
   const _ = require('underscore');
-  const d3 = require(d3);
+  const d3 = require('d3');
 
   /**
    * All MapperCore modules are defined under namespace `core`.
@@ -39,5 +39,5 @@ define(function (require) {
    * Render the web page after you have finished build your mapper.
    * This line must be the last line of this module.
    */
-  // mapperInstance.render();
+  mapperInstance.render();
 });

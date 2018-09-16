@@ -7,12 +7,16 @@
 define(function (require) {
   var _ = require('underscore');
   var $ = require('jquery');
-  var Range = require('core/ui/form/Range');
-  var Button = require('core/ui/form/Button');
   var Pane = require('../Pane');
 
+  // HTML elements
+  var Range = require('core/ui/form/Range');
+  var Button = require('core/ui/form/Button');
+  var Dropdown = require('core/ui/form/Dropdown');
+
   var FORM_CONTROLS = {
-    'range': Range
+    'range': Range,
+    'dropdown': Dropdown
   };
 
   return Pane.extend({
@@ -49,7 +53,7 @@ define(function (require) {
         var controlClass = FORM_CONTROLS[param['type']];
         delete param['type'];
         var control = new controlClass({ el: container });
-        control.states.set(param);
+        control.model.set(param);
         controls.push(control);
         control.render();
       });
@@ -59,13 +63,13 @@ define(function (require) {
       var button = new Button({ el: container });
       this.button = button;
 
-      button.states.set({ text: 'Load Graph' });
+      button.model.set({ text: 'Load Graph' });
 
       button.on('click', function () {
         var values = _.object(controls.map(function (control) {
-          var _control$states$attri = control.states.attributes,
-              name = _control$states$attri.name,
-              value = _control$states$attri.value;
+          var _control$model$attrib = control.model.attributes,
+              name = _control$model$attrib.name,
+              value = _control$model$attrib.value;
 
           return [name, value];
         }));

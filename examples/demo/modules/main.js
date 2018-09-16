@@ -24,7 +24,7 @@ define(function (require) {
    * With class `Mapper`, let create our instance with title "Random Graphs".
    */
   let mapperInstance = new Mapper({
-    title: "Random Graphs",
+    title: "demo",
     options: {
       'behaviors': ['force-simulation', 'draggable'],
     }
@@ -36,14 +36,29 @@ define(function (require) {
   let EdgeList2Graph = require('core/utils/EdgelistToGraph');
 
   mapperInstance.createPane(
-    require('core/mapper/panes/FixedDataLoader'),
+    require('core/mapper/panes/FormDataLoader'),
     {
-      loader: function (panel) {
-        let url = mapperInstance.url('files/edgelist.txt');
-        d3.text(url, function (txt) {
-          panel.trigger('data', EdgeList2Graph(txt));
-        })
-      }
+      // display three sliders
+      controls: [
+        {
+          name: 'name',
+          type: 'dropdown',
+          label: 'Data Set',
+          value: 'moreno_kangaroo',
+          options: ['moreno_kangaroo', 'arenas_jazz', 'karate_club']
+        },
+      ],
+      // load edges list from server, you can try different method to load other data format
+      loader: function (pane, values) {
+        let url = pane.app.url('files/' + values['name'] + '/edges.txt');
+        d3.text(url, (error, data) => {
+          if (error) {
+            pane.trigger('error', error)
+          } else {
+            pane.trigger('data', EdgeList2Graph(data))
+          }
+        });
+      },
     }
   );
 
