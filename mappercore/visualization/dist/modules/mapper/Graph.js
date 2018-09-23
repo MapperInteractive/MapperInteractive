@@ -120,7 +120,7 @@ define(function (require) {
     _renderNodes: function _renderNodes() {
       var _this2 = this;
 
-      this.nodes = this.svg.selectAll("circle").data(this.model.get("data").nodes).enter().append("circle").classed(this.CLASS_NAME_VERTEX, true).on("click", function () {
+      this.nodes = this.svg.selectAll("circle").data(this.model.get("data")["nodes"]).enter().append("circle").classed(this.CLASS_NAME_VERTEX, true).on("click", function () {
         _this2.trigger(_this2.EVENT_CLICK_NODE, d3.event);
       }).on("mouseenter", function () {
         _this2.trigger(_this2.EVENT_MOUSEENTER_NODE, d3.event);
@@ -133,7 +133,7 @@ define(function (require) {
     _renderLinks: function _renderLinks() {
       var _this3 = this;
 
-      this.links = this.svg.append('g').selectAll("line").data(this.model.get('data').links).enter().append("line").classed(this.CLASS_NAME_EDGE, true).on("click", function () {
+      this.links = this.svg.append('g').selectAll("line").data(this.model.get("data")["links"]).enter().append("line").classed(this.CLASS_NAME_EDGE, true).on("click", function () {
         _this3.trigger(_this3.EVENT_CLICK_LINK, d3.event);
       }).on("mouseover", function () {
         _this3.trigger(_this3.EVENT_MOUSEOVER_LINK, d3.event);

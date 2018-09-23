@@ -123,7 +123,7 @@ define(function (require) {
     _renderNodes() {
       this.nodes = this.svg
         .selectAll("circle")
-        .data(this.model.get("data").nodes)
+        .data(this.model.get("data")["nodes"])
         .enter()
         .append("circle")
         .classed(this.CLASS_NAME_VERTEX, true)
@@ -145,7 +145,7 @@ define(function (require) {
       this.links = this.svg
         .append('g')
         .selectAll("line")
-        .data(this.model.get('data').links)
+        .data(this.model.get("data")["links"])
         .enter()
         .append("line")
         .classed(this.CLASS_NAME_EDGE, true)
