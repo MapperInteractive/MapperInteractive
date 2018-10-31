@@ -1,5 +1,7 @@
 # MapperCore
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4affb78857354e45be96167bb765c963)](https://app.codacy.com/app/yaodong/sci-mapper-core?utm_source=github.com&utm_medium=referral&utm_content=yaodong/sci-mapper-core&utm_campaign=Badge_Grade_Dashboard)
+
 MapperCore is a framework to create analysis and visualization with high-dimensional data.
 
 ## Installation
