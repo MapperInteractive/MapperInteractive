@@ -35,6 +35,9 @@ GEM
       jekyll (~> 3.3)
     jekyll-watch (2.1.2)
       listen (~> 3.0)
+    just-the-docs (0.2.1)
+      jekyll (~> 3.8.5)
+      rake (~> 12.3.1)
     kramdown (1.17.0)
     liquid (4.0.1)
     listen (3.1.5)
@@ -49,6 +52,7 @@ GEM
     pathutil (0.16.2)
       forwardable-extended (~> 2.6)
     public_suffix (3.0.3)
+    rake (12.3.2)
     rb-fsevent (0.10.3)
     rb-inotify (0.10.0)
       ffi (~> 1.0)
@@ -67,6 +71,7 @@ PLATFORMS
 DEPENDENCIES
   jekyll (~> 3.8.5)
   jekyll-feed (~> 0.6)
+  just-the-docs
   minima (~> 2.0)
   tzinfo-data
 
