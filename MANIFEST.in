@@ -1,1 +1,1 @@
-recursive-include mappercore/visualization/dist *.html *.js *.css
+recursive-include visualization/dist *.html *.js *.css
