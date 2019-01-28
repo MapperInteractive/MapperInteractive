@@ -9,17 +9,17 @@ const plumber = require('gulp-plumber');
 const clean = require('gulp-clean');
 
 const paths = {
-  'dist': './dist/*',
+  'dist': '../mappercore/static/*',
   'tpl.src': './src/templates/**/*.html',
-  'tpl.dest': './dist/templates',
+  'tpl.dest': '../mappercore/static/templates',
   'js.src': './src/modules/**/*.js',
-  'js.dest': './dist/modules',
+  'js.dest': '../mappercore/static/modules',
   'vendor.src': './src/vendors/**/*',
-  'vendor.dest': './dist/vendors',
+  'vendor.dest': '../mappercore/static/vendors',
   'less.src': './src/styles/styles.less',
-  'less.dest': './dist/styles',
+  'less.dest': '../mappercore/static/styles',
   'image.src': './src/styles/images/*',
-  'image.dest': './dist/styles/images'
+  'image.dest': '../mappercore/static/styles/images'
 };
 
 gulp.task('clean', function () {
