@@ -57,6 +57,18 @@ if __name__ == '__main__':
     server.run()
 ```
 
+### Publish New Version
+
+The following steps need to be performed if you want to publish a new version to PyPI.
+
+1. Make sure your local version is functional and bug free
+2. Open setup.py and change the version, e.g., version='1.0.1'
+3. If you added new, non-Python files to the project that need to be distributed as well, e.g., configuration files and DB init scripts, add them to MANIFEST.in Note: They need to be within the newsplease subfolder, otherwise the packaged code will not work.
+3. Open a terminal and go into the parent of the project's root dir
+python setup.py sdist
+4. Check the resulting files, especially the egg file: are all the files contained?
+5. If everything is ok, upload the new version to PyPI: python setup.py sdist upload
+
 ## Contribute
 
 Base on MapperCore, you can create your visualization of graph data, time series data, table data, etc. Everyone is encouraged to share their customized `Layout` .

@@ -1,10 +1,10 @@
 from mappercore import Server
-
+# from flask import Flask
 # create server instance
 server = Server()
+app = server.flask
 
 # register your backend function here
-
-# start the server
+# app = Flask(__name__)
 if __name__ == '__main__':
-    server.run()
+    app.run(debug=True)

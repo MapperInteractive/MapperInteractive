@@ -9,13 +9,13 @@ const plumber = require('gulp-plumber');
 const clean = require('gulp-clean');
 
 const paths = {
-  'dist': 'dist/*',
-  'tpl.src': 'src/templates/**/*.html',
-  'tpl.dest': 'dist/templates',
-  'js.src': 'src/modules/**/*.js',
-  'js.dest': 'dist/modules',
-  'vendor.src': 'src/vendors/**/*',
-  'vendor.dest': 'dist/vendors',
+  'dist': './dist/*',
+  'tpl.src': './src/templates/**/*.html',
+  'tpl.dest': './dist/templates',
+  'js.src': './src/modules/**/*.js',
+  'js.dest': './dist/modules',
+  'vendor.src': './src/vendors/**/*',
+  'vendor.dest': './dist/vendors',
   'less.src': './src/styles/styles.less',
   'less.dest': './dist/styles',
   'image.src': './src/styles/images/*',

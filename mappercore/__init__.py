@@ -71,7 +71,7 @@ class Server:
         self.port = port
         self.exports = {}
 
-    def run(self):
+    def flask(self):
         flask = self.setup_flask()
         exports = self.exports
 
@@ -85,7 +85,8 @@ class Server:
             func = exports[name]
             return jsonify(func(payload))
 
-        flask.run(host=self.host, port=self.port)
+        return flask
+        # flask.run(host=self.host, port=self.port)
 
     def register_function(self, name, func):
         self.exports[name] = func
@@ -102,7 +103,7 @@ class Server:
     def setup_flask(self):
         flask = Flask(__name__, static_folder=None)
         layers = {
-            'core': Layer('core', root_path=path.join(path.dirname(__file__), 'visualization', 'dist')),
+            'core': Layer('core', root_path=path.join(path.dirname(__file__), '..', 'visualization', 'dist')),
             'app': Layer('app', root_path=self.root_path),
         }
 
