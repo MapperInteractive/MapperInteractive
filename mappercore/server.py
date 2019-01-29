@@ -38,7 +38,7 @@ class Server:
     def _make_flask_instance(self):
         flask = Flask(__name__, static_folder=None)
         layers = {
-            'core': Layer('core', root_path=path.join(path.dirname(__file__), 'dist')),
+            'core': Layer('core', root_path=path.join(path.dirname(__file__), 'static')),
             'app': Layer('app', root_path=self.root_path),
         }
 
