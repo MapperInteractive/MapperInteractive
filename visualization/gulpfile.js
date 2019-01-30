@@ -23,8 +23,8 @@ const paths = {
   'less.src': './stylesheets/styles.less',
   'less.dest': '../mappercore/static/stylesheets',
 
-  'image.src': './images/*',
-  'image.dest': '../mappercore/static/images'
+  'icons.src': './stylesheets/icons/*',
+  'icons.dest': '../mappercore/static/stylesheets/icons'
 };
 
 gulp.task('clean', function () {
@@ -47,11 +47,11 @@ gulp.task('less:build', function () {
     .pipe(gulp.dest(paths['less.dest']));
 });
 
-gulp.task('images:copy', function () {
-  return gulp.src(paths['image.src'])
+gulp.task('icons:copy', function () {
+  return gulp.src(paths['icons.src'])
     .pipe(plumber())
-    .pipe(changed(paths['image.dest']))
-    .pipe(gulp.dest(paths['image.dest']));
+    .pipe(changed(paths['icons.dest']))
+    .pipe(gulp.dest(paths['icons.dest']));
 });
 
 gulp.task('vendors:copy', function () {
@@ -68,7 +68,7 @@ gulp.task('js:build', function () {
     .pipe(gulp.dest(paths['js.dest']));
 });
 
-gulp.task('build', ['tpl:copy', 'less:build', 'js:build', 'images:copy', 'vendors:copy']);
+gulp.task('build', ['tpl:copy', 'less:build', 'js:build', 'icons:copy', 'vendors:copy']);
 gulp.task('dist', ['clean', 'build']);
 
 gulp.task('default', function () {
@@ -80,7 +80,7 @@ gulp.task('default', function () {
     })
   });
 
-  gulp.watch(paths['image.src'], ['images:copy']);
+  gulp.watch(paths['icons.src'], ['icons:copy']);
   gulp.watch(paths['js.src'], ['js:build']);
   gulp.watch(paths['tpl.src'], ['tpl:copy']);
   gulp.watch(paths['vendor.src'], ['vendors:copy']);
