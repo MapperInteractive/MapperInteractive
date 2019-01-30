@@ -10,16 +10,21 @@ const clean = require('gulp-clean');
 
 const paths = {
   'dist': '../mappercore/static/*',
+
   'tpl.src': './templates/**/*.html',
   'tpl.dest': '../mappercore/static/templates',
+
   'js.src': './modules/**/*.js',
   'js.dest': '../mappercore/static/modules',
+
   'vendor.src': './vendors/**/*',
   'vendor.dest': '../mappercore/static/vendors',
-  'less.src': './stylesheets/stylesheets.less',
+
+  'less.src': './stylesheets/styles.less',
   'less.dest': '../mappercore/static/stylesheets',
-  'image.src': './stylesheets/images/*',
-  'image.dest': '../mappercore/static/stylesheets/images'
+
+  'image.src': './images/*',
+  'image.dest': '../mappercore/static/images'
 };
 
 gulp.task('clean', function () {
