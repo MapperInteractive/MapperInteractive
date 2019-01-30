@@ -1,7 +1,7 @@
 define(function (require) {
 
   const d3 = require('d3');
-  const Pane = require('core/mapper/pane');
+  const Pane = require('core/mapper/Pane');
 
   return Pane.extend({
 
