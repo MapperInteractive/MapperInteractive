@@ -1,7 +1,5 @@
 # MapperCore
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4affb78857354e45be96167bb765c963)](https://app.codacy.com/app/yaodong/sci-mapper-core?utm_source=github.com&utm_medium=referral&utm_content=yaodong/sci-mapper-core&utm_campaign=Badge_Grade_Dashboard)
-
 The Mapper algorithm is a method for topological data analysis invented by Gurjeet Singh, Facundo Mémoli and Gunnar Carlsson [^1]. MapperCore is a web-based visualization of Mapper algorithm. It is open source software and is released under the MIT License.
 
 ## Installation
