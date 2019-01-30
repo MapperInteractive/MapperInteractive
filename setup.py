@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mappercore',
-    version='1.2.3',
+    version='1.2.4',
     keywords='mapper',
     description='A framework for data analysis and visualization',
     license='MIT',
