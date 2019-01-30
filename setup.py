@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mappercore',
-    version='1.1.6',
+    version='1.2.0',
     keywords='mapper',
     description='A framework for data analysis and visualization',
     license='MIT',
@@ -14,6 +14,7 @@ setup(
     platforms='any',
     install_requires=[
         'gunicorn==19.9.0',
-        'Flask==1.0.2'
+        'Flask==1.0.2',
+        'Flask-HTTPAuth==3.2.4'
     ],
 )

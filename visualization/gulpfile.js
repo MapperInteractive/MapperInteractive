@@ -16,10 +16,10 @@ const paths = {
   'js.dest': '../mappercore/static/modules',
   'vendor.src': './vendors/**/*',
   'vendor.dest': '../mappercore/static/vendors',
-  'less.src': './styles/styles.less',
-  'less.dest': '../mappercore/static/styles',
-  'image.src': './styles/images/*',
-  'image.dest': '../mappercore/static/styles/images'
+  'less.src': './stylesheets/stylesheets.less',
+  'less.dest': '../mappercore/static/stylesheets',
+  'image.src': './stylesheets/images/*',
+  'image.dest': '../mappercore/static/stylesheets/images'
 };
 
 gulp.task('clean', function () {
