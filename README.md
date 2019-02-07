@@ -2,17 +2,17 @@
 
 The Mapper algorithm is a method for topological data analysis invented by Gurjeet Singh, Facundo Mémoli and Gunnar Carlsson [^1]. MapperCore is a web-based visualization of Mapper algorithm. It is open source software and is released under the MIT License.
 
+## Live Demo
+
+[Here](https://github.com/yaodong/mapper-example) is an example project and a [live demo](https://mapper-example.herokuapp.com).
+
 ## Installation
 
 MapperCore can be installed from PyPI by:
 
-```py
+```shell
 pip install mappercore==1.2.6
 ```
-
-# Example
-
-We have an example project [here](https://github.com/yaodong/mapper-example) and a [live demo](https://mapper-example.herokuapp.com).
 
 ## Documentation
 
