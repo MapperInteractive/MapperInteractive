@@ -9,9 +9,9 @@ define((require) => {
   const Block = require('Block');
 
   // HTML elements
-  const Range = require('ui/form/Range');
-  const Button = require('ui/form/Button');
-  const Dropdown = require('ui/form/Dropdown');
+  const Range = require('../form/Range');
+  const Button = require('../form/Button');
+  const Dropdown = require('../form/Dropdown');
 
   const FORM_CONTROLS = {
     'range': Range,
