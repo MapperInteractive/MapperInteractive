@@ -12,7 +12,7 @@ define(function () {
     initialize: function (config) {
       this.model = new Model(config);
 
-      // you can use the following shortcuts in your pane
+      // you can use the following shortcuts in your block
       this.app = this.model.get('app');
       this.graph = this.app.graph;
 
