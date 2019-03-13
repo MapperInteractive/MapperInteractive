@@ -12,15 +12,14 @@ define(function (require) {
   var Sidebar = require('./Sidebar');
   var Graph = require('./Graph');
 
-  var _require = require('backbone'),
-      View = _require.View,
-      Model = _require.Model;
+  var _window = window,
+      $ = _window.$,
+      _ = _window._,
+      guard = _window.guard,
+      _window$b = _window.b,
+      View = _window$b.View,
+      Model = _window$b.Model;
 
-  var _ = require('underscore');
-  var $ = require('jquery');
-
-  var _require2 = require('Helper'),
-      guard = _require2.guard;
 
   return View.extend({
     initialize: function initialize(states) {

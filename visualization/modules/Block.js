@@ -3,9 +3,9 @@
 /**
  * The base class for Block classes.
  */
-define(function (require) {
+define(function () {
 
-  const { View, Model } = require('backbone');
+  const { b: { View, Model } } = window;
 
   return View.extend({
 

@@ -5,16 +5,15 @@
  */
 
 define(function (require) {
-  var d3 = require('d3');
-  var _ = require('underscore');
-  var $ = require('jquery');
+  var _window = window,
+      d3 = _window.d3,
+      _ = _window._,
+      $ = _window.$,
+      _window$b = _window.b,
+      View = _window$b.View,
+      Model = _window$b.Model,
+      guard = _window.guard;
 
-  var _require = require('backbone'),
-      View = _require.View,
-      Model = _require.Model;
-
-  var _require2 = require('Helper'),
-      guard = _require2.guard;
 
   var Toolbar = require('./graph/Toolbar');
   var ModesManager = require('./graph/helpers/Modes');

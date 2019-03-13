@@ -6,15 +6,12 @@
  * Use this class to create a mapper instance.
  * This class will create a instance for graph and sidebar.
  */
-define(function (require) {
+define((require) => {
 
   const Sidebar = require('./Sidebar');
   const Graph = require('./Graph');
 
-  const { View, Model } = require('backbone');
-  const _ = require('underscore');
-  const $ = require('jquery');
-  const { guard } = require('Helper');
+  const { $, _, guard, b: { View, Model } } = window;
 
   return View.extend({
 

@@ -3,9 +3,9 @@
 /**
  * Block for building a form to load graph data.
  */
-define(function (require) {
-  const _ = require('underscore');
-  const $ = require('jquery');
+define((require) => {
+  const { _, $ } = window;
+
   const Block = require('Block');
 
   // HTML elements

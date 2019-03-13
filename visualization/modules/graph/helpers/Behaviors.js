@@ -3,9 +3,9 @@
 /**
  * Base class for behavior classes.
  */
-define(function (require) {
+define( (require) =>{
 
-  const _ = require('underscore');
+  const { _ } = window;
   const MountableManager = require('./Mountable');
 
   return class BehaviorsManager extends MountableManager {

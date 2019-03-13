@@ -15,14 +15,12 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 define(function (require) {
+  var _window = window,
+      d3 = _window.d3,
+      _ = _window._,
+      Model = _window.b.Model;
 
   var GraphMode = require('../Mode');
-  var d3 = require('d3');
-  var _ = require('underscore');
-
-  var _require = require('backbone'),
-      View = _require.View,
-      Model = _require.Model;
 
   return function (_GraphMode) {
     _inherits(SelectPathMode, _GraphMode);

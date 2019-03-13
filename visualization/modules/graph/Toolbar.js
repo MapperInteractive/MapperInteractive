@@ -3,11 +3,9 @@
 /**
  * The toolbar above the graph structure on UI.
  */
-define(function (require) {
+define(function () {
 
-  const $ = require('jquery');
-  const _ = require('underscore');
-  const { View } = require('backbone');
+  const { _, $, b: { View } } = window;
 
   return View.extend({
 

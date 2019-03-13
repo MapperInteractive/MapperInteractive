@@ -1,6 +1,6 @@
-define(function (require) {
+define((require) => {
 
-  const d3 = require('d3');
+  const { d3 } = window;
   const Block = require('Block');
 
   return Block.extend({

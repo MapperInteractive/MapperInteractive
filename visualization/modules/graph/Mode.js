@@ -3,10 +3,9 @@
 /**
  * Base class for a graph mode.
  */
-define(function (require) {
+define(function () {
 
-  const _ = require('underscore');
-  const { Events } = require('backbone');
+  const { _, b: { Events } } = window;
 
   return class Mode {
 

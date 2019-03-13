@@ -5,8 +5,8 @@
  */
 define(function (require) {
 
+  const { d3 } = window;
   const GraphMode = require('../Mode');
-  const d3 = require('d3');
 
   return class SelectClickMode extends GraphMode {
 

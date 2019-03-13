@@ -36,7 +36,8 @@ window.jQuery(function () {
   require.load = function (context, moduleId, url) {
 
     if (!(moduleId in context.config.paths)) {
-      if (moduleId.startsWith("modules/")) {
+
+      if (moduleId.startsWith("modules")) {
         url = context.config.baseUrl + "app/" + moduleId + '.js';
       } else {
         url = context.config.baseUrl + "core/modules/" + moduleId + '.js';
@@ -46,6 +47,26 @@ window.jQuery(function () {
     console.debug('[require] ' + moduleId + ' @ ' + url);
     return superLoader(context, moduleId, url);
   };
+
+  /**
+   * set global bindings
+   */
+  require(['backbone', 'd3', 'jquery', 'underscore'], function (b, d, j, u) {
+    window.backbone = window.b = b;
+    window.d3 = d;
+    window.$ = j;
+    window._ = u;
+    window.guard = function (variable, fallback) {
+      if (!variable) {
+        if (typeof fallback === 'function') {
+          return fallback();
+        } else {
+          return fallback;
+        }
+      }
+      return variable;
+    };
+  });
 
   /**
    * Keep this line as the last statement in this function.

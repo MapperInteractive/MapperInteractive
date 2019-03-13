@@ -3,7 +3,7 @@
 /**
  * Base class for mode classes.
  */
-define(function (require) {
+define((require) => {
 
   const MountableManager = require('./Mountable');
 

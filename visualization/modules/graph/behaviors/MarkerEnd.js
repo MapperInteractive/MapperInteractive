@@ -3,7 +3,7 @@
 /**
  * Enable graph show arrows on edges.
  */
-define(function (require) {
+define((require) => {
 
   const GraphMode = require('../Behavior');
 

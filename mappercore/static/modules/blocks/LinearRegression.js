@@ -5,9 +5,12 @@
  */
 
 define(function (require) {
-  var d3 = require('d3');
-  var _ = require('underscore');
-  var $ = require('jquery');
+  var _window = window,
+      d3 = _window.d3,
+      _ = _window._,
+      $ = _window.$;
+
+
   var Block = require('Block');
 
   return Block.extend({

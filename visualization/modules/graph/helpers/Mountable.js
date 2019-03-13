@@ -5,9 +5,9 @@
  *
  * You can create a new mechanism which can be mount to a graph.
  */
-define(function (require) {
+define(() => {
 
-  const _ = require('underscore');
+  const { _ } = window;
 
   return class MountableManager {
 

@@ -12,7 +12,7 @@
  *    - data. pass data to graph
  *    - error, display error data in console
  */
-define(function (require) {
+define((require) => {
 
   const Block = require('Block');
 

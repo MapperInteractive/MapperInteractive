@@ -5,8 +5,11 @@
  */
 
 define(function (require) {
-  var _ = require('underscore');
-  var $ = require('jquery');
+  var _window = window,
+      _ = _window._,
+      $ = _window.$;
+
+
   var Block = require('Block');
 
   // HTML elements

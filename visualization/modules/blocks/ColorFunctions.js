@@ -5,10 +5,10 @@
  *
  * This class can create block for set color of nodes base on customized functions and color maps.
  */
-define(function (require) {
+define((require) => {
 
-  const d3 = require('d3');
-  const $ = require('jquery');
+  const { d3, $ } = window;
+
   const d3ScaleChromatic = require('d3-scale-chromatic');
   const Block = require('Block');
 

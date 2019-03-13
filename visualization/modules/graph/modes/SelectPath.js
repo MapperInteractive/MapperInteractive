@@ -5,10 +5,9 @@
  */
 define(function (require) {
 
+  const { d3, _, b: { Model } } = window;
   const GraphMode = require('../Mode');
-  const d3 = require('d3');
-  const _ = require('underscore');
-  const { View, Model } = require('backbone');
+
 
   return class SelectPathMode extends GraphMode {
 

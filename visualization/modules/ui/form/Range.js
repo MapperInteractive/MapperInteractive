@@ -3,10 +3,9 @@
 /**
  * Component class for HTML range.
  */
-define(function (require) {
+define(function () {
 
-  const _ = require('underscore');
-  const { View, Model } = require('backbone');
+  const { _, b: { View, Model } } = window;
 
   return View.extend({
 

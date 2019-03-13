@@ -3,10 +3,9 @@
 /**
  * Enable graph showing popover when use hover a node.
  */
-define(function (require) {
+define((require) => {
 
-  const d3 = require('d3');
-  const $ = require('jquery');
+  const { d3, $ } = window;
   const GraphBehavior = require('../Behavior');
 
   return class Popover extends GraphBehavior {

@@ -3,10 +3,9 @@
 /**
  * Base class for a graph behavior.
  */
-define(function (require) {
+define(() => {
 
-  const _ = require('underscore');
-  const { Events } = require('backbone');
+  const { _, b: { Events } } = window;
 
   return class GraphBehavior {
 

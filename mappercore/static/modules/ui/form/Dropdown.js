@@ -4,13 +4,14 @@
  * Component class for Dropdown range.
  */
 
-define(function (require) {
+define(function () {
+  var _window = window,
+      _ = _window._,
+      $ = _window.$,
+      _window$b = _window.b,
+      View = _window$b.View,
+      Model = _window$b.Model;
 
-  var _ = require('underscore');
-
-  var _require = require('backbone'),
-      View = _require.View,
-      Model = _require.Model;
 
   return View.extend({
 

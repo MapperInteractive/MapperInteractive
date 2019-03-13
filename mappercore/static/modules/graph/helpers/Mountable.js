@@ -10,9 +10,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-define(function (require) {
+define(function () {
+  var _window = window,
+      _ = _window._;
 
-  var _ = require('underscore');
 
   return function () {
     function MountableManager(graph) {

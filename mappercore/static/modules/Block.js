@@ -4,10 +4,12 @@
  * The base class for Block classes.
  */
 
-define(function (require) {
-  var _require = require('backbone'),
-      View = _require.View,
-      Model = _require.Model;
+define(function () {
+  var _window = window,
+      _window$b = _window.b,
+      View = _window$b.View,
+      Model = _window$b.Model;
+
 
   return View.extend({
 

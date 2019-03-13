@@ -3,12 +3,8 @@
 /**
  * Create a set of graph UI elements include graph structure, toolbar and popovers.
  */
-define(function (require) {
-  const d3 = require('d3');
-  const _ = require('underscore');
-  const $ = require('jquery');
-  const { View, Model } = require('backbone');
-  const { guard } = require('Helper');
+define((require) => {
+  const { d3, _, $, b: { View, Model }, guard } = window;
 
   const Toolbar = require('./graph/Toolbar');
   const ModesManager = require('./graph/helpers/Modes');

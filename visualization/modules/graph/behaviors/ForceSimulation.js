@@ -3,8 +3,8 @@
 /**
  * Enable graph using force layout.
  */
-define(function (require) {
-  const d3 = require('d3');
+define((require) => {
+  const { d3 } = window;
   const GraphBehavior = require('../Behavior');
 
   return class ForceSimulation extends GraphBehavior {

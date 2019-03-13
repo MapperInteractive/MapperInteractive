@@ -3,10 +3,9 @@
 /**
  * Linear Regression Block
  */
-define(function (require) {
-  const d3 = require('d3');
-  const _ = require('underscore');
-  const $ = require('jquery');
+define((require) => {
+  const { d3, _, $ } = window;
+
   const Block = require('Block');
 
   return Block.extend({

@@ -3,10 +3,10 @@
 /**
  * A mode to select a cluster in a graph.
  */
-define(function (require) {
+define((require) => {
 
+  const { d3 } = window;
   const GraphMode = require('../Mode');
-  const d3 = require('d3');
 
   return class SelectClusterMode extends GraphMode {
 

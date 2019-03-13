@@ -3,11 +3,9 @@
 /**
  * Right side bar, contains block instances.
  */
-define(function (require) {
+define(function () {
 
-  const _ = require('underscore');
-  const { Model, View } = require('backbone');
-  const { guard } = require('Helper');
+  const { _, b: { View, Model }, guard } = window;
 
   return View.extend({
 

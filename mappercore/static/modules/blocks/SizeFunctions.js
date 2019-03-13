@@ -1,8 +1,9 @@
 'use strict';
 
 define(function (require) {
+  var _window = window,
+      d3 = _window.d3;
 
-  var d3 = require('d3');
   var Block = require('Block');
 
   return Block.extend({

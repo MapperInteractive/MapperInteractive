@@ -3,7 +3,8 @@
 /**
  * Enable graph show labels on nodes.
  */
-define(function (require) {
+define((require) => {
+
   const GraphBehavior = require('../Behavior');
 
   return class Labeled extends GraphBehavior {

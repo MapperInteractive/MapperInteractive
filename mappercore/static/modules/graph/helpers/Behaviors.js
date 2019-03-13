@@ -13,8 +13,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 define(function (require) {
+  var _window = window,
+      _ = _window._;
 
-  var _ = require('underscore');
   var MountableManager = require('./Mountable');
 
   return function (_MountableManager) {
@@ -27,7 +28,7 @@ define(function (require) {
     }
 
     _createClass(BehaviorsManager, [{
-      key: 'trigger',
+      key: "trigger",
       value: function trigger(event, context) {
         _.mapObject(this.mounted, function (b) {
           b.trigger(event, context);

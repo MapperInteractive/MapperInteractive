@@ -3,11 +3,9 @@
 /**
  * Component class for HTML button.
  */
-define(function (require) {
+define(function () {
 
-  const _ = require('underscore');
-  const $ = require('jquery');
-  const { View, Model } = require('backbone');
+  const { _, $, b: { View, Model }, guard } = window;
 
   return View.extend({
 

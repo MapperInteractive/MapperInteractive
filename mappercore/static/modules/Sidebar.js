@@ -4,16 +4,14 @@
  * Right side bar, contains block instances.
  */
 
-define(function (require) {
+define(function () {
+  var _window = window,
+      _ = _window._,
+      _window$b = _window.b,
+      View = _window$b.View,
+      Model = _window$b.Model,
+      guard = _window.guard;
 
-  var _ = require('underscore');
-
-  var _require = require('backbone'),
-      Model = _require.Model,
-      View = _require.View;
-
-  var _require2 = require('Helper'),
-      guard = _require2.guard;
 
   return View.extend({
 

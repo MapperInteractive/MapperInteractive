@@ -2,7 +2,7 @@
  * This is a registry for built-in modes and behaviors.
  * It's more convenient to use names instead of module paths.
  */
-define(function (require) {
+define((require) => {
   return {
     'modes': {
       'select-node': require('./graph/modes/SelectNode'),

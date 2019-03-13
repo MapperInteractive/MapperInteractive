@@ -7,9 +7,11 @@
  */
 
 define(function (require) {
+  var _window = window,
+      d3 = _window.d3,
+      $ = _window.$;
 
-  var d3 = require('d3');
-  var $ = require('jquery');
+
   var d3ScaleChromatic = require('d3-scale-chromatic');
   var Block = require('Block');
 
