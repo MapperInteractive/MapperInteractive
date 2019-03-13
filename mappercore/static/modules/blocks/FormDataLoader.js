@@ -13,9 +13,9 @@ define(function (require) {
   var Block = require('Block');
 
   // HTML elements
-  var Range = require('ui/form/Range');
-  var Button = require('ui/form/Button');
-  var Dropdown = require('ui/form/Dropdown');
+  var Range = require('../form/Range');
+  var Button = require('../form/Button');
+  var Dropdown = require('../form/Dropdown');
 
   var FORM_CONTROLS = {
     'range': Range,
