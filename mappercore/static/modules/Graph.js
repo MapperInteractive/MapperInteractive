@@ -13,7 +13,7 @@ define(function (require) {
       View = _require.View,
       Model = _require.Model;
 
-  var _require2 = require('core/Helper'),
+  var _require2 = require('Helper'),
       guard = _require2.guard;
 
   var Toolbar = require('./graph/Toolbar');

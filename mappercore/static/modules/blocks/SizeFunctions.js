@@ -3,9 +3,9 @@
 define(function (require) {
 
   var d3 = require('d3');
-  var Pane = require('core/mapper/Pane');
+  var Block = require('Block');
 
-  return Pane.extend({
+  return Block.extend({
 
     name: 'Size',
 

@@ -6,13 +6,12 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   <script src="/core/vendors/jquery.min.js"></script>
   <script src="/core/vendors/bootstrap.bundle.min.js"></script>
+  <script src="/core/vendors/require.min.js"></script>
   {% block head %}{% endblock %}
 </head>
 <body>
 <div id="root" class="container-fluid"></div>
-
-<script src="/core/vendors/require.min.js"></script>
-<script src="/core/modules/Start.js" defer></script>
+<script src="/core/modules/main.js" defer></script>
 
 {# Enable live reload when in debugging mode.
 In order to use this feature, browser-sync is needed.

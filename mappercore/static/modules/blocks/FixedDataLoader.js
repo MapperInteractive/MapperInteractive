@@ -15,9 +15,9 @@
 
 define(function (require) {
 
-  var Pane = require('../Pane');
+  var Block = require('Block');
 
-  return Pane.extend({
+  return Block.extend({
 
     name: 'Fixed Data Source',
 
@@ -47,7 +47,7 @@ define(function (require) {
       }
     },
     _notConfiguredError: function _notConfiguredError() {
-      return '<div class="alert alert-danger">' + 'Pane not configured. Please check configuration: ' + '<code>loader</code>' + '</div>';
+      return '<div class="alert alert-danger">' + 'Block not configured. Please check configuration: ' + '<code>loader</code>' + '</div>';
     }
   });
 });

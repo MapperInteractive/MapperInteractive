@@ -1,16 +1,20 @@
 "use strict";
 
 /**
- * This App provides a class for creating different kinds of analysis tools.
- *  Do not use this class directly, extend it instead.
+ * Mapper class.
+ *
+ * Use this class to create a mapper instance.
+ * This class will create a instance for graph and sidebar.
  */
-
 define(function (require) {
+
+  const Sidebar = require('./Sidebar');
+  const Graph = require('./Graph');
 
   const { View, Model } = require('backbone');
   const _ = require('underscore');
   const $ = require('jquery');
-  const { guard } = require('core/Helper');
+  const { guard } = require('Helper');
 
   return View.extend({
 
@@ -37,6 +41,9 @@ define(function (require) {
     },
 
     didMount() {
+      this.$el.append($(this.template));
+      this.graph = new Graph({ el: '#app-graph', app: this });
+      this.sidebar = new Sidebar({ el: '#app-sidebar', app: this });
     },
 
     /**
@@ -51,7 +58,8 @@ define(function (require) {
     },
 
     render() {
-      // abstract method
+      this.graph.render();
+      this.sidebar.render();
     },
 
     serverSideFunction(name, data, onData) {
@@ -64,6 +72,16 @@ define(function (require) {
       }).done((res) => {
         onData(res);
       });
+    },
+
+    template: '<div class="row" style="margin-top: 20px;" id="app">' +
+      '<div class="col-md-8 col-sm-12"><div id="app-graph"></div></div>' +
+      '<div class="col-md-4 col-sm-12"><div id="app-sidebar"></div></div>' +
+      '</div>',
+
+    addBlock(module, config = {}) {
+      return this.sidebar.addBlock(module, config);
     }
   });
+
 });

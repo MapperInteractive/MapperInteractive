@@ -1,9 +1,9 @@
 define(function (require) {
 
   const d3 = require('d3');
-  const Pane = require('core/mapper/Pane');
+  const Block = require('Block');
 
-  return Pane.extend({
+  return Block.extend({
 
     name: 'Size',
 

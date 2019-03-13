@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Right side bar, contains all pane instances.
+ * Right side bar, contains block instances.
  */
 
 define(function (require) {
@@ -12,12 +12,12 @@ define(function (require) {
       Model = _require.Model,
       View = _require.View;
 
-  var _require2 = require('core/Helper'),
+  var _require2 = require('Helper'),
       guard = _require2.guard;
 
   return View.extend({
 
-    template: _.template('<div class="pane">' + '    <div class="pane__title" data-toggle="collapse"\n' + '         for="<%= id %>" href="#<%= id %>"\n' + '         aria-expanded="true" aria-controls="pane-<%= id %>"><%= title %></div>\n' + '    <div class="pane__body collapse show" id="<%= id %>">\n' + '      <div class="pane__body-inner" id="pane-<%= id %>-body">\n' + '      </div>\n' + '    </div>\n' + ' </div>\n'),
+    template: _.template('<div class="block">' + '    <div class="block__title" data-toggle="collapse"\n' + '         for="<%= id %>" href="#<%= id %>"\n' + '         aria-expanded="true" aria-controls="block-<%= id %>"><%= title %></div>\n' + '    <div class="block__body collapse show" id="<%= id %>">\n' + '      <div class="block__body-inner" id="block-<%= id %>-body">\n' + '      </div>\n' + '    </div>\n' + ' </div>\n'),
 
     initialize: function initialize(states) {
       this.states = new Model(_.extend({
@@ -25,14 +25,14 @@ define(function (require) {
       }, states));
 
       this.app = this.states.get('app');
-      this._panes = [];
+      this._blocks = [];
     },
-    createPane: function createPane(module, config) {
+    addBlock: function addBlock(module, config) {
       if (typeof module !== 'function') {
-        throw "panes module is required";
+        throw "blocks module is required";
       }
 
-      var id = 'pane-' + this._panes.length + 1;
+      var id = 'block-' + this._blocks.length + 1;
       var title = guard(config['title'], function () {
         return module.prototype.name;
       });
@@ -41,15 +41,15 @@ define(function (require) {
       this.$el.append(template);
 
       config = _.extend(config, {
-        el: '#pane-' + id + '-body',
+        el: '#block-' + id + '-body',
         app: this.app,
         title: title
       });
 
-      this._panes.push(new module(config));
+      this._blocks.push(new module(config));
     },
     render: function render() {
-      _.map(this._panes, function (p) {
+      _.map(this._blocks, function (p) {
         return p.render();
       });
     }

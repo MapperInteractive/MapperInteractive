@@ -1,25 +1,25 @@
 "use strict";
 
 /**
- * Pane for building a form to load graph data.
+ * Block for building a form to load graph data.
  */
 
 define(function (require) {
   var _ = require('underscore');
   var $ = require('jquery');
-  var Pane = require('../Pane');
+  var Block = require('Block');
 
   // HTML elements
-  var Range = require('core/ui/form/Range');
-  var Button = require('core/ui/form/Button');
-  var Dropdown = require('core/ui/form/Dropdown');
+  var Range = require('ui/form/Range');
+  var Button = require('ui/form/Button');
+  var Dropdown = require('ui/form/Dropdown');
 
   var FORM_CONTROLS = {
     'range': Range,
     'dropdown': Dropdown
   };
 
-  return Pane.extend({
+  return Block.extend({
 
     name: 'Graph Loader',
 
@@ -79,7 +79,7 @@ define(function (require) {
       button.render();
     },
     _notConfiguredError: function _notConfiguredError() {
-      return '<div class="alert alert-danger">' + 'Pane not configured. Please check configuration: ' + '<code>controls</code> and ' + '<code>loader</code>' + '</div>';
+      return '<div class="alert alert-danger">' + 'Block not configured. Please check configuration: ' + '<code>controls</code> and ' + '<code>loader</code>' + '</div>';
     }
   });
 });

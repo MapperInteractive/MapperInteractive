@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * The base class for pane classes.
+ * The base class for Block classes.
  */
 define(function (require) {
 

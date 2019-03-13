@@ -8,7 +8,7 @@ define(function (require) {
   const _ = require('underscore');
   const $ = require('jquery');
   const { View, Model } = require('backbone');
-  const { guard } = require('core/Helper');
+  const { guard } = require('Helper');
 
   const Toolbar = require('./graph/Toolbar');
   const ModesManager = require('./graph/helpers/Modes');

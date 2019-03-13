@@ -1,9 +1,9 @@
 "use strict";
 
+
 /**
  * This file bootstrap the UI
  */
-
 window.jQuery(function () {
 
   // noinspection JSFileReferences
@@ -24,30 +24,33 @@ window.jQuery(function () {
       'd3-scale-chromatic': 'core/vendors/d3-scale-chromatic.min',
       'jquery': 'core/vendors/jquery.min',
       'require': 'core/vendors/require.min',
-      'underscore': 'core/vendors/underscore.min'
+      'underscore': 'core/vendors/underscore.min',
     }
   });
 
   /**
-   * Since we use two blueprints in Flask,
-   *  we need to let RequireJS know how to load core modules and project modules correctly.
+   * we need to let RequireJS know how to load core modules and project modules correctly.
    */
-  var load = require.load;
+  const superLoader = require.load;
+
   require.load = function (context, moduleId, url) {
-    console.log('[require] ' + moduleId);
+
     if (!(moduleId in context.config.paths)) {
-      var modules = moduleId.split('/');
-      if (modules[0] !== 'core') {
-        modules.unshift('app');
+      if (moduleId.startsWith("modules/")) {
+        url = context.config.baseUrl + "app/" + moduleId + '.js';
+      } else {
+        url = context.config.baseUrl + "core/modules/" + moduleId + '.js';
       }
-      url = context.config.baseUrl + modules[0] + '/modules/' + modules.slice(1).join('/') + '.js';
     }
-    return load(context, moduleId, url);
+
+    console.debug('[require] ' + moduleId + ' @ ' + url);
+    return superLoader(context, moduleId, url);
   };
 
   /**
    * Keep this line as the last statement in this function.
    * It will require and execute your project `main.js` module.
    */
-  require(['main']);
+  require(['modules/main']);
+
 });
