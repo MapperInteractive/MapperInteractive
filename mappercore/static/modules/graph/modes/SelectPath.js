@@ -115,8 +115,8 @@ define(function (require) {
           var selection = [clickedNodeId];
           this.model.set('selection', selection);
         } else {
-          // make a copy in order to trigger event on model
-          // if not, the selection will shadow updated without using `set` on model
+          // make a copy in order to trigger event on config
+          // if not, the selection will shadow updated without using `set` on config
           var _selection = this.model.get('selection').slice();
 
           // if we have last anchor,

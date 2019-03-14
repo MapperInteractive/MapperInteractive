@@ -24,7 +24,7 @@ define(function (require) {
     didMount: function didMount() {
       var _this = this;
 
-      this.loader = this.model.get('loader');
+      this.loader = this.config.get('loader');
 
       this.on('data', function (data) {
         _this.graph.updateData(data);
@@ -39,7 +39,7 @@ define(function (require) {
         return this.$el.html(this._notConfiguredError());
       } else {
         this.loader(this);
-        var description = this.model.get('description');
+        var description = this.config.get('description');
         if (!description) {
           description = 'No description provided.';
         }

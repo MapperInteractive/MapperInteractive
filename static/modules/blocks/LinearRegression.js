@@ -18,9 +18,9 @@ define((require) => {
       '</div></form>'),
 
     didMount() {
-      this.dataBuilder = this.model.get('dataBuilder');
-      this.algorithms = this.model.get('algorithms');
-      this.attributes = this.model.get('attributes');
+      this.dataBuilder = this.config.get('dataBuilder');
+      this.algorithms = this.config.get('algorithms');
+      this.attributes = this.config.get('attributes');
 
       this.listenTo(this.graph.model, 'change:selection', () => this.onSelectionChanged());
 

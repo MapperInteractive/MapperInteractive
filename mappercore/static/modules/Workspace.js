@@ -23,20 +23,20 @@ define(function (require) {
 
   return View.extend({
     initialize: function initialize(states) {
-      this.model = new Model(_.extend({
+      this.config = new Model(_.extend({
         'baseUrl': '',
         'title': 'Mapper'
       }, states));
 
       this.willMount();
-      this.setElement(guard(this.model.get('element'), '#root'));
+      this.setElement(guard(this.config.get('element'), '#root'));
       this.didMount();
     },
     hasOption: function hasOption(name) {
       return this.getOption(name) !== undefined;
     },
     getOption: function getOption(name) {
-      return guard(this.model.get('options'), {})[name];
+      return guard(this.config.get('options'), {})[name];
     },
     willMount: function willMount() {},
     didMount: function didMount() {
@@ -54,7 +54,7 @@ define(function (require) {
      * @returns {string}
      */
     url: function url(path) {
-      return [this.model.get('baseURL'), 'app', path].join('/');
+      return [this.config.get('baseURL'), 'app', path].join('/');
     },
     render: function render() {
       this.graph.render();

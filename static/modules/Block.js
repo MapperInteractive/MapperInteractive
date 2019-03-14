@@ -10,10 +10,10 @@ define(function () {
   return View.extend({
 
     initialize: function (config) {
-      this.model = new Model(config);
+      this.config = new Model(config);
 
       // you can use the following shortcuts in your block
-      this.app = this.model.get('app');
+      this.app = this.config.get('app');
       this.graph = this.app.graph;
 
       this.didMount();

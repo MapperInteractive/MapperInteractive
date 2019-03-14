@@ -22,9 +22,9 @@ define(function (require) {
     didMount: function didMount() {
       var _this = this;
 
-      this.dataBuilder = this.model.get('dataBuilder');
-      this.algorithms = this.model.get('algorithms');
-      this.attributes = this.model.get('attributes');
+      this.dataBuilder = this.config.get('dataBuilder');
+      this.algorithms = this.config.get('algorithms');
+      this.attributes = this.config.get('attributes');
 
       this.listenTo(this.graph.model, 'change:selection', function () {
         return _this.onSelectionChanged();

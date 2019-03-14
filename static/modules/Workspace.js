@@ -16,13 +16,13 @@ define((require) => {
   return View.extend({
 
     initialize(states) {
-      this.model = new Model(_.extend({
+      this.config = new Model(_.extend({
         'baseUrl': '',
         'title': 'Mapper'
       }, states));
 
       this.willMount();
-      this.setElement(guard(this.model.get('element'), '#root'));
+      this.setElement(guard(this.config.get('element'), '#root'));
       this.didMount();
     },
 
@@ -31,7 +31,7 @@ define((require) => {
     },
 
     getOption(name) {
-      return guard(this.model.get('options'), {})[name];
+      return guard(this.config.get('options'), {})[name];
     },
 
     willMount() {
@@ -51,7 +51,7 @@ define((require) => {
      * @returns {string}
      */
     url(path) {
-      return [this.model.get('baseURL'), 'app', path].join('/');
+      return [this.config.get('baseURL'), 'app', path].join('/');
     },
 
     render() {

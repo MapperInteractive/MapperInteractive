@@ -8,22 +8,22 @@ define((require) => {
     name: 'Size',
 
     didMount() {
-      this.model.set('functions', this.model.get('functions'));
-      this.model.set('currentFunction', this.model.get('functions')[0]);
+      this.config.set('functions', this.config.get('functions'));
+      this.config.set('currentFunction', this.config.get('functions')[0]);
 
-      this.listenTo(this.model, 'change:currentFunction', () => this._onCurrentSizeFunctionChange());
-      this.listenTo(this.graph.model, 'change:data', () => this._onGraphChangeData());
+      this.listenTo(this.config, 'change:currentFunction', () => this._onCurrentSizeFunctionChange());
+      this.listenTo(this.graph.model, 'change:data', () => this._whenGraphDataChanged());
     },
 
     render() {
       let $container = $('<div class="btn-group" role="group"></div>');
 
-      this.model.get('functions').map((func) => {
+      this.config.get('functions').map((func) => {
         let $btn = $('<button type="button" class="btn btn-outline-secondary">' + func['name'] + '</button>');
         $btn.on('click', () => {
           $container.find('.active').removeClass('active');
           $btn.addClass('active');
-          this.model.set('currentFunction', func);
+          this.config.set('currentFunction', func);
         });
         $container.append($btn);
       });
@@ -31,7 +31,7 @@ define((require) => {
       this.$el.append($container);
     },
 
-    _onGraphChangeData() {
+    _whenGraphDataChanged() {
       this._updateSize();
     },
 
@@ -47,7 +47,7 @@ define((require) => {
         return false;
       }
 
-      let currentFunction = this.model.get('currentFunction');
+      let currentFunction = this.config.get('currentFunction');
       let valueParser = currentFunction['func'];
 
       if (!valueParser) {

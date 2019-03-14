@@ -18,7 +18,7 @@ define(function () {
     template: _.template('<label class="ui-form-dropdown__label"><%= label %></label>' + '<select class="ui-form-dropdown__input form-control" name="<%= name %>"></select>'),
 
     initialize: function initialize() {
-      this.model = new Model({
+      this.config = new Model({
         label: 'range',
         name: '',
         value: null,
@@ -34,12 +34,12 @@ define(function () {
     render: function render() {
       var _this = this;
 
-      this.$el.html(this.template(this.model.attributes));
+      this.$el.html(this.template(this.config.attributes));
 
       var $select = this.$('.form-control');
-      _.map(this.model.get('options'), function (op) {
+      _.map(this.config.get('options'), function (op) {
         var $opEl = $("<option value='" + op + "'>" + op + "</option>");
-        if (op === _this.model.get('value')) {
+        if (op === _this.config.get('value')) {
           $opEl.attr('selected', true);
         }
         $select.append($opEl);
@@ -47,7 +47,7 @@ define(function () {
     },
 
     valueChanged: function valueChanged(e) {
-      this.model.set('value', e.target.value);
+      this.config.set('value', e.target.value);
     }
   });
 });

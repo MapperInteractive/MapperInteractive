@@ -56,9 +56,9 @@ define(function (require) {
           return d.id;
         })).force("charge", d3.forceManyBody().strength(-200)).force("center", d3.forceCenter(clientRect.width / 2, clientRect.height / 2)).force("x", d3.forceX().strength(0.2)).force("y", d3.forceY().strength(0.2));
 
-        var _graph$model$get = this.graph.model.get('data'),
-            nodes = _graph$model$get.nodes,
-            links = _graph$model$get.links;
+        var _graph$config$get = this.graph.config.get('data'),
+            nodes = _graph$config$get.nodes,
+            links = _graph$config$get.links;
 
         this.simulation.nodes(nodes).on("tick", function () {
           _this3._ticked();

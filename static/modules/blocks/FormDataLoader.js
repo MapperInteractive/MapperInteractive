@@ -23,8 +23,8 @@ define((require) => {
     name: 'Graph Loader',
 
     didMount() {
-      this.controls = this.model.get('controls');
-      this.loader = this.model.get('loader');
+      this.controls = this.config.get('controls');
+      this.loader = this.config.get('loader');
 
       this.on('data', (data) => {
         this.graph.updateData(data);
@@ -49,7 +49,7 @@ define((require) => {
         let controlClass = FORM_CONTROLS[param['type']];
         delete param['type'];
         let control = new controlClass({ el: container });
-        control.model.set(param);
+        control.config.set(param);
         controls.push(control);
         control.render();
       });
@@ -59,11 +59,11 @@ define((require) => {
       let button = new Button({ el: container });
       this.button = button;
 
-      button.model.set({ text: 'Load Graph' });
+      button.config.set({ text: 'Load Graph' });
 
       button.on('click', () => {
         let values = _.object(controls.map((control) => {
-          let { name, value } = control.model.attributes;
+          let { name, value } = control.config.attributes;
           return [name, value];
         }));
 

@@ -12,23 +12,23 @@ define(function () {
     template: _.template('<button class="btn btn-block ui-form-button"><%= text %></button>'),
 
     initialize: function () {
-      this.model = new Model({
+      this.config = new Model({
         disable: false,
         text: 'Submit',
       });
       this.$el.addClass('form-group');
-      this.button = $(this.template(this.model.attributes));
+      this.button = $(this.template(this.config.attributes));
 
-      this.listenTo(this.model, 'change:disable', () => {
-        if (this.model.get('disable')) {
+      this.listenTo(this.config, 'change:disable', () => {
+        if (this.config.get('disable')) {
           this.button.addClass('disabled');
         } else {
           this.button.removeClass('disabled');
         }
       });
 
-      this.listenTo(this.model, 'change:text', () => {
-        this.button.text(this.model.get('text'));
+      this.listenTo(this.config, 'change:text', () => {
+        this.button.text(this.config.get('text'));
       });
     },
 
@@ -42,7 +42,7 @@ define(function () {
     },
 
     render: function () {
-      this.button.text(this.model.get('text'));
+      this.button.text(this.config.get('text'));
       this.$el.html(this.button);
     }
   });

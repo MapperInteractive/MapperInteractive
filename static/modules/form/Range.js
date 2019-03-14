@@ -14,7 +14,7 @@ define(function () {
       '<input class="ui-form-range__input" name="<%= name %>" type="range" value="<%= value %>" max="<%= max %>" min="<%= min %>" step="<%= step %>" />'),
 
     initialize: function () {
-      this.model = new Model({
+      this.config = new Model({
         label: 'range',
         name: '',
         value: 0,
@@ -31,11 +31,11 @@ define(function () {
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.attributes));
+      this.$el.html(this.template(this.config.attributes));
     },
 
     valueChanged: function (e) {
-      this.model.set('value', e.target.value);
+      this.config.set('value', e.target.value);
     },
 
     valueChanging: function (e) {

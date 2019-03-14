@@ -36,13 +36,13 @@ define((require) => {
     EVENT_MODE_ACTIVATED: 'activate:mode',
 
     initialize: function (states) {
-      this.model = new Model(_.extend({
+      this.config = new Model(_.extend({
         data: null,
         app: null,
         selection: null,
       }, states));
 
-      this.app = this.model.get('app');
+      this.app = this.config.get('app');
 
       // init html
       this.$el.addClass('viewer-graph');
@@ -68,7 +68,7 @@ define((require) => {
     },
 
     updateData(data) {
-      this.model.set('data', data);
+      this.config.set('data', data);
     },
 
     render: function () {
@@ -84,7 +84,7 @@ define((require) => {
         .attr('width', width)
         .attr('height', height);
 
-      if (!this.model.get('data')) {
+      if (!this.config.get('data')) {
         this.svg
           .append('text')
           .attr('x', width / 2)
@@ -106,12 +106,12 @@ define((require) => {
     },
 
     _initEvents() {
-      this.listenTo(this.model, 'change:data', () => {
+      this.listenTo(this.config, 'change:data', () => {
         this.modes.activate('view');
         this.render();
       });
 
-      this.listenTo(this.model, 'change:selection', () => {
+      this.listenTo(this.config, 'change:selection', () => {
         this.trigger(this.EVENT_CHANGE_SELECTION);
       });
     },
@@ -119,7 +119,7 @@ define((require) => {
     _renderNodes() {
       this.nodes = this.svg
         .selectAll("circle")
-        .data(this.model.get("data")["nodes"])
+        .data(this.config.get("data")["nodes"])
         .enter()
         .append("circle")
         .classed(this.CLASS_NAME_VERTEX, true)
@@ -138,10 +138,11 @@ define((require) => {
     },
 
     _renderLinks() {
+      let data = this.config.get("data");
       this.links = this.svg
         .append('g')
         .selectAll("line")
-        .data(this.model.get("data")["links"])
+        .data(this.config.get("data")["links"])
         .enter()
         .append("line")
         .classed(this.CLASS_NAME_EDGE, true)
@@ -198,12 +199,12 @@ define((require) => {
 
     updateSelection() {
       let selection = this.svg.selectAll('circle.' + this.CLASS_NAME_SELECTED).data();
-      this.model.set('selection', selection.map((n) => n['id']));
+      this.config.set('selection', selection.map((n) => n['id']));
     },
 
     clearSelection() {
       this.nodes.classed(this.CLASS_NAME_SELECTED, false);
-      this.model.set('selection', []);
+      this.config.set('selection', []);
     },
 
     _initConfig() {

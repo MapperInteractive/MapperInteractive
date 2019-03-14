@@ -21,7 +21,7 @@ define((require) => {
     name: 'Fixed Data Source',
 
     didMount() {
-      this.loader = this.model.get('loader');
+      this.loader = this.config.get('loader');
 
       this.on('data', (data) => {
         this.graph.updateData(data);
@@ -37,7 +37,7 @@ define((require) => {
         return this.$el.html(this._notConfiguredError());
       } else {
         this.loader(this);
-        let description = this.model.get('description');
+        let description = this.config.get('description');
         if (!description) {
           description = 'No description provided.'
         }

@@ -29,8 +29,8 @@ define(function (require) {
     didMount: function didMount() {
       var _this = this;
 
-      this.controls = this.model.get('controls');
-      this.loader = this.model.get('loader');
+      this.controls = this.config.get('controls');
+      this.loader = this.config.get('loader');
 
       this.on('data', function (data) {
         _this.graph.updateData(data);
@@ -56,7 +56,7 @@ define(function (require) {
         var controlClass = FORM_CONTROLS[param['type']];
         delete param['type'];
         var control = new controlClass({ el: container });
-        control.model.set(param);
+        control.config.set(param);
         controls.push(control);
         control.render();
       });
@@ -66,13 +66,13 @@ define(function (require) {
       var button = new Button({ el: container });
       this.button = button;
 
-      button.model.set({ text: 'Load Graph' });
+      button.config.set({ text: 'Load Graph' });
 
       button.on('click', function () {
         var values = _.object(controls.map(function (control) {
-          var _control$model$attrib = control.model.attributes,
-              name = _control$model$attrib.name,
-              value = _control$model$attrib.value;
+          var _control$config$attri = control.config.attributes,
+              name = _control$config$attri.name,
+              value = _control$config$attri.value;
 
           return [name, value];
         }));

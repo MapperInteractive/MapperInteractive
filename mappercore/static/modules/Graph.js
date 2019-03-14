@@ -44,13 +44,13 @@ define(function (require) {
     EVENT_MODE_ACTIVATED: 'activate:mode',
 
     initialize: function initialize(states) {
-      this.model = new Model(_.extend({
+      this.config = new Model(_.extend({
         data: null,
         app: null,
         selection: null
       }, states));
 
-      this.app = this.model.get('app');
+      this.app = this.config.get('app');
 
       // init html
       this.$el.addClass('viewer-graph');
@@ -76,7 +76,7 @@ define(function (require) {
     },
 
     updateData: function updateData(data) {
-      this.model.set('data', data);
+      this.config.set('data', data);
     },
 
 
@@ -90,7 +90,7 @@ define(function (require) {
 
       this.svg = d3.select(this.container).append('svg').attr('width', width).attr('height', height);
 
-      if (!this.model.get('data')) {
+      if (!this.config.get('data')) {
         this.svg.append('text').attr('x', width / 2).attr('y', 100).attr('fill', 'gray').attr('text-anchor', 'middle').attr('font-size', 35).text("no graph loaded yet");
         return;
       }
@@ -107,19 +107,19 @@ define(function (require) {
     _initEvents: function _initEvents() {
       var _this = this;
 
-      this.listenTo(this.model, 'change:data', function () {
+      this.listenTo(this.config, 'change:data', function () {
         _this.modes.activate('view');
         _this.render();
       });
 
-      this.listenTo(this.model, 'change:selection', function () {
+      this.listenTo(this.config, 'change:selection', function () {
         _this.trigger(_this.EVENT_CHANGE_SELECTION);
       });
     },
     _renderNodes: function _renderNodes() {
       var _this2 = this;
 
-      this.nodes = this.svg.selectAll("circle").data(this.model.get("data")["nodes"]).enter().append("circle").classed(this.CLASS_NAME_VERTEX, true).on("click", function () {
+      this.nodes = this.svg.selectAll("circle").data(this.config.get("data")["nodes"]).enter().append("circle").classed(this.CLASS_NAME_VERTEX, true).on("click", function () {
         _this2.trigger(_this2.EVENT_CLICK_NODE, d3.event);
       }).on("mouseenter", function () {
         _this2.trigger(_this2.EVENT_MOUSEENTER_NODE, d3.event);
@@ -132,7 +132,8 @@ define(function (require) {
     _renderLinks: function _renderLinks() {
       var _this3 = this;
 
-      this.links = this.svg.append('g').selectAll("line").data(this.model.get("data")["links"]).enter().append("line").classed(this.CLASS_NAME_EDGE, true).on("click", function () {
+      var data = this.config.get("data");
+      this.links = this.svg.append('g').selectAll("line").data(this.config.get("data")["links"]).enter().append("line").classed(this.CLASS_NAME_EDGE, true).on("click", function () {
         _this3.trigger(_this3.EVENT_CLICK_LINK, d3.event);
       }).on("mouseover", function () {
         _this3.trigger(_this3.EVENT_MOUSEOVER_LINK, d3.event);
@@ -187,13 +188,13 @@ define(function (require) {
     },
     updateSelection: function updateSelection() {
       var selection = this.svg.selectAll('circle.' + this.CLASS_NAME_SELECTED).data();
-      this.model.set('selection', selection.map(function (n) {
+      this.config.set('selection', selection.map(function (n) {
         return n['id'];
       }));
     },
     clearSelection: function clearSelection() {
       this.nodes.classed(this.CLASS_NAME_SELECTED, false);
-      this.model.set('selection', []);
+      this.config.set('selection', []);
     },
     _initConfig: function _initConfig() {
       var _this6 = this;

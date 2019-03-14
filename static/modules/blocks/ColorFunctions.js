@@ -2,8 +2,6 @@
 
 /**
  * Color Functions Block.
- *
- * This class can create block for set color of nodes base on customized functions and color maps.
  */
 define((require) => {
 
@@ -16,84 +14,69 @@ define((require) => {
 
     name: 'Color Functions',
 
-    COLOR_MAPS: [
-      { colormapName: '- None -', colormapFunc: null },
-      { colormapName: 'Rainbow', colormapFunc: 'interpolateRainbow' },
-      { colormapName: 'Yellow, Red', colormapFunc: 'interpolateYlOrRd' },
-      { colormapName: 'Yellow, Blue', colormapFunc: 'interpolateYlOrBr' },
-      { colormapName: 'Yellow, Green', colormapFunc: 'interpolateYlGn' },
-      { colormapName: 'Yellow, Green, Blue', colormapFunc: 'interpolateYlGnBu' },
-      { colormapName: 'Purple, Red', colormapFunc: 'interpolatePuRd' },
-      { colormapName: 'Purple, Blue', colormapFunc: 'interpolatePuBu' },
-      { colormapName: 'Purple, Blue, Green', colormapFunc: 'interpolatePuBuGn' },
-      { colormapName: 'Green, Blue', colormapFunc: 'interpolateGnBu' },
-      { colormapName: 'Red', colormapFunc: 'interpolateOrRd' },
-      { colormapName: 'Red, Blue', colormapFunc: 'interpolateRdPu' },
-      { colormapName: 'Blue', colormapFunc: 'interpolateBlues' },
-      { colormapName: 'Blue, Purple', colormapFunc: 'interpolateBuPu' },
+    SCHEMAS: [
+      { label: '- None -', scheme: null },
+      { label: 'Rainbow', scheme: 'interpolateRainbow' },
+      { label: 'Yellow, Red', scheme: 'interpolateYlOrRd' },
+      { label: 'Yellow, Blue', scheme: 'interpolateYlOrBr' },
+      { label: 'Yellow, Green', scheme: 'interpolateYlGn' },
+      { label: 'Yellow, Green, Blue', scheme: 'interpolateYlGnBu' },
+      { label: 'Purple, Red', scheme: 'interpolatePuRd' },
+      { label: 'Purple, Blue', scheme: 'interpolatePuBu' },
+      { label: 'Purple, Blue, Green', scheme: 'interpolatePuBuGn' },
+      { label: 'Green, Blue', scheme: 'interpolateGnBu' },
+      { label: 'Red', scheme: 'interpolateOrRd' },
+      { label: 'Red, Blue', scheme: 'interpolateRdPu' },
+      { label: 'Blue', scheme: 'interpolateBlues' },
+      { label: 'Blue, Purple', scheme: 'interpolateBuPu' },
     ],
 
+    /**
+     * config:
+     *  - values: function list
+     */
     didMount() {
+
+      // get ref of graph
       this.graph = this.app.graph;
 
-      this.model.set('valueFunctions', this.model.get('valueFunctions'));
-      this.model.set('colorMaps', this._generateColorMaps());
+      // config
+      this.functions = this.config.get("functions");
+      this.maps = this.SCHEMAS;
 
-      this.listenTo(this.graph.model, 'change:data', () => this._onGraphChangeData());
-      this.listenTo(this.model, 'change:currentColorMap', () => this._onChangeColorMap());
-      this.listenTo(this.model, 'change:currentValueFunction', () => this._onChangeValueFunction());
+      // set default schema as null
+      this.setCurrentFunction(this.functions[0]);
+      this.setCurrentMap(this.SCHEMAS[0]);
 
+      // refresh the
+      this.listenTo(this.graph.config, 'change:data', () => this.refresh());
+      this.listenTo(this.config, 'change:currentMap', () => this.refresh());
+      this.listenTo(this.config, 'change:currentFunction', () => this.refresh());
+
+      // create HTML elements
       d3.select(this.el).append('form').classed('form', true);
 
+      // set ref of form and svg
       this.$form = this.$('form');
       this.svg = d3.select(this.el).append('svg');
     },
 
     render() {
-      this._renderValueFunctionSelect();
-      this._renderColorMapSelect();
+      this._appendFunctionsDropdown();
+      this._appendMapDropdown();
       this._renderColorMapFigure();
     },
 
-    _generateColorMaps() {
-      return this.COLOR_MAPS.map((one) => {
-        let func = null;
-        if (one['colormapFunc']) {
-          func = d3.scaleSequential(d3ScaleChromatic[one['colormapFunc']]);
-        }
-        return {
-          colormapName: one['colormapName'],
-          colormapFunc: func
-        }
-      });
-    },
-
-    getCurrentColorMap() {
-      let current = this.model.get('currentColorMap');
-      if (!current) {
-        return this.model.get('colorMaps')[0];
-      } else {
-        return current;
-      }
-    },
-
-    /**
-     * return {label: feature, evaluate: f}
-     */
-    getCurrentValueFunction() {
-      let current = this.model.get('currentValueFunction');
-      if (!current) {
-        return this.model.get('valueFunctions')[0];
-      } else {
-        return current;
-      }
+    _firstValueFunction() {
+      return this.config.get('values')[0];
     },
 
     _renderColorMapFigure() {
       this.svg.html("");
 
-      let colorMap = this.getCurrentColorMap();
-      let colorScale = colorMap['colormapFunc'];
+      let colorMap = this.getCurrentMap();
+
+      let colorScale = colorMap['scale'];
       if (!colorScale) {
         this.svg.attr('width', 0).attr('height', 0);
         return false;
@@ -136,23 +119,53 @@ define((require) => {
       return svg;
     },
 
-    _renderValueFunctionSelect() {
-      let valueFunctions = this.model.get('valueFunctions');
-      let options = valueFunctions.map((fn) => fn['valueName']);
-      let onClick = (index) => this.model.set('currentValueFunction', valueFunctions[index]);
-      this.$form.append(this._generateDropDown('value', options, onClick));
+    getCurrentFunction() {
+      return this.config.get('currentFunction');
     },
 
-    _renderColorMapSelect() {
-      let colorMaps = this.model.get('colorMaps');
-      let options = colorMaps.map((map) => map['colormapName']);
-      let onClick = (index) => this.model.set('currentColorMap', colorMaps[index]);
-      this.$form.append(this._generateDropDown('map', options, onClick));
+    setCurrentFunction(func) {
+      if (func['attr'] && !func['func']) {
+        func['func'] = (d) => d[func['attr']];
+      }
+      this.config.set('currentFunction', func);
     },
 
-    _generateDropDown(name, options, onClick) {
+    getCurrentMap() {
+      return this.config.get('currentMap');
+    },
+
+    setCurrentMap(map) {
+      if (map['scheme']) {
+        map['scale'] = d3.scaleSequential(d3ScaleChromatic[map['scheme']]);
+      } else {
+        map['scale'] = null;
+      }
+      this.config.set('currentMap', map);
+    },
+
+    getFunctionNames() {
+      return this.functions.map((f) => f['name']);
+    },
+
+    getMapLabels() {
+      return this.maps.map((s) => s['label']);
+    },
+
+    _appendFunctionsDropdown() {
+      this.$form.append(this._dropdown('value', this.getFunctionNames(), (index) => {
+        this.setCurrentFunction(this.functions[index]);
+      }));
+    },
+
+    _appendMapDropdown() {
+      this.$form.append(this._dropdown('map', this.getMapLabels(), (index) => {
+        this.setCurrentMap(this.maps[index]);
+      }));
+    },
+
+    _dropdown(label, options, onClick) {
       let $html = $('<div class="form-group row">' +
-        '<label class="col-sm-2 col-form-label" style="font-size:1.2em;font-weight:lighter;">' + name + '</label>' +
+        '<label class="col-sm-2 col-form-label" style="font-size:1.2em;font-weight:lighter;">' + label + '</label>' +
         '<div class="col-sm-10"><div class="btn-group" style="margin-right:1em;">' +
         '<button class="btn btn-outline-secondary dropdown-toggle btn-sm" ' +
         'role="button" data-toggle="dropdown" aria-haspopup="true" ' +
@@ -177,25 +190,16 @@ define((require) => {
       return $html;
     },
 
-    _onGraphChangeData() {
-      this._renderColorMapFigure();
-      this._updateGraphColor();
-    },
-
-    _onChangeColorMap() {
-      this._renderColorMapFigure();
-      this._updateGraphColor();
-    },
-
-    _onChangeValueFunction() {
+    refresh() {
       this._renderColorMapFigure();
       this._updateGraphColor();
     },
 
     _updateGraphColor() {
       let graph = this.graph;
-      let colorMap = this.getCurrentColorMap();
-      let colorScale = colorMap['colormapFunc'];
+
+      let currentMap = this.getCurrentMap();
+      let colorScale = currentMap['scale'];
 
       if (!colorScale || !graph.nodes) {
         if (graph.nodes) {
@@ -207,19 +211,18 @@ define((require) => {
 
       colorScale.domain(this._getCurrentAxisDomain());
 
-      let currentValueFunction = this.getCurrentValueFunction();
-      let d3ValueFunction = (d) => colorScale(currentValueFunction['valueFunc'](d));
+      let currentFunc = this.getCurrentFunction();
+      let d3ValueFunction = (d) => colorScale(currentFunc['func'](d));
       graph.nodes.style('fill', d3ValueFunction);
 
       this._invertLabelColors(graph, d3ValueFunction);
     },
 
     _getCurrentAxisDomain() {
-      let graph = this.graph;
-      let data = graph.model.get('data');
-      let valueFunction = this.getCurrentValueFunction();
+      let data = this.graph.config.get('data');
+      let valueFunction = this.getCurrentFunction();
       if (data) {
-        return d3.extent(data['nodes'], (d) => valueFunction['valueFunc'](d));
+        return d3.extent(data['nodes'], (d) => valueFunction['func'](d));
       } else {
         return [0, 1];
       }
