@@ -6,7 +6,7 @@
 define(function (require) {
 
   const { d3, _, b: { Model } } = window;
-  const GraphMode = require('../Mode');
+  const GraphMode = require('../Tool');
 
 
   return class SelectPathMode extends GraphMode {
@@ -166,28 +166,28 @@ define(function (require) {
     }
 
     markInitialCandidates() {
-      this.graph.nodes.filter((d) => {
+      this.graph.getNodes().filter((d) => {
         return this.nodes[d["id"]]["neighbors"].length === 0;
       }).classed(this.graph.CLASS_NAME_UNAVAILABLE, true);
     }
 
     setCandidates(nodeIdList) {
-      this.graph.nodes.filter((d) => {
+      this.graph.getNodes().filter((d) => {
         return nodeIdList.indexOf(d["id"]) === -1;
       }).classed(this.graph.CLASS_NAME_UNAVAILABLE, true);
 
-      this.graph.links.filter((d) => {
+      this.graph.getLinks().filter((d) => {
         return nodeIdList.indexOf(d['source']['id']) === -1
           && nodeIdList.indexOf(d['target']['id']) === -1;
       }).classed(this.graph.CLASS_NAME_UNAVAILABLE, true);
     }
 
     preparing() {
-      this.nodes = _.object(this.graph.nodes.data().map((n) => {
+      this.nodes = _.object(this.graph.getNodes().data().map((n) => {
         return [n["id"], { "id": n["id"], "neighbors": [] }];
       }));
 
-      this.graph.links.data().forEach((link) => {
+      this.graph.getLinks().data().forEach((link) => {
         this.nodes[link["source"]["id"]]["neighbors"].push(link["target"]["id"]);
         this.nodes[link["target"]["id"]]["neighbors"].push(link["source"]["id"]);
       });
@@ -234,19 +234,19 @@ define(function (require) {
     }
 
     clearPotentialSelection() {
-      this.graph.nodes.classed(this.graph.CLASS_NAME_CANDIDATE, false);
+      this.graph.getNodes().classed(this.graph.CLASS_NAME_CANDIDATE, false);
     }
 
     findNodeById(id) {
-      return this.graph.nodes.filter((d) => d["id"] === id);
+      return this.graph.getNodes().filter((d) => d["id"] === id);
     }
 
     clear() {
       this.clearPotentialSelection();
-      this.graph.nodes.classed(this.graph.CLASS_NAME_UNAVAILABLE, false);
-      this.graph.nodes.classed(this.graph.CLASS_NAME_SELECTED, false);
-      this.graph.nodes.classed(this.CLASS_NAME_ANCHOR, false);
-      this.graph.links.classed(this.graph.CLASS_NAME_SELECTED, false);
+      this.graph.getNodes().classed(this.graph.CLASS_NAME_UNAVAILABLE, false);
+      this.graph.getNodes().classed(this.graph.CLASS_NAME_SELECTED, false);
+      this.graph.getNodes().classed(this.CLASS_NAME_ANCHOR, false);
+      this.graph.getLinks().classed(this.graph.CLASS_NAME_SELECTED, false);
       this.graph.trigger('change:selection', []);
     }
 

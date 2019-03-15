@@ -12,7 +12,7 @@ define((require) => {
       this.config.set('currentFunction', this.config.get('functions')[0]);
 
       this.listenTo(this.config, 'change:currentFunction', () => this._onCurrentSizeFunctionChange());
-      this.listenTo(this.graph.model, 'change:data', () => this._whenGraphDataChanged());
+      this.listenTo(this.getGraph().config, 'change:data', () => this._whenGraphDataChanged());
     },
 
     render() {
@@ -40,8 +40,8 @@ define((require) => {
     },
 
     _updateSize() {
-      let data = this.graph.model.get('data');
-      let nodes = this.graph.nodes;
+      let data = this.getGraph().config.get('data');
+      let nodes = this.getGraph().getNodes();
 
       if (!nodes) {
         return false;

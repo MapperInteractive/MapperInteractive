@@ -5,7 +5,7 @@
  */
 define((require) => {
 
-  const { d3, $ } = window;
+  const { d3, $, b: { Model } } = window;
 
   const d3ScaleChromatic = require('d3-scale-chromatic');
   const Block = require('Block');
@@ -14,7 +14,7 @@ define((require) => {
 
     name: 'Color Functions',
 
-    SCHEMAS: [
+    COLORMAPS: [
       { label: '- None -', scheme: null },
       { label: 'Rainbow', scheme: 'interpolateRainbow' },
       { label: 'Yellow, Red', scheme: 'interpolateYlOrRd' },
@@ -37,21 +37,24 @@ define((require) => {
      */
     didMount() {
 
-      // get ref of graph
-      this.graph = this.app.graph;
-
       // config
-      this.functions = this.config.get("functions");
-      this.maps = this.SCHEMAS;
+      this.selection = this.config.get("selection").map(this._initSelections.bind(this));
+      this.maps = this.COLORMAPS.map(this._initMap.bind(this));
 
-      // set default schema as null
-      this.setCurrentFunction(this.functions[0]);
-      this.setCurrentMap(this.SCHEMAS[0]);
+      // states
+      this.data = this.getGraph().getData();
+      this.color = new Model({
+        getter: this.selection[0]['getter'],
+        scale: this.maps[0]['scale']
+      });
 
-      // refresh the
-      this.listenTo(this.graph.config, 'change:data', () => this.refresh());
-      this.listenTo(this.config, 'change:currentMap', () => this.refresh());
-      this.listenTo(this.config, 'change:currentFunction', () => this.refresh());
+      // refresh when data or config changed
+      [
+        this.data,
+        this.color,
+      ].map(sender => sender.on('change', () => {
+        this.refresh();
+      }));
 
       // create HTML elements
       d3.select(this.el).append('form').classed('form', true);
@@ -61,22 +64,30 @@ define((require) => {
       this.svg = d3.select(this.el).append('svg');
     },
 
+    _initSelections(s) {
+      s['getter'] =
+        typeof s['attr'] != 'string' ? s['attr'] : function (d) {
+          return d[s['attr']];
+        };
+
+      return s;
+    },
+
+    _initMap(m) {
+      m['scale'] = m['scheme'] === null ? null : d3.scaleSequential(d3ScaleChromatic[m['scheme']]);
+      return m;
+    },
+
     render() {
       this._appendFunctionsDropdown();
       this._appendMapDropdown();
       this._renderColorMapFigure();
     },
 
-    _firstValueFunction() {
-      return this.config.get('values')[0];
-    },
-
     _renderColorMapFigure() {
       this.svg.html("");
 
-      let colorMap = this.getCurrentMap();
-
-      let colorScale = colorMap['scale'];
+      let colorScale = this.color.get('scale');
       if (!colorScale) {
         this.svg.attr('width', 0).attr('height', 0);
         return false;
@@ -119,47 +130,23 @@ define((require) => {
       return svg;
     },
 
-    getCurrentFunction() {
-      return this.config.get('currentFunction');
-    },
-
-    setCurrentFunction(func) {
-      if (func['attr'] && !func['func']) {
-        func['func'] = (d) => d[func['attr']];
-      }
-      this.config.set('currentFunction', func);
-    },
-
-    getCurrentMap() {
-      return this.config.get('currentMap');
-    },
-
-    setCurrentMap(map) {
-      if (map['scheme']) {
-        map['scale'] = d3.scaleSequential(d3ScaleChromatic[map['scheme']]);
-      } else {
-        map['scale'] = null;
-      }
-      this.config.set('currentMap', map);
-    },
-
     getFunctionNames() {
-      return this.functions.map((f) => f['name']);
+      return this.selection.map((f) => f['name']);
     },
 
     getMapLabels() {
-      return this.maps.map((s) => s['label']);
+      return this.COLORMAPS.map((s) => s['label']);
     },
 
     _appendFunctionsDropdown() {
       this.$form.append(this._dropdown('value', this.getFunctionNames(), (index) => {
-        this.setCurrentFunction(this.functions[index]);
+        this.color.set('getter', this.selection[index]['getter']);
       }));
     },
 
     _appendMapDropdown() {
       this.$form.append(this._dropdown('map', this.getMapLabels(), (index) => {
-        this.setCurrentMap(this.maps[index]);
+        this.color.set('scale', this.maps[index]['scale']);
       }));
     },
 
@@ -196,42 +183,41 @@ define((require) => {
     },
 
     _updateGraphColor() {
-      let graph = this.graph;
+      let graph = this.getGraph();
 
-      let currentMap = this.getCurrentMap();
-      let colorScale = currentMap['scale'];
+      let scale = this.color.get('scale');
 
-      if (!colorScale || !graph.nodes) {
-        if (graph.nodes) {
-          graph.nodes.style('fill', null);
+      if (!scale || !graph.getNodes()) {
+        if (graph.getNodes()) {
+          graph.getNodes().style('fill', null);
           this._clearLabelColor();
         }
         return false;
       }
 
-      colorScale.domain(this._getCurrentAxisDomain());
+      scale.domain(this._getCurrentAxisDomain());
 
-      let currentFunc = this.getCurrentFunction();
-      let d3ValueFunction = (d) => colorScale(currentFunc['func'](d));
-      graph.nodes.style('fill', d3ValueFunction);
+      let getter = this.color.get('getter');
+      let svgColor = (d) => scale(getter(d));
 
-      this._invertLabelColors(graph, d3ValueFunction);
+      graph.getNodes().style('fill', svgColor);
+      this._invertLabelColors(graph, svgColor);
     },
 
     _getCurrentAxisDomain() {
-      let data = this.graph.config.get('data');
-      let valueFunction = this.getCurrentFunction();
-      if (data) {
-        return d3.extent(data['nodes'], (d) => valueFunction['func'](d));
+      let nodes = this.data.get('nodes');
+      let getter = this.color.get('getter');
+      if (nodes && nodes.length > 0) {
+        return d3.extent(nodes, (d) => getter(d));
       } else {
         return [0, 1];
       }
     },
 
     _invertLabelColors(graph, fn) {
-      let labelBehavior = graph.behaviors.get('labeled');
-      if (labelBehavior) {
-        labelBehavior.labels.style('fill', (d) => {
+      let labeled = graph.getPlugins().get('labeled');
+      if (labeled) {
+        labeled.labels.style('fill', (d) => {
           let bgColor = fn(d);
           let rgb = bgColor.replace(/rgb\(|\)|rgba\(|\)|\s/gi, '').split(',');
           for (let i = 0; i < rgb.length; i++) rgb[i] = (i === 3 ? 1 : 255) - rgb[i];
@@ -241,9 +227,9 @@ define((require) => {
     },
 
     _clearLabelColor() {
-      let labelBehavior = this.graph.behaviors.get('labeled');
-      if (labelBehavior) {
-        labelBehavior.labels.style('fill', '#333');
+      let labeled = this.getGraph().getPlugins().get('labeled');
+      if (labeled) {
+        labeled.labels.style('fill', '#333');
       }
     }
 

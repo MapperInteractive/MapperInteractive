@@ -7,11 +7,10 @@ define((require) => {
   const { d3, _, $, b: { View, Model }, guard } = window;
 
   const Toolbar = require('./graph/Toolbar');
-  const ModesManager = require('./graph/helpers/Modes');
-  const BehaviorsManager = require('./graph/helpers/Plugins');
-  const ViewMode = require('./graph/modes/View');
+  const ToolsManager = require('./graph/managers/Tools');
+  const PluginsManager = require('./graph/managers/Plugins');
+  const ViewOnly = require('./graph/tools/ViewOnly');
   const Registry = require('./Registry');
-
 
   return View.extend({
 
@@ -35,14 +34,19 @@ define((require) => {
     EVENT_DID_LAYOUT: 'didLayout',
     EVENT_MODE_ACTIVATED: 'activate:mode',
 
-    initialize: function (states) {
-      this.config = new Model(_.extend({
-        data: null,
-        app: null,
-        selection: null,
-      }, states));
+    initialize: function (config) {
 
-      this.app = this.config.get('app');
+      this.config = new Model(_.extend({
+        plugins: [],
+        tools: [],
+        selection: null,
+      }, config));
+
+      // init data container
+      this._data = new Model({ links: [], nodes: [] });
+      this._selection = new Model([]);
+
+      // init links and nodes
 
       // init html
       this.$el.addClass('viewer-graph');
@@ -55,20 +59,44 @@ define((require) => {
       this.container = d3.select(this.el).append('div').classed('viewer-graph__graph', true).node();
       this.$container = $(this.container);
 
-      // init modes & plugins
-      this.modes = new ModesManager(this);
-      this.plugins = new BehaviorsManager(this);
+      // init tools and plugins
+      this.tools = new ToolsManager(this);
+      this.plugins = new PluginsManager(this);
 
-      // init customizations
-      this.modes.add(new ViewMode());
-      this._initConfig();
-      this.modes.activate('view');
-
+      this._initExtensions();
       this._initEvents();
     },
 
-    updateData(data) {
-      this.config.set('data', data);
+    getWorkspace() {
+      return this.config.get('workspace');
+    },
+
+    getData() {
+      return this._data;
+    },
+
+    getSelection() {
+      return this._selection;
+    },
+
+    getPlugins() {
+      return this.plugins;
+    },
+
+    getTools() {
+      return this.tools;
+    },
+
+    getLinks() {
+      return this._links;
+    },
+
+    getNodes() {
+      return this._nodes;
+    },
+
+    setGraphData(graph) {
+      this.getData().set(graph);
     },
 
     render: function () {
@@ -84,7 +112,11 @@ define((require) => {
         .attr('width', width)
         .attr('height', height);
 
-      if (!this.config.get('data')) {
+      let nodes = this.getData().get('nodes');
+
+      if (!nodes || nodes.length === 0) {
+        this._links = null;
+        this._nodes = null;
         this.svg
           .append('text')
           .attr('x', width / 2)
@@ -92,34 +124,32 @@ define((require) => {
           .attr('fill', 'gray')
           .attr('text-anchor', 'middle')
           .attr('font-size', 35)
-          .text("no graph loaded yet");
+          .text("no data");
         return;
       }
 
-      this.links = null;
-      this.nodes = null;
-
       this.trigger('willRender');
-      this._renderLinks();
-      this._renderNodes();
+      this._links = this._renderLinks();
+      this._nodes = this._renderNodes();
       this.trigger('didRender');
     },
 
     _initEvents() {
-      this.listenTo(this.config, 'change:data', () => {
-        this.modes.activate('view');
+      this.getData().on('change', () => {
+        this.tools.activate('view');
         this.render();
       });
 
-      this.listenTo(this.config, 'change:selection', () => {
+      this.getData().on('change:selection', () => {
         this.trigger(this.EVENT_CHANGE_SELECTION);
       });
     },
 
     _renderNodes() {
-      this.nodes = this.svg
+      let nodesData = this.getData().get('nodes');
+      return this.svg
         .selectAll("circle")
-        .data(this.config.get("data")["nodes"])
+        .data(nodesData)
         .enter()
         .append("circle")
         .classed(this.CLASS_NAME_VERTEX, true)
@@ -138,11 +168,11 @@ define((require) => {
     },
 
     _renderLinks() {
-      let data = this.config.get("data");
-      this.links = this.svg
+      let linksData = this.getData().get('links');
+      return this.svg
         .append('g')
-        .selectAll("line")
-        .data(this.config.get("data")["links"])
+        .selectAll('line')
+        .data(linksData)
         .enter()
         .append("line")
         .classed(this.CLASS_NAME_EDGE, true)
@@ -158,19 +188,19 @@ define((require) => {
     },
 
     selectNode(id) {
-      this.nodes.filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, true);
+      this.getNodes().filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, true);
       this.updateSelection();
     },
 
     selectNodeList(list) {
       list.map((id) => {
-        this.nodes.filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, true);
+        this.getNodes().filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, true);
       });
       this.updateSelection();
     },
 
     unselectNode(id) {
-      this.nodes
+      this.getNodes()
         .filter((d) => d['id'] === id)
         .classed(this.CLASS_NAME_SELECTED, false);
       this.updateSelection();
@@ -178,20 +208,20 @@ define((require) => {
 
     unselectNodeList(list) {
       list.map((id) => {
-        this.nodes.filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, false);
+        this.getNodes().filter((d) => d['id'] === id).classed(this.CLASS_NAME_SELECTED, false);
       });
       this.updateSelection();
     },
 
     isNodeSelected(id) {
-      return this.nodes.filter((d) => d['id'] === id)
+      return this.getNodes().filter((d) => d['id'] === id)
         .classed(this.CLASS_NAME_SELECTED);
     },
 
     selectLink(targetEndPoints) {
       targetEndPoints = targetEndPoints.sort();
 
-      this.links.filter((d) => {
+      this.getLinks().filter((d) => {
         let testEndPoints = [d['source']['id'], d['target']['id']].sort();
         return testEndPoints[0] === targetEndPoints[0] && testEndPoints[1] === targetEndPoints[1];
       }).classed(this.CLASS_NAME_SELECTED, true);
@@ -203,20 +233,29 @@ define((require) => {
     },
 
     clearSelection() {
-      this.nodes.classed(this.CLASS_NAME_SELECTED, false);
+      this.getNodes().classed(this.CLASS_NAME_SELECTED, false);
       this.config.set('selection', []);
     },
 
-    _initConfig() {
-      guard(this.app.getOption('plugins'), []).map((item) => {
+    _initExtensions() {
+      this._initCustomTools();
+      this._initCustomPlugins();
+    },
+
+    _initCustomPlugins() {
+      guard(this.config.get('plugins'), []).map((item) => {
         let Module = this._parseModule('plugins', item);
         this.plugins.add(new Module());
       });
+    },
 
-      guard(this.app.getOption('modes'), []).map((item) => {
-        let Module = this._parseModule('modes', item);
-        this.modes.add(new Module());
+    _initCustomTools() {
+      this.tools.add(new ViewOnly());
+      guard(this.config.get('tools'), []).map((item) => {
+        let Module = this._parseModule('tools', item);
+        this.tools.add(new Module());
       });
+      this.tools.activate('view');
     },
 
     _parseModule(category, name) {

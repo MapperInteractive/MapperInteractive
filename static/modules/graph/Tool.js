@@ -7,13 +7,13 @@ define(function () {
 
   const { _, b: { Events } } = window;
 
-  return class Mode {
+  return class Tool {
 
     constructor() {
       this.activated = false;
       this.events = _.extend({}, Events);
 
-      // this.graph and this.app is available after mount
+      // this.graph and this.workspace is available after mount
       this.graph = undefined;
       this.app = undefined;
 

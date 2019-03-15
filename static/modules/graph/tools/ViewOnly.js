@@ -5,7 +5,7 @@
  */
 define(function (require) {
 
-  const Mode = require('../Mode');
+  const Mode = require('../Tool');
 
   return class ViewMode extends Mode {
 

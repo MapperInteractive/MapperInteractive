@@ -22,7 +22,7 @@ define((require) => {
       this.algorithms = this.config.get('algorithms');
       this.attributes = this.config.get('attributes');
 
-      this.listenTo(this.graph.model, 'change:selection', () => this.onSelectionChanged());
+      this.listenTo(this.getGraph().config, 'change:selection', () => this.onSelectionChanged());
 
       this.UIWidth = this.$el.width();
       this.SVGHeight = 300;
@@ -30,7 +30,7 @@ define((require) => {
 
     onSelectionChanged: function () {
       this.render();
-      let selection = this.graph.model.get('selection');
+      let selection = this.getGraph().model.get('selection');
       if (selection.length > 0) {
         this.$('select').removeClass('disabled').attr('disabled', false);
         this.$('button').removeClass('disabled').attr('disabled', false);
@@ -51,10 +51,10 @@ define((require) => {
       this.$el.html(html);
 
       html.find('button').on('click', () => {
-        this.app.serverSideFunction('linear_regression',
+        this.workspace.serverSideFunction('linear_regression',
           {
             'algorithm': select.val(),
-            'data': this.dataBuilder(this.graph)
+            'data': this.dataBuilder(this.getGraph())
           },
           (res) => {
             this.draw(res)
@@ -63,7 +63,7 @@ define((require) => {
     },
 
     buildData: function () {
-      let selection = this.graph.model.get('selection');
+      let selection = this.getGraph().config.get('selection');
       selection = this.transform(selection);
       return selection;
     },

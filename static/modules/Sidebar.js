@@ -19,33 +19,33 @@ define(function () {
       '    </div>\n' +
       ' </div>\n'),
 
-    initialize(states) {
-      this.states = new Model(_.extend({
+    initialize(config) {
+      this.config = new Model(_.extend({
         app: null,
-      }, states));
+      }, config));
 
-      this.app = this.states.get('app');
+      this.workspace = this.config.get('workspace');
       this._blocks = [];
     },
 
-    addBlock(module, config) {
-      if (typeof module !== 'function') {
-        throw "blocks module is required"
+    addBlock(klass, config) {
+      if (typeof klass !== 'function') {
+        throw "blocks module is required";
       }
 
       let id = 'block-' + this._blocks.length + 1;
-      let title = guard(config['title'], () => module.prototype.name);
+      let title = guard(config['title'], () => klass.prototype.name);
       let template = this.template({ id: id, title: title });
 
       this.$el.append(template);
 
-      config = _.extend(config, {
+      let blockConfig = _.extend(config, {
         el: '#block-' + id + '-body',
-        app: this.app,
+        workspace: this.workspace,
         title: title,
       });
 
-      this._blocks.push(new module(config));
+      this._blocks.push(new klass(blockConfig));
     },
 
     render() {

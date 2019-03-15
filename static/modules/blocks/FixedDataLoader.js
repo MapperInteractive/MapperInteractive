@@ -21,10 +21,10 @@ define((require) => {
     name: 'Fixed Data Source',
 
     didMount() {
-      this.loader = this.config.get('loader');
+      this._loader = this.config.get('loader');
 
       this.on('data', (data) => {
-        this.graph.updateData(data);
+        this.getGraph().setGraphData(data);
       });
 
       this.on('error', (error) => {
@@ -33,10 +33,10 @@ define((require) => {
     },
 
     render() {
-      if (!this.loader) {
-        return this.$el.html(this._notConfiguredError());
+      if (!this._loader) {
+        return this.$el.html(this._displayNotConfiguredError());
       } else {
-        this.loader(this);
+        this._loader(this);
         let description = this.config.get('description');
         if (!description) {
           description = 'No description provided.'
@@ -45,7 +45,7 @@ define((require) => {
       }
     },
 
-    _notConfiguredError() {
+    _displayNotConfiguredError() {
       return '<div class="alert alert-danger">' +
         'Block not configured. Please check configuration: ' +
         '<code>loader</code>' +

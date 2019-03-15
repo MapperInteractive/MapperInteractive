@@ -15,7 +15,7 @@ define((require) => {
 
     didMount() {
       super.didMount();
-
+      console.log('force-simulation');
       this.events.listenTo(this.graph, 'didRender', () => {
         this._graphDidRender();
       });
@@ -33,7 +33,7 @@ define((require) => {
         .force("x", d3.forceX().strength(0.2))
         .force("y", d3.forceY().strength(0.2));
 
-      let { nodes, links } = this.graph.config.get('data');
+      let { nodes, links } = this.graph.getData().attributes;
 
       this.simulation
         .nodes(nodes)
@@ -48,7 +48,7 @@ define((require) => {
 
     _ticked() {
 
-      this.graph.links
+      this.graph.getLinks()
         .attr("x1", function (d) {
           return d.source.x;
         })
@@ -62,7 +62,7 @@ define((require) => {
           return d.target.y;
         });
 
-      this.graph.nodes
+      this.graph.getNodes()
         .attr("cx", function (d) {
           return d.x;
         })
@@ -72,6 +72,6 @@ define((require) => {
 
       this.graph.trigger('didLayout');
     }
-  }
+  };
 
 });

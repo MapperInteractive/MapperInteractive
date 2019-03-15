@@ -18,14 +18,13 @@ define(function () {
 
     setGraph: function (graph) {
       this.graph = graph;
-
     },
 
     render: function () {
       this.$el.html("");
 
       let container = this.$el;
-      let modes = this.graph.modes;
+      let modes = this.graph.tools;
 
       modes.map((mode) => {
         container.append(this.template({ mode: mode }));

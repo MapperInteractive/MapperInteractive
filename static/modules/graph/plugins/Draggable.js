@@ -19,7 +19,7 @@ define((require) => {
 
       this.listenTo(this.graph, 'didRender', () => {
         this.forceSimulation = this.graph.plugins.get('force-simulation');
-        this.graph.nodes.call(d3.drag()
+        this.graph.getNodes().call(d3.drag()
           .on("start", (d) => {
             this.dragStarted(d);
           })

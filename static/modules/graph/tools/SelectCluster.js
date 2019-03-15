@@ -6,7 +6,7 @@
 define((require) => {
 
   const { d3 } = window;
-  const GraphMode = require('../Mode');
+  const GraphMode = require('../Tool');
 
   return class SelectClusterMode extends GraphMode {
 
@@ -49,7 +49,7 @@ define((require) => {
     }
 
     findClusterNodes(nodeId) {
-      let links = this.graph.model.get('data').links;
+      let links = this.graph.getLinks();
       let cluster = [];
 
       let finder = (startId) => {
@@ -77,13 +77,13 @@ define((require) => {
 
     eventNodeMouseOver(e) {
       let cluster = this.findClusterNodes(d3.select(e.target).datum()['id']);
-      this.graph.nodes.filter((d) => {
+      this.graph.getNodes().filter((d) => {
         return cluster.indexOf(d['id']) > -1;
       }).classed(this.graph.CLASS_NAME_CANDIDATE, true);
     }
 
     eventNodeMouseOut(e) {
-      this.graph.nodes.classed(this.graph.CLASS_NAME_CANDIDATE, false);
+      this.graph.getNodes().classed(this.graph.CLASS_NAME_CANDIDATE, false);
     }
 
   }

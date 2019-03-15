@@ -9,7 +9,7 @@ define(() => {
 
   const { _ } = window;
 
-  return class MountableManager {
+  return class AbstractManager {
 
     constructor(graph) {
       this.graph = graph;
@@ -35,6 +35,6 @@ define(() => {
     map(fn) {
       _.mapObject(this.mounted, fn);
     }
-  }
+  };
 
 });

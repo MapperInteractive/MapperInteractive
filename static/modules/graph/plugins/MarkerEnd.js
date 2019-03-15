@@ -31,7 +31,7 @@ define((require) => {
         .attr('fill', '#777')
         .attr('stroke', '#777');
 
-      this.graph.links.attr('marker-end', 'url(#arrowhead)');
+      this.graph.getLinks().attr('marker-end', 'url(#arrowhead)');
     }
   };
 });

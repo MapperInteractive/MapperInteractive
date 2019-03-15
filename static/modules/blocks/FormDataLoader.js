@@ -23,61 +23,64 @@ define((require) => {
     name: 'Graph Loader',
 
     didMount() {
-      this.controls = this.config.get('controls');
-      this.loader = this.config.get('loader');
-
-      this.on('data', (data) => {
-        this.graph.updateData(data);
-      });
-
-      this.on('error', (error) => {
-        console.log(error);
-      });
+      this._controls = this.config.get('form').map(this._initControl.bind(this));
+      this._loader = this.config.get('loader');
     },
 
     render() {
-      if (!this.controls || !this.loader) {
-        return this.$el.html(this._notConfiguredError());
+      if (!this._controls || !this._loader) {
+        return this.$el.html(this._displayNotConfiguredError());
       }
 
-      let controls = [];
+      this._renderControls();
+      this._renderButton();
+    },
 
-      this.controls.map((param) => {
-        let container = $('<div></div>');
-        container.appendTo(this.$el);
+    _initControl(control) {
+      let controlClass = FORM_CONTROLS[control['type']];
 
-        let controlClass = FORM_CONTROLS[param['type']];
-        delete param['type'];
-        let control = new controlClass({ el: container });
-        control.config.set(param);
-        controls.push(control);
-        control.render();
-      });
+      let view = new controlClass();
+      view.config.set(control['config']);
+      return view;
+    },
 
-      let container = $('<div></div>');
-      container.appendTo(this.$el);
-      let button = new Button({ el: container });
+    _renderControls() {
+      this._controls.map((c) => this.append(c, 'div'));
+    },
+
+    _renderButton() {
+
+      let button = new Button();
       this.button = button;
 
       button.config.set({ text: 'Load Graph' });
-
       button.on('click', () => {
-        let values = _.object(controls.map((control) => {
+        let controls = _.object(this._controls.map((control) => {
           let { name, value } = control.config.attributes;
           return [name, value];
         }));
 
-        this.loader(this, values);
+        this._loader(controls, this.onDataReceived.bind(this), this.onErrorOccurred.bind(this));
       });
-      button.render();
+
+      this.append(button);
     },
 
-    _notConfiguredError() {
+    _displayNotConfiguredError() {
       return '<div class="alert alert-danger">' +
         'Block not configured. Please check configuration: ' +
         '<code>controls</code> and ' +
         '<code>loader</code>' +
         '</div>';
-    }
+    },
+
+    onDataReceived(data) {
+      this.getGraph().setGraphData(data);
+    },
+
+    onErrorOccurred(error) {
+      alert(error);
+    },
+
   });
 });

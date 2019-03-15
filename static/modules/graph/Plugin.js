@@ -7,13 +7,13 @@ define(() => {
 
   const { _, b: { Events } } = window;
 
-  return class GraphBehavior {
+  return class Plugin {
 
     constructor() {
       this.paused = false;
       this.events = _.extend({}, Events);
 
-      // this.graph and this.app is available after mount
+      // this.graph and this.workspace is available after mount
       this.graph = undefined;
       this.app = undefined;
 
@@ -25,7 +25,6 @@ define(() => {
     }
 
     initialize() {
-
     }
 
     willMount() {

@@ -5,9 +5,9 @@
  */
 define((require) => {
 
-  const MountableManager = require('./Mountable');
+  const AbstractManager = require('./Abstract');
 
-  return class ModesManager extends MountableManager {
+  return class ToolsManager extends AbstractManager {
 
     init() {
       this.activated = null;
@@ -37,6 +37,6 @@ define((require) => {
       this.activated.trigger(event, context);
     }
 
-  }
+  };
 
 });

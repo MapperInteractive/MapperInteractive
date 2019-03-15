@@ -3,12 +3,12 @@
 /**
  * Base class for behavior classes.
  */
-define( (require) =>{
+define((require) => {
 
   const { _ } = window;
-  const MountableManager = require('./Mountable');
+  const AbstractManager = require('./Abstract');
 
-  return class PluginsManager extends MountableManager {
+  return class PluginsManager extends AbstractManager {
 
     trigger(event, context) {
       _.mapObject(this.mounted, (b) => {
@@ -16,6 +16,6 @@ define( (require) =>{
       });
     }
 
-  }
+  };
 
 });

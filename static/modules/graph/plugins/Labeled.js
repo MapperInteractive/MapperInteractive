@@ -22,7 +22,7 @@ define((require) => {
       this.events.listenTo(this.graph, 'didLayout', () => {
         this.graph.svg
           .selectAll('.viewer-graph__label')
-          .data(this.graph.nodes.data())
+          .data(this.graph.getNodes().data())
           .attr('dx', (d) => d.x)
           .attr('dy', (d) => d.y + 1)
           .attr('text-anchor', 'middle')
@@ -33,7 +33,7 @@ define((require) => {
     _graphDidRender() {
       this.labels = this.graph.svg.append("g")
         .selectAll("text")
-        .data(this.graph.nodes.data())
+        .data(this.graph.getNodes().data())
         .enter().append("text")
         .attr("dx", 12)
         .attr("dy", ".35em")

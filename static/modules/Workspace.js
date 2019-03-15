@@ -15,36 +15,64 @@ define((require) => {
 
   return View.extend({
 
-    initialize(states) {
+    /**
+     *
+     * Config should includes
+     *
+     *
+     * @param config object
+     */
+    initialize(config) {
       this.config = new Model(_.extend({
         'baseUrl': '',
-        'title': 'Mapper'
-      }, states));
+        'title': 'Mapper',
+      }, config));
 
       this.willMount();
       this.setElement(guard(this.config.get('element'), '#root'));
       this.didMount();
     },
 
-    hasOption(name) {
-      return this.getOption(name) !== undefined;
-    },
-
-    getOption(name) {
-      return guard(this.config.get('options'), {})[name];
-    },
+    // hasOption(name) {
+    //   return this.getOption(name) !== undefined;
+    // },
+    //
+    // getOption(name) {
+    //   return guard(this.config.get('graph'), {})[name];
+    // },
 
     willMount() {
     },
 
     didMount() {
       this.$el.append($(this.template));
-      this.graph = new Graph({ el: '#app-graph', app: this });
-      this.sidebar = new Sidebar({ el: '#app-sidebar', app: this });
+
+      // init graph
+      const graphConfig = _.extend(
+        guard(this.config.get('graph'), {}),
+        { el: '#workspace-graph', workspace: this });
+
+      const sidebarConfig = { el: '#workspace-sidebar', workspace: this };
+
+      this._graph = new Graph(graphConfig);
+      this._sidebar = new Sidebar(sidebarConfig);
+    },
+
+    _composeGraphConfig() {
+      let defaults = guard(this.config.get('graph'), {});
+      return _.extend(defaults, { el: '#workspace-graph', workspace: this });
+    },
+
+    getGraph() {
+      return this._graph;
+    },
+
+    getSidebar() {
+      return this._sidebar;
     },
 
     /**
-     * Call this method to generate the url for your app.
+     * Call this method to generate the url for your workspace.
      * Don't hard code URL.
      *
      * @param path
@@ -55,8 +83,8 @@ define((require) => {
     },
 
     render() {
-      this.graph.render();
-      this.sidebar.render();
+      this.getGraph().render();
+      this.getSidebar().render();
     },
 
     serverSideFunction(name, data, onData) {
@@ -71,14 +99,12 @@ define((require) => {
       });
     },
 
-    template: '<div class="row" style="margin-top: 20px;" id="app">' +
-      '<div class="col-md-8 col-sm-12"><div id="app-graph"></div></div>' +
-      '<div class="col-md-4 col-sm-12"><div id="app-sidebar"></div></div>' +
+
+    template: '<div class="row" style="margin-top: 20px;" id="workspace">' +
+      '<div class="col-md-8 col-sm-12"><div id="workspace-graph"></div></div>' +
+      '<div class="col-md-4 col-sm-12"><div id="workspace-sidebar"></div></div>' +
       '</div>',
 
-    addBlock(module, config = {}) {
-      return this.sidebar.addBlock(module, config);
-    }
   });
 
 });
