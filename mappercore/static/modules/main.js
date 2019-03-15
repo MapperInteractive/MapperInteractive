@@ -66,11 +66,10 @@ window.jQuery(function () {
       }
       return variable;
     };
+    /**
+     * Keep this line as the last statement in this function.
+     * It will require and execute your project `main.js` module.
+     */
+    require(['modules/main']);
   });
-
-  /**
-   * Keep this line as the last statement in this function.
-   * It will require and execute your project `main.js` module.
-   */
-  require(['modules/main']);
 });
