@@ -8,7 +8,7 @@ define((require) => {
 
   const Toolbar = require('./graph/Toolbar');
   const ModesManager = require('./graph/helpers/Modes');
-  const BehaviorsManager = require('./graph/helpers/Behaviors');
+  const BehaviorsManager = require('./graph/helpers/Plugins');
   const ViewMode = require('./graph/modes/View');
   const Registry = require('./Registry');
 
@@ -55,9 +55,9 @@ define((require) => {
       this.container = d3.select(this.el).append('div').classed('viewer-graph__graph', true).node();
       this.$container = $(this.container);
 
-      // init modes & behaviors
+      // init modes & plugins
       this.modes = new ModesManager(this);
-      this.behaviors = new BehaviorsManager(this);
+      this.plugins = new BehaviorsManager(this);
 
       // init customizations
       this.modes.add(new ViewMode());
@@ -208,9 +208,9 @@ define((require) => {
     },
 
     _initConfig() {
-      guard(this.app.getOption('behaviors'), []).map((item) => {
-        let Module = this._parseModule('behaviors', item);
-        this.behaviors.add(new Module());
+      guard(this.app.getOption('plugins'), []).map((item) => {
+        let Module = this._parseModule('plugins', item);
+        this.plugins.add(new Module());
       });
 
       guard(this.app.getOption('modes'), []).map((item) => {

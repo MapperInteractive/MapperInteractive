@@ -5,7 +5,7 @@
  */
 define((require) => {
 
-  const GraphBehavior = require('../Behavior');
+  const GraphBehavior = require('../Plugin');
 
   return class Labeled extends GraphBehavior {
 

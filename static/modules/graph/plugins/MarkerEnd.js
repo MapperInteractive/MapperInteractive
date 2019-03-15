@@ -5,7 +5,7 @@
  */
 define((require) => {
 
-  const GraphMode = require('../Behavior');
+  const GraphMode = require('../Plugin');
 
   return class MarkerEnd extends GraphMode {
 

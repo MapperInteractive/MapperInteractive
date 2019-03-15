@@ -16,7 +16,7 @@ define(function (require) {
 
     didMount() {
       super.didMount();
-      this.draggable = this.graph.behaviors.get('draggable');
+      this.draggable = this.graph.plugins.get('draggable');
     }
 
     willActivate() {

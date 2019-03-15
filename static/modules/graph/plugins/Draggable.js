@@ -6,7 +6,7 @@
 define((require) => {
 
   const { d3 } = window;
-  const GraphBehavior = require('../Behavior');
+  const GraphBehavior = require('../Plugin');
 
   class Draggable extends GraphBehavior {
 
@@ -18,7 +18,7 @@ define((require) => {
       super.didMount();
 
       this.listenTo(this.graph, 'didRender', () => {
-        this.forceSimulation = this.graph.behaviors.get('force-simulation');
+        this.forceSimulation = this.graph.plugins.get('force-simulation');
         this.graph.nodes.call(d3.drag()
           .on("start", (d) => {
             this.dragStarted(d);

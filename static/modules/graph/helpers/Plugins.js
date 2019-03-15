@@ -8,7 +8,7 @@ define( (require) =>{
   const { _ } = window;
   const MountableManager = require('./Mountable');
 
-  return class BehaviorsManager extends MountableManager {
+  return class PluginsManager extends MountableManager {
 
     trigger(event, context) {
       _.mapObject(this.mounted, (b) => {

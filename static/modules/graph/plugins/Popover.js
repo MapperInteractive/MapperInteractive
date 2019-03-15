@@ -6,7 +6,7 @@
 define((require) => {
 
   const { d3, $ } = window;
-  const GraphBehavior = require('../Behavior');
+  const GraphBehavior = require('../Plugin');
 
   return class Popover extends GraphBehavior {
 
