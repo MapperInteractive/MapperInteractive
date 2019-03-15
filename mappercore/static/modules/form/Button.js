@@ -25,7 +25,6 @@ define(function () {
         disable: false,
         text: 'Submit'
       });
-      this.$el.addClass('form-group');
       this.button = $(this.template(this.config.attributes));
 
       this.listenTo(this.config, 'change:disable', function () {
@@ -51,6 +50,7 @@ define(function () {
     },
 
     render: function render() {
+      this.$el.addClass('form-group');
       this.button.text(this.config.get('text'));
       this.$el.html(this.button);
     }

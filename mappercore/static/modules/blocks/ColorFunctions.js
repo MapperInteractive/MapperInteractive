@@ -7,7 +7,8 @@
 define(function (require) {
   var _window = window,
       d3 = _window.d3,
-      $ = _window.$;
+      $ = _window.$,
+      Model = _window.b.Model;
 
 
   var d3ScaleChromatic = require('d3-scale-chromatic');
@@ -17,7 +18,7 @@ define(function (require) {
 
     name: 'Color Functions',
 
-    SCHEMAS: [{ label: '- None -', scheme: null }, { label: 'Rainbow', scheme: 'interpolateRainbow' }, { label: 'Yellow, Red', scheme: 'interpolateYlOrRd' }, { label: 'Yellow, Blue', scheme: 'interpolateYlOrBr' }, { label: 'Yellow, Green', scheme: 'interpolateYlGn' }, { label: 'Yellow, Green, Blue', scheme: 'interpolateYlGnBu' }, { label: 'Purple, Red', scheme: 'interpolatePuRd' }, { label: 'Purple, Blue', scheme: 'interpolatePuBu' }, { label: 'Purple, Blue, Green', scheme: 'interpolatePuBuGn' }, { label: 'Green, Blue', scheme: 'interpolateGnBu' }, { label: 'Red', scheme: 'interpolateOrRd' }, { label: 'Red, Blue', scheme: 'interpolateRdPu' }, { label: 'Blue', scheme: 'interpolateBlues' }, { label: 'Blue, Purple', scheme: 'interpolateBuPu' }],
+    COLORMAPS: [{ label: '- None -', scheme: null }, { label: 'Rainbow', scheme: 'interpolateRainbow' }, { label: 'Yellow, Red', scheme: 'interpolateYlOrRd' }, { label: 'Yellow, Blue', scheme: 'interpolateYlOrBr' }, { label: 'Yellow, Green', scheme: 'interpolateYlGn' }, { label: 'Yellow, Green, Blue', scheme: 'interpolateYlGnBu' }, { label: 'Purple, Red', scheme: 'interpolatePuRd' }, { label: 'Purple, Blue', scheme: 'interpolatePuBu' }, { label: 'Purple, Blue, Green', scheme: 'interpolatePuBuGn' }, { label: 'Green, Blue', scheme: 'interpolateGnBu' }, { label: 'Red', scheme: 'interpolateOrRd' }, { label: 'Red, Blue', scheme: 'interpolateRdPu' }, { label: 'Blue', scheme: 'interpolateBlues' }, { label: 'Blue, Purple', scheme: 'interpolateBuPu' }],
 
     /**
      * config:
@@ -26,26 +27,22 @@ define(function (require) {
     didMount: function didMount() {
       var _this = this;
 
-      // get ref of graph
-      this.graph = this.app.graph;
-
       // config
-      this.functions = this.config.get("functions");
-      this.maps = this.SCHEMAS;
+      this.selection = this.config.get("selection").map(this._initSelections.bind(this));
+      this.maps = this.COLORMAPS.map(this._initMap.bind(this));
 
-      // set default schema as null
-      this.setCurrentFunction(this.functions[0]);
-      this.setCurrentMap(this.SCHEMAS[0]);
+      // states
+      this.data = this.getGraph().getData();
+      this.color = new Model({
+        getter: this.selection[0]['getter'],
+        scale: this.maps[0]['scale']
+      });
 
-      // refresh the
-      this.listenTo(this.graph.config, 'change:data', function () {
-        return _this.refresh();
-      });
-      this.listenTo(this.config, 'change:currentMap', function () {
-        return _this.refresh();
-      });
-      this.listenTo(this.config, 'change:currentFunction', function () {
-        return _this.refresh();
+      // refresh when data or config changed
+      [this.data, this.color].map(function (sender) {
+        return sender.on('change', function () {
+          _this.refresh();
+        });
       });
 
       // create HTML elements
@@ -55,20 +52,26 @@ define(function (require) {
       this.$form = this.$('form');
       this.svg = d3.select(this.el).append('svg');
     },
+    _initSelections: function _initSelections(s) {
+      s['getter'] = typeof s['attr'] != 'string' ? s['attr'] : function (d) {
+        return d[s['attr']];
+      };
+
+      return s;
+    },
+    _initMap: function _initMap(m) {
+      m['scale'] = m['scheme'] === null ? null : d3.scaleSequential(d3ScaleChromatic[m['scheme']]);
+      return m;
+    },
     render: function render() {
       this._appendFunctionsDropdown();
       this._appendMapDropdown();
       this._renderColorMapFigure();
     },
-    _firstValueFunction: function _firstValueFunction() {
-      return this.config.get('values')[0];
-    },
     _renderColorMapFigure: function _renderColorMapFigure() {
       this.svg.html("");
 
-      var colorMap = this.getCurrentMap();
-
-      var colorScale = colorMap['scale'];
+      var colorScale = this.color.get('scale');
       if (!colorScale) {
         this.svg.attr('width', 0).attr('height', 0);
         return false;
@@ -105,35 +108,13 @@ define(function (require) {
 
       return svg;
     },
-    getCurrentFunction: function getCurrentFunction() {
-      return this.config.get('currentFunction');
-    },
-    setCurrentFunction: function setCurrentFunction(func) {
-      if (func['attr'] && !func['func']) {
-        func['func'] = function (d) {
-          return d[func['attr']];
-        };
-      }
-      this.config.set('currentFunction', func);
-    },
-    getCurrentMap: function getCurrentMap() {
-      return this.config.get('currentMap');
-    },
-    setCurrentMap: function setCurrentMap(map) {
-      if (map['scheme']) {
-        map['scale'] = d3.scaleSequential(d3ScaleChromatic[map['scheme']]);
-      } else {
-        map['scale'] = null;
-      }
-      this.config.set('currentMap', map);
-    },
     getFunctionNames: function getFunctionNames() {
-      return this.functions.map(function (f) {
+      return this.selection.map(function (f) {
         return f['name'];
       });
     },
     getMapLabels: function getMapLabels() {
-      return this.maps.map(function (s) {
+      return this.COLORMAPS.map(function (s) {
         return s['label'];
       });
     },
@@ -141,14 +122,14 @@ define(function (require) {
       var _this2 = this;
 
       this.$form.append(this._dropdown('value', this.getFunctionNames(), function (index) {
-        _this2.setCurrentFunction(_this2.functions[index]);
+        _this2.color.set('getter', _this2.selection[index]['getter']);
       }));
     },
     _appendMapDropdown: function _appendMapDropdown() {
       var _this3 = this;
 
       this.$form.append(this._dropdown('map', this.getMapLabels(), function (index) {
-        _this3.setCurrentMap(_this3.maps[index]);
+        _this3.color.set('scale', _this3.maps[index]['scale']);
       }));
     },
     _dropdown: function _dropdown(label, options, onClick) {
@@ -175,44 +156,43 @@ define(function (require) {
       this._updateGraphColor();
     },
     _updateGraphColor: function _updateGraphColor() {
-      var graph = this.graph;
+      var graph = this.getGraph();
 
-      var currentMap = this.getCurrentMap();
-      var colorScale = currentMap['scale'];
+      var scale = this.color.get('scale');
 
-      if (!colorScale || !graph.nodes) {
-        if (graph.nodes) {
-          graph.nodes.style('fill', null);
+      if (!scale || !graph.getNodes()) {
+        if (graph.getNodes()) {
+          graph.getNodes().style('fill', null);
           this._clearLabelColor();
         }
         return false;
       }
 
-      colorScale.domain(this._getCurrentAxisDomain());
+      scale.domain(this._getCurrentAxisDomain());
 
-      var currentFunc = this.getCurrentFunction();
-      var d3ValueFunction = function d3ValueFunction(d) {
-        return colorScale(currentFunc['func'](d));
+      var getter = this.color.get('getter');
+      var svgColor = function svgColor(d) {
+        return scale(getter(d));
       };
-      graph.nodes.style('fill', d3ValueFunction);
 
-      this._invertLabelColors(graph, d3ValueFunction);
+      graph.getNodes().style('fill', svgColor);
+      this._invertLabelColors(graph, svgColor);
     },
     _getCurrentAxisDomain: function _getCurrentAxisDomain() {
-      var data = this.graph.config.get('data');
-      var valueFunction = this.getCurrentFunction();
-      if (data) {
-        return d3.extent(data['nodes'], function (d) {
-          return valueFunction['func'](d);
+      var nodes = this.data.get('nodes');
+      var getter = this.color.get('getter');
+      if (nodes && nodes.length > 0) {
+        return d3.extent(nodes, function (d) {
+          return getter(d);
         });
       } else {
         return [0, 1];
       }
     },
     _invertLabelColors: function _invertLabelColors(graph, fn) {
-      var labelBehavior = graph.behaviors.get('labeled');
-      if (labelBehavior) {
-        labelBehavior.labels.style('fill', function (d) {
+      var labeled = graph.getPlugins().get('labeled');
+      if (labeled) {
+        labeled.labels.style('fill', function (d) {
           var bgColor = fn(d);
           var rgb = bgColor.replace(/rgb\(|\)|rgba\(|\)|\s/gi, '').split(',');
           for (var i = 0; i < rgb.length; i++) {
@@ -222,9 +202,9 @@ define(function (require) {
       }
     },
     _clearLabelColor: function _clearLabelColor() {
-      var labelBehavior = this.graph.behaviors.get('labeled');
-      if (labelBehavior) {
-        labelBehavior.labels.style('fill', '#333');
+      var labeled = this.getGraph().getPlugins().get('labeled');
+      if (labeled) {
+        labeled.labels.style('fill', '#333');
       }
     }
   });

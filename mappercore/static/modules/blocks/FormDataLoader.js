@@ -27,49 +27,40 @@ define(function (require) {
     name: 'Graph Loader',
 
     didMount: function didMount() {
-      var _this = this;
-
-      this.controls = this.config.get('controls');
-      this.loader = this.config.get('loader');
-
-      this.on('data', function (data) {
-        _this.graph.updateData(data);
-      });
-
-      this.on('error', function (error) {
-        console.log(error);
-      });
+      this._controls = this.config.get('form').map(this._initControl.bind(this));
+      this._loader = this.config.get('loader');
     },
     render: function render() {
-      var _this2 = this;
-
-      if (!this.controls || !this.loader) {
-        return this.$el.html(this._notConfiguredError());
+      if (!this._controls || !this._loader) {
+        return this.$el.html(this._displayNotConfiguredError());
       }
 
-      var controls = [];
+      this._renderControls();
+      this._renderButton();
+    },
+    _initControl: function _initControl(control) {
+      var controlClass = FORM_CONTROLS[control['type']];
 
-      this.controls.map(function (param) {
-        var container = $('<div></div>');
-        container.appendTo(_this2.$el);
+      var view = new controlClass();
+      view.config.set(control['config']);
+      return view;
+    },
+    _renderControls: function _renderControls() {
+      var _this = this;
 
-        var controlClass = FORM_CONTROLS[param['type']];
-        delete param['type'];
-        var control = new controlClass({ el: container });
-        control.config.set(param);
-        controls.push(control);
-        control.render();
+      this._controls.map(function (c) {
+        return _this.append(c, 'div');
       });
+    },
+    _renderButton: function _renderButton() {
+      var _this2 = this;
 
-      var container = $('<div></div>');
-      container.appendTo(this.$el);
-      var button = new Button({ el: container });
+      var button = new Button();
       this.button = button;
 
       button.config.set({ text: 'Load Graph' });
-
       button.on('click', function () {
-        var values = _.object(controls.map(function (control) {
+        var controls = _.object(_this2._controls.map(function (control) {
           var _control$config$attri = control.config.attributes,
               name = _control$config$attri.name,
               value = _control$config$attri.value;
@@ -77,12 +68,19 @@ define(function (require) {
           return [name, value];
         }));
 
-        _this2.loader(_this2, values);
+        _this2._loader(controls, _this2.onDataReceived.bind(_this2), _this2.onErrorOccurred.bind(_this2));
       });
-      button.render();
+
+      this.append(button);
     },
-    _notConfiguredError: function _notConfiguredError() {
+    _displayNotConfiguredError: function _displayNotConfiguredError() {
       return '<div class="alert alert-danger">' + 'Block not configured. Please check configuration: ' + '<code>controls</code> and ' + '<code>loader</code>' + '</div>';
+    },
+    onDataReceived: function onDataReceived(data) {
+      this.getGraph().setGraphData(data);
+    },
+    onErrorOccurred: function onErrorOccurred(error) {
+      alert(error);
     }
   });
 });

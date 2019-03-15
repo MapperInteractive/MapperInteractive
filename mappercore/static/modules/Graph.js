@@ -16,9 +16,9 @@ define(function (require) {
 
 
   var Toolbar = require('./graph/Toolbar');
-  var ModesManager = require('./graph/helpers/Modes');
-  var BehaviorsManager = require('./graph/helpers/Behaviors');
-  var ViewMode = require('./graph/modes/View');
+  var ToolsManager = require('./graph/managers/Tools');
+  var PluginsManager = require('./graph/managers/Plugins');
+  var ViewOnly = require('./graph/tools/ViewOnly');
   var Registry = require('./Registry');
 
   return View.extend({
@@ -43,14 +43,19 @@ define(function (require) {
     EVENT_DID_LAYOUT: 'didLayout',
     EVENT_MODE_ACTIVATED: 'activate:mode',
 
-    initialize: function initialize(states) {
-      this.config = new Model(_.extend({
-        data: null,
-        app: null,
-        selection: null
-      }, states));
+    initialize: function initialize(config) {
 
-      this.app = this.config.get('app');
+      this.config = new Model(_.extend({
+        plugins: [],
+        tools: [],
+        selection: null
+      }, config));
+
+      // init data container
+      this._data = new Model({ links: [], nodes: [] });
+      this._selection = new Model([]);
+
+      // init links and nodes
 
       // init html
       this.$el.addClass('viewer-graph');
@@ -63,20 +68,37 @@ define(function (require) {
       this.container = d3.select(this.el).append('div').classed('viewer-graph__graph', true).node();
       this.$container = $(this.container);
 
-      // init modes & behaviors
-      this.modes = new ModesManager(this);
-      this.behaviors = new BehaviorsManager(this);
+      // init tools and plugins
+      this.tools = new ToolsManager(this);
+      this.plugins = new PluginsManager(this);
 
-      // init customizations
-      this.modes.add(new ViewMode());
-      this._initConfig();
-      this.modes.activate('view');
-
+      this._initExtensions();
       this._initEvents();
     },
 
-    updateData: function updateData(data) {
-      this.config.set('data', data);
+    getWorkspace: function getWorkspace() {
+      return this.config.get('workspace');
+    },
+    getData: function getData() {
+      return this._data;
+    },
+    getSelection: function getSelection() {
+      return this._selection;
+    },
+    getPlugins: function getPlugins() {
+      return this.plugins;
+    },
+    getTools: function getTools() {
+      return this.tools;
+    },
+    getLinks: function getLinks() {
+      return this._links;
+    },
+    getNodes: function getNodes() {
+      return this._nodes;
+    },
+    setGraphData: function setGraphData(graph) {
+      this.getData().set(graph);
     },
 
 
@@ -90,36 +112,38 @@ define(function (require) {
 
       this.svg = d3.select(this.container).append('svg').attr('width', width).attr('height', height);
 
-      if (!this.config.get('data')) {
-        this.svg.append('text').attr('x', width / 2).attr('y', 100).attr('fill', 'gray').attr('text-anchor', 'middle').attr('font-size', 35).text("no graph loaded yet");
+      var nodes = this.getData().get('nodes');
+
+      if (!nodes || nodes.length === 0) {
+        this._links = null;
+        this._nodes = null;
+        this.svg.append('text').attr('x', width / 2).attr('y', 100).attr('fill', 'gray').attr('text-anchor', 'middle').attr('font-size', 35).text("no data");
         return;
       }
 
-      this.links = null;
-      this.nodes = null;
-
       this.trigger('willRender');
-      this._renderLinks();
-      this._renderNodes();
+      this._links = this._renderLinks();
+      this._nodes = this._renderNodes();
       this.trigger('didRender');
     },
 
     _initEvents: function _initEvents() {
       var _this = this;
 
-      this.listenTo(this.config, 'change:data', function () {
-        _this.modes.activate('view');
+      this.getData().on('change', function () {
+        _this.tools.activate('view');
         _this.render();
       });
 
-      this.listenTo(this.config, 'change:selection', function () {
+      this.getData().on('change:selection', function () {
         _this.trigger(_this.EVENT_CHANGE_SELECTION);
       });
     },
     _renderNodes: function _renderNodes() {
       var _this2 = this;
 
-      this.nodes = this.svg.selectAll("circle").data(this.config.get("data")["nodes"]).enter().append("circle").classed(this.CLASS_NAME_VERTEX, true).on("click", function () {
+      var nodesData = this.getData().get('nodes');
+      return this.svg.selectAll("circle").data(nodesData).enter().append("circle").classed(this.CLASS_NAME_VERTEX, true).on("click", function () {
         _this2.trigger(_this2.EVENT_CLICK_NODE, d3.event);
       }).on("mouseenter", function () {
         _this2.trigger(_this2.EVENT_MOUSEENTER_NODE, d3.event);
@@ -132,8 +156,8 @@ define(function (require) {
     _renderLinks: function _renderLinks() {
       var _this3 = this;
 
-      var data = this.config.get("data");
-      this.links = this.svg.append('g').selectAll("line").data(this.config.get("data")["links"]).enter().append("line").classed(this.CLASS_NAME_EDGE, true).on("click", function () {
+      var linksData = this.getData().get('links');
+      return this.svg.append('g').selectAll('line').data(linksData).enter().append("line").classed(this.CLASS_NAME_EDGE, true).on("click", function () {
         _this3.trigger(_this3.EVENT_CLICK_LINK, d3.event);
       }).on("mouseover", function () {
         _this3.trigger(_this3.EVENT_MOUSEOVER_LINK, d3.event);
@@ -142,7 +166,7 @@ define(function (require) {
       });
     },
     selectNode: function selectNode(id) {
-      this.nodes.filter(function (d) {
+      this.getNodes().filter(function (d) {
         return d['id'] === id;
       }).classed(this.CLASS_NAME_SELECTED, true);
       this.updateSelection();
@@ -151,14 +175,14 @@ define(function (require) {
       var _this4 = this;
 
       list.map(function (id) {
-        _this4.nodes.filter(function (d) {
+        _this4.getNodes().filter(function (d) {
           return d['id'] === id;
         }).classed(_this4.CLASS_NAME_SELECTED, true);
       });
       this.updateSelection();
     },
     unselectNode: function unselectNode(id) {
-      this.nodes.filter(function (d) {
+      this.getNodes().filter(function (d) {
         return d['id'] === id;
       }).classed(this.CLASS_NAME_SELECTED, false);
       this.updateSelection();
@@ -167,21 +191,21 @@ define(function (require) {
       var _this5 = this;
 
       list.map(function (id) {
-        _this5.nodes.filter(function (d) {
+        _this5.getNodes().filter(function (d) {
           return d['id'] === id;
         }).classed(_this5.CLASS_NAME_SELECTED, false);
       });
       this.updateSelection();
     },
     isNodeSelected: function isNodeSelected(id) {
-      return this.nodes.filter(function (d) {
+      return this.getNodes().filter(function (d) {
         return d['id'] === id;
       }).classed(this.CLASS_NAME_SELECTED);
     },
     selectLink: function selectLink(targetEndPoints) {
       targetEndPoints = targetEndPoints.sort();
 
-      this.links.filter(function (d) {
+      this.getLinks().filter(function (d) {
         var testEndPoints = [d['source']['id'], d['target']['id']].sort();
         return testEndPoints[0] === targetEndPoints[0] && testEndPoints[1] === targetEndPoints[1];
       }).classed(this.CLASS_NAME_SELECTED, true);
@@ -193,21 +217,30 @@ define(function (require) {
       }));
     },
     clearSelection: function clearSelection() {
-      this.nodes.classed(this.CLASS_NAME_SELECTED, false);
+      this.getNodes().classed(this.CLASS_NAME_SELECTED, false);
       this.config.set('selection', []);
     },
-    _initConfig: function _initConfig() {
+    _initExtensions: function _initExtensions() {
+      this._initCustomTools();
+      this._initCustomPlugins();
+    },
+    _initCustomPlugins: function _initCustomPlugins() {
       var _this6 = this;
 
-      guard(this.app.getOption('behaviors'), []).map(function (item) {
-        var Module = _this6._parseModule('behaviors', item);
-        _this6.behaviors.add(new Module());
+      guard(this.config.get('plugins'), []).map(function (item) {
+        var Module = _this6._parseModule('plugins', item);
+        _this6.plugins.add(new Module());
       });
+    },
+    _initCustomTools: function _initCustomTools() {
+      var _this7 = this;
 
-      guard(this.app.getOption('modes'), []).map(function (item) {
-        var Module = _this6._parseModule('modes', item);
-        _this6.modes.add(new Module());
+      this.tools.add(new ViewOnly());
+      guard(this.config.get('tools'), []).map(function (item) {
+        var Module = _this7._parseModule('tools', item);
+        _this7.tools.add(new Module());
       });
+      this.tools.activate('view');
     },
     _parseModule: function _parseModule(category, name) {
       if (typeof name === 'string') {

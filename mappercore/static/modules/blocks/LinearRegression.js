@@ -26,7 +26,7 @@ define(function (require) {
       this.algorithms = this.config.get('algorithms');
       this.attributes = this.config.get('attributes');
 
-      this.listenTo(this.graph.model, 'change:selection', function () {
+      this.listenTo(this.getGraph().config, 'change:selection', function () {
         return _this.onSelectionChanged();
       });
 
@@ -37,7 +37,7 @@ define(function (require) {
 
     onSelectionChanged: function onSelectionChanged() {
       this.render();
-      var selection = this.graph.model.get('selection');
+      var selection = this.getGraph().model.get('selection');
       if (selection.length > 0) {
         this.$('select').removeClass('disabled').attr('disabled', false);
         this.$('button').removeClass('disabled').attr('disabled', false);
@@ -60,9 +60,9 @@ define(function (require) {
       this.$el.html(html);
 
       html.find('button').on('click', function () {
-        _this2.app.serverSideFunction('linear_regression', {
+        _this2.workspace.serverSideFunction('linear_regression', {
           'algorithm': select.val(),
-          'data': _this2.dataBuilder(_this2.graph)
+          'data': _this2.dataBuilder(_this2.getGraph())
         }, function (res) {
           _this2.draw(res);
         });
@@ -70,7 +70,7 @@ define(function (require) {
     },
 
     buildData: function buildData() {
-      var selection = this.graph.model.get('selection');
+      var selection = this.getGraph().config.get('selection');
       selection = this.transform(selection);
       return selection;
     },

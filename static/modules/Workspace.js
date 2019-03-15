@@ -28,18 +28,17 @@ define((require) => {
         'title': 'Mapper',
       }, config));
 
+      // blank states, for end user only
+      this._states = new Model({});
+
       this.willMount();
       this.setElement(guard(this.config.get('element'), '#root'));
       this.didMount();
     },
 
-    // hasOption(name) {
-    //   return this.getOption(name) !== undefined;
-    // },
-    //
-    // getOption(name) {
-    //   return guard(this.config.get('graph'), {})[name];
-    // },
+    getStates() {
+      return this._states;
+    },
 
     willMount() {
     },

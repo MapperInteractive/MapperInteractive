@@ -25,7 +25,6 @@ define(function () {
         min: 0,
         step: 1
       });
-      this.$el.addClass('form-group ui-form-range');
     },
 
     events: {
@@ -34,6 +33,7 @@ define(function () {
     },
 
     render: function render() {
+      this.$el.addClass('form-group ui-form-range');
       this.$el.html(this.template(this.config.attributes));
     },
 

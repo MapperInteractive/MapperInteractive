@@ -22,32 +22,56 @@ define(function (require) {
 
 
   return View.extend({
-    initialize: function initialize(states) {
+
+    /**
+     *
+     * Config should includes
+     *
+     *
+     * @param config object
+     */
+    initialize: function initialize(config) {
       this.config = new Model(_.extend({
         'baseUrl': '',
         'title': 'Mapper'
-      }, states));
+      }, config));
+
+      // blank states, for end user only
+      this._states = new Model({});
 
       this.willMount();
       this.setElement(guard(this.config.get('element'), '#root'));
       this.didMount();
     },
-    hasOption: function hasOption(name) {
-      return this.getOption(name) !== undefined;
-    },
-    getOption: function getOption(name) {
-      return guard(this.config.get('options'), {})[name];
+    getStates: function getStates() {
+      return this._states;
     },
     willMount: function willMount() {},
     didMount: function didMount() {
       this.$el.append($(this.template));
-      this.graph = new Graph({ el: '#app-graph', app: this });
-      this.sidebar = new Sidebar({ el: '#app-sidebar', app: this });
+
+      // init graph
+      var graphConfig = _.extend(guard(this.config.get('graph'), {}), { el: '#workspace-graph', workspace: this });
+
+      var sidebarConfig = { el: '#workspace-sidebar', workspace: this };
+
+      this._graph = new Graph(graphConfig);
+      this._sidebar = new Sidebar(sidebarConfig);
+    },
+    _composeGraphConfig: function _composeGraphConfig() {
+      var defaults = guard(this.config.get('graph'), {});
+      return _.extend(defaults, { el: '#workspace-graph', workspace: this });
+    },
+    getGraph: function getGraph() {
+      return this._graph;
+    },
+    getSidebar: function getSidebar() {
+      return this._sidebar;
     },
 
 
     /**
-     * Call this method to generate the url for your app.
+     * Call this method to generate the url for your workspace.
      * Don't hard code URL.
      *
      * @param path
@@ -57,8 +81,8 @@ define(function (require) {
       return [this.config.get('baseURL'), 'app', path].join('/');
     },
     render: function render() {
-      this.graph.render();
-      this.sidebar.render();
+      this.getGraph().render();
+      this.getSidebar().render();
     },
     serverSideFunction: function serverSideFunction(name, data, onData) {
       $.ajax({
@@ -73,12 +97,7 @@ define(function (require) {
     },
 
 
-    template: '<div class="row" style="margin-top: 20px;" id="app">' + '<div class="col-md-8 col-sm-12"><div id="app-graph"></div></div>' + '<div class="col-md-4 col-sm-12"><div id="app-sidebar"></div></div>' + '</div>',
+    template: '<div class="row" style="margin-top: 20px;" id="workspace">' + '<div class="col-md-8 col-sm-12"><div id="workspace-graph"></div></div>' + '<div class="col-md-4 col-sm-12"><div id="workspace-sidebar"></div></div>' + '</div>'
 
-    addBlock: function addBlock(module) {
-      var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      return this.sidebar.addBlock(module, config);
-    }
   });
 });

@@ -1,21 +1,21 @@
 'use strict';
 
 /**
- * This is a registry for built-in modes and behaviors.
+ * This is a registry for built-in tools and plugins.
  * It's more convenient to use names instead of module paths.
  */
 define(function (require) {
   return {
-    'modes': {
-      'select-node': require('./graph/modes/SelectNode'),
-      'select-cluster': require('./graph/modes/SelectCluster'),
-      'select-path': require('./graph/modes/SelectPath')
+    'tools': {
+      'select-node': require('./graph/tools/SelectNode'),
+      'select-cluster': require('./graph/tools/SelectCluster'),
+      'select-path': require('./graph/tools/SelectPath')
     },
-    'behaviors': {
-      'force-simulation': require('./graph/behaviors/ForceSimulation'),
-      'draggable': require('./graph/behaviors/Draggable'),
-      'labeled': require('./graph/behaviors/Labeled'),
-      'popover': require('./graph/behaviors/Popover')
+    'plugins': {
+      'force-simulation': require('./graph/plugins/ForceSimulation'),
+      'draggable': require('./graph/plugins/Draggable'),
+      'labeled': require('./graph/plugins/Labeled'),
+      'popover': require('./graph/plugins/Popover')
     }
   };
 });

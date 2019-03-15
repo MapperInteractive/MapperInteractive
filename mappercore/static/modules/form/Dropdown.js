@@ -24,7 +24,6 @@ define(function () {
         value: null,
         options: []
       });
-      this.$el.addClass('form-group ui-form-range');
     },
 
     events: {
@@ -34,6 +33,7 @@ define(function () {
     render: function render() {
       var _this = this;
 
+      this.$el.addClass('form-group ui-form-range');
       this.$el.html(this.template(this.config.attributes));
 
       var $select = this.$('.form-control');

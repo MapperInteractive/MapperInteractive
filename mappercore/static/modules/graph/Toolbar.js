@@ -27,7 +27,7 @@ define(function () {
       this.$el.html("");
 
       var container = this.$el;
-      var modes = this.graph.modes;
+      var modes = this.graph.tools;
 
       modes.map(function (mode) {
         container.append(_this.template({ mode: mode }));

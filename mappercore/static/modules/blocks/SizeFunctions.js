@@ -19,7 +19,7 @@ define(function (require) {
       this.listenTo(this.config, 'change:currentFunction', function () {
         return _this._onCurrentSizeFunctionChange();
       });
-      this.listenTo(this.graph.model, 'change:data', function () {
+      this.listenTo(this.getGraph().config, 'change:data', function () {
         return _this._whenGraphDataChanged();
       });
     },
@@ -47,8 +47,8 @@ define(function (require) {
       this._updateSize();
     },
     _updateSize: function _updateSize() {
-      var data = this.graph.model.get('data');
-      var nodes = this.graph.nodes;
+      var data = this.getGraph().config.get('data');
+      var nodes = this.getGraph().getNodes();
 
       if (!nodes) {
         return false;

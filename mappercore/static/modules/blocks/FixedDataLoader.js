@@ -24,10 +24,10 @@ define(function (require) {
     didMount: function didMount() {
       var _this = this;
 
-      this.loader = this.config.get('loader');
+      this._loader = this.config.get('loader');
 
       this.on('data', function (data) {
-        _this.graph.updateData(data);
+        _this.getGraph().setGraphData(data);
       });
 
       this.on('error', function (error) {
@@ -35,10 +35,10 @@ define(function (require) {
       });
     },
     render: function render() {
-      if (!this.loader) {
-        return this.$el.html(this._notConfiguredError());
+      if (!this._loader) {
+        return this.$el.html(this._displayNotConfiguredError());
       } else {
-        this.loader(this);
+        this._loader(this);
         var description = this.config.get('description');
         if (!description) {
           description = 'No description provided.';
@@ -46,7 +46,7 @@ define(function (require) {
         return this.$el.html(description);
       }
     },
-    _notConfiguredError: function _notConfiguredError() {
+    _displayNotConfiguredError: function _displayNotConfiguredError() {
       return '<div class="alert alert-danger">' + 'Block not configured. Please check configuration: ' + '<code>loader</code>' + '</div>';
     }
   });
