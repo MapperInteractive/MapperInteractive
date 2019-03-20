@@ -11,7 +11,7 @@ define((require) => {
   const Sidebar = require('./Sidebar');
   const Graph = require('./Graph');
 
-  const { $, _, guard, b: { View, Model } } = window;
+  const { $, _, d3, guard, b: { View, Model } } = window;
 
   return View.extend({
 
@@ -86,16 +86,18 @@ define((require) => {
       this.getSidebar().render();
     },
 
-    serverSideFunction(name, data, onData) {
-      $.ajax({
-        type: 'POST',
-        url: `${this.url('call')}/${name}`,
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        dataType: "json",
-      }).done((res) => {
-        onData(res);
-      });
+    call(name, params) {
+      const method = 'POST';
+      const url = `${this.url('call')}/${name}`;
+      const data = JSON.stringify(params);
+      const contentType = "application/json; charset=utf-8";
+      return $.ajax({
+        method,
+        url,
+        data,
+        contentType,
+        dataType: "json"
+      })
     },
 
 

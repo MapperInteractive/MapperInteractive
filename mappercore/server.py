@@ -1,8 +1,9 @@
 import inspect
 import jinja2
+import traceback
 
 from os import path
-from flask import Flask, render_template, jsonify, send_from_directory
+from flask import Flask, render_template, jsonify, send_from_directory, request
 from flask_httpauth import HTTPBasicAuth
 
 PERMITTED_ROUTE_PREFIXES = ['core', 'app']
@@ -74,11 +75,14 @@ class Server:
     def _config_routes(self, flask, auth):
         route_index = self._route_index
         route_static = self._route_static_files
+        route_call = self._route_function_call
+
         if auth is not None:
             route_index = auth.login_required(route_index)
             route_static = auth.login_required(route_static)
 
         flask.route("/")(route_index)
+        flask.route("/app/call/<string:name>", methods=["POST"])(route_call)
         flask.route("/<string:group>/<path:file_path>")(route_static)
 
     def _route_static_files(self, group, file_path):
@@ -97,6 +101,22 @@ class Server:
                 return send_from_directory(directory, filename)
 
         return self._response_forbidden()
+
+    def _route_function_call(self, name):
+        if name in self.functions:
+            kwargs = request.json
+            try:
+                result = self.functions[name](**kwargs)
+                status = 200
+            except Exception as e:
+                traceback.print_exc()
+                result = { "error": "function call failed: " + str(e)}
+                status = 500
+            return jsonify(result), status
+        return jsonify({
+            "error": "function {} is not found.".format(name)
+        }), 500
+
 
     @staticmethod
     def _response_forbidden():

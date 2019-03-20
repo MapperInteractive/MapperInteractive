@@ -15,6 +15,7 @@ define(function (require) {
   var _window = window,
       $ = _window.$,
       _ = _window._,
+      d3 = _window.d3,
       guard = _window.guard,
       _window$b = _window.b,
       View = _window$b.View,
@@ -84,15 +85,17 @@ define(function (require) {
       this.getGraph().render();
       this.getSidebar().render();
     },
-    serverSideFunction: function serverSideFunction(name, data, onData) {
-      $.ajax({
-        type: 'POST',
-        url: this.url('call') + '/' + name,
-        data: JSON.stringify(data),
-        contentType: "application/json",
+    call: function call(name, params) {
+      var method = 'POST';
+      var url = this.url('call') + '/' + name;
+      var data = JSON.stringify(params);
+      var contentType = "application/json; charset=utf-8";
+      return $.ajax({
+        method: method,
+        url: url,
+        data: data,
+        contentType: contentType,
         dataType: "json"
-      }).done(function (res) {
-        onData(res);
       });
     },
 
