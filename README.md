@@ -18,7 +18,7 @@ pip install mappercore==1.2.6
 
 ## Documentation
 
-Please checkout our [wiki](https://github.com/yaodong/mapper-core/wiki) for documentaion.
+Please checkout our [wiki](https://github.com/yaodong/mapper-core/wiki) or [our website](https://mappercore.org) for documentaion.
 
 ## License
 
@@ -26,7 +26,7 @@ This project is licensed under the MIT License - see the `LICENSE` file for deta
 
 ## Contributing
 
-Pull requests are welcomed.
+Pull requests are welcomed. 
 
 
 
