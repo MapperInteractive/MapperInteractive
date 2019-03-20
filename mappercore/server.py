@@ -8,13 +8,10 @@ from flask_httpauth import HTTPBasicAuth
 
 from .helpers.func import run_mapper
 
-
 PERMITTED_ROUTE_PREFIXES = ['core', 'app']
 PERMITTED_STATIC_FOLDERS = ['modules', 'stylesheets', 'vendors', 'images', 'javascripts', 'files']
 
-
 class Server:
-
     def __init__(self, title, app_root_path=None, users=None):
         self.title = title
         self.core_root_path = path.join(path.dirname(__file__), 'static')
@@ -28,9 +25,10 @@ class Server:
         self.users = users
         self.flask = self._make_flask_instance()
 
-        # Add kmapper as a default setup
-        self.register_function('run_mapper', run_mapper)
-
+    def __repr__(self):
+        return 'Server(title="{}", app_root_path="{}", core_root_path="{}", users={})'.format(
+            self.title, self.app_root_path, self.core_root_path, self.users
+        )
 
     def __call__(self, *args, **kwargs):
         return self.flask(*args, **kwargs)
@@ -128,7 +126,6 @@ class Server:
             "error": "function {} is not found.".format(name)
         }), 500
 
-
     @staticmethod
     def _response_forbidden():
         response = jsonify({'message': 'Forbidden'})
@@ -136,3 +133,20 @@ class Server:
 
     def _route_index(self):
         return render_template('core/index.html', title=self.title)
+
+
+class KMServer(Server):
+    def __init__(self, title, app_root_path=None, users=None):
+        super().__init__(title, app_root_path, users)
+
+        # Add kmapper as a default setup
+        self.register_function('run_mapper', run_mapper)
+
+    @staticmethod
+    def _auto_find_root_path():
+        """
+        your_script.py (2) => server.py (1) => _find_root_path
+        """
+        frame = inspect.stack()[3]
+        module = inspect.getmodule(frame[0])
+        return path.dirname(path.abspath(module.__file__))
