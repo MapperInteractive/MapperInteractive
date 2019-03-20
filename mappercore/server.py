@@ -6,6 +6,9 @@ from os import path
 from flask import Flask, render_template, jsonify, send_from_directory, request
 from flask_httpauth import HTTPBasicAuth
 
+from .helpers.func import run_mapper
+
+
 PERMITTED_ROUTE_PREFIXES = ['core', 'app']
 PERMITTED_STATIC_FOLDERS = ['modules', 'stylesheets', 'vendors', 'images', 'javascripts', 'files']
 
@@ -24,6 +27,10 @@ class Server:
         self.functions = {}
         self.users = users
         self.flask = self._make_flask_instance()
+
+        # Add kmapper as a default setup
+        self.register_function('run_mapper', run_mapper)
+
 
     def __call__(self, *args, **kwargs):
         return self.flask(*args, **kwargs)
@@ -110,6 +117,7 @@ class Server:
                     result = self.functions[name](**kwargs)
                 else:
                     result = self.functions[name]()
+
                 status = 200
             except Exception as e:
                 traceback.print_exc()
