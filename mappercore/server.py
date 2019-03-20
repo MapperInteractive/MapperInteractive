@@ -106,7 +106,10 @@ class Server:
         if name in self.functions:
             kwargs = request.json
             try:
-                result = self.functions[name](**kwargs)
+                if kwargs:
+                    result = self.functions[name](**kwargs)
+                else:
+                    result = self.functions[name]()
                 status = 200
             except Exception as e:
                 traceback.print_exc()
