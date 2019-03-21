@@ -1,6 +1,7 @@
 # MapperCore
 
 [![PyPI version](https://badge.fury.io/py/mappercore.svg)](https://badge.fury.io/py/mappercore)
+[![Build Status](https://travis-ci.com/mappercore/mappercore.svg?branch=master)](https://travis-ci.com/mappercore/mappercore)
 
 The Mapper algorithm is a method for topological data analysis invented by Gurjeet Singh, Facundo Mémoli and Gunnar Carlsson [^1]. MapperCore is a web-based visualization of Mapper algorithm. It is open source software and is released under the MIT License.
 
