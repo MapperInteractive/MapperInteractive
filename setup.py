@@ -17,4 +17,10 @@ setup(
         'Flask==1.0.2',
         'Flask-HTTPAuth==3.2.4'
     ],
+    extras_require={
+        'testing': [ # `pip install -e ".[testing]"``
+            'pytest',
+            'kmapper'
+        ]
+    }
 )

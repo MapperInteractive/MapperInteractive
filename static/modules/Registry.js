@@ -14,6 +14,13 @@ define((require) => {
       'draggable': require('./graph/plugins/Draggable'),
       'labeled': require('./graph/plugins/Labeled'),
       'popover': require('./graph/plugins/Popover'),
+    },
+    'blocks': {
+      'color-function': require('./blocks/ColorFunctions'),
+      'fixed-data-loader': require('./blocks/FixedDataLoader'),
+      'form-data-loader': require('./blocks/FormDataLoader'),
+      'linear-regression': require('./blocks/LinearRegression'),
+      'size-function': require('./blocks/FormDataLoader')
     }
   };
 });

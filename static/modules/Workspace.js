@@ -47,11 +47,8 @@ define((require) => {
       this.$el.append($(this.template));
 
       // init graph
-      const graphConfig = _.extend(
-        guard(this.config.get('graph'), {}),
-        { el: '#workspace-graph', workspace: this });
-
-      const sidebarConfig = { el: '#workspace-sidebar', workspace: this };
+      const graphConfig = this._composeGraphConfig()
+      const sidebarConfig = this._composeSidebarConfig()
 
       this._graph = new Graph(graphConfig);
       this._sidebar = new Sidebar(sidebarConfig);
@@ -59,7 +56,19 @@ define((require) => {
 
     _composeGraphConfig() {
       let defaults = guard(this.config.get('graph'), {});
-      return _.extend(defaults, { el: '#workspace-graph', workspace: this });
+      return _.extend(defaults, { 
+        el: '#workspace-graph', 
+        workspace: this 
+      });
+    },
+
+    _composeSidebarConfig() {
+      let defaults = guard(this.config.get('blocks'), {});
+
+      return _.extend(defaults, { 
+        el: '#workspace-sidebar', 
+        workspace: this 
+      });
     },
 
     getGraph() {
