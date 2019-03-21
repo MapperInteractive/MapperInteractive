@@ -7,8 +7,8 @@ define((require) => {
   const { d3, _, $, b: { View, Model }, guard } = window;
 
   const Toolbar = require('./graph/Toolbar');
-  const ToolsManager = require('./graph/managers/Tools');
-  const PluginsManager = require('./graph/managers/Plugins');
+  const ToolsManager = require('./managers/Tools');
+  const PluginsManager = require('./managers/Plugins');
   const ViewOnly = require('./graph/tools/ViewOnly');
   const Registry = require('./Registry');
 

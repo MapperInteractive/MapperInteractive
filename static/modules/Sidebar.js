@@ -1,11 +1,13 @@
 "use strict";
 
+
+
 /**
  * Right side bar, contains block instances.
  */
-define(function () {
-
+define(function (require) {
   const { _, b: { View, Model }, guard } = window;
+  const BlocksManager = require('./managers/Plugins');
 
   return View.extend({
 
@@ -20,12 +22,16 @@ define(function () {
       ' </div>\n'),
 
     initialize(config) {
+
       this.config = new Model(_.extend({
         app: null,
+        blocks: [],
       }, config));
 
       this.workspace = this.config.get('workspace');
       this._blocks = [];
+
+      this.tools = new BlocksManager(this);
     },
 
     addBlock(klass, config) {
