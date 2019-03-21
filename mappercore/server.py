@@ -11,30 +11,32 @@ from .helpers.func import run_mapper
 PERMITTED_ROUTE_PREFIXES = ['core', 'app']
 PERMITTED_STATIC_FOLDERS = ['modules', 'stylesheets', 'vendors', 'images', 'javascripts', 'files']
 
+
 class Server:
-    def __init__(self, title, app_root_path=None, users=None):
+    def __init__(self, title, users=None, functions=None):
         self.title = title
+
+        # setup paths
         self.core_root_path = path.join(path.dirname(__file__), 'static')
+        self.app_root_path = self._auto_find_root_path()
 
-        if not app_root_path:
-            self.app_root_path = self._auto_find_root_path()
-        else:
-            self.app_root_path = path.abspath(app_root_path)
+        self.users = {} if users is None else users
+        self.functions = {} if functions is None else functions
 
-        self.functions = {}
-        self.users = users
         self.flask = self._make_flask_instance()
 
     def __repr__(self):
-        return 'Server(title="{}", app_root_path="{}", core_root_path="{}", users={})'.format(
-            self.title, self.app_root_path, self.core_root_path, self.users
-        )
+        return 'Server(title="{}", app_root_path="{}", core_root_path="{}", users={})' \
+            .format(self.title, self.app_root_path, self.core_root_path, self.users)
 
     def __call__(self, *args, **kwargs):
         return self.flask(*args, **kwargs)
 
     def register_function(self, name, func):
         self.functions[name] = func
+
+    def test_client(self):
+        return self.flask.test_client()
 
     @staticmethod
     def _auto_find_root_path():
@@ -119,7 +121,7 @@ class Server:
                 status = 200
             except Exception as e:
                 traceback.print_exc()
-                result = { "error": "function call failed: " + str(e)}
+                result = {"error": "function call failed: " + str(e)}
                 status = 500
             return jsonify(result), status
         return jsonify({
