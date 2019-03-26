@@ -1,1 +1,1 @@
-from .server import Server, KMServer
+from .server import Server

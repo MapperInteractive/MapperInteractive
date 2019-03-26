@@ -1,12 +1,12 @@
 import pytest
 from mappercore import Server
-from mappercore.configs.kepler_mapper import KeplerMapper
+from mappercore.conf.kepler_mapper import KeplerMapperConfig
 
 
 @pytest.fixture
 def server():
     server = Server("test")
-    KeplerMapper.setup(server, data=[
+    KeplerMapperConfig.setup(server, data=[
         [1, 'Yes', 1.1],
         [2, 'No', 1.2],
     ])

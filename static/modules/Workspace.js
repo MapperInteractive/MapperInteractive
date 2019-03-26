@@ -28,6 +28,9 @@ define((require) => {
         'title': 'Mapper',
       }, config));
 
+      // bind workspace instance to window object
+      window.workspace = this;
+
       // blank states, for end user only
       this._states = new Model({});
 
@@ -56,18 +59,18 @@ define((require) => {
 
     _composeGraphConfig() {
       let defaults = guard(this.config.get('graph'), {});
-      return _.extend(defaults, { 
-        el: '#workspace-graph', 
-        workspace: this 
+      return _.extend(defaults, {
+        el: '#workspace-graph',
+        workspace: this
       });
     },
 
     _composeSidebarConfig() {
       let defaults = guard(this.config.get('blocks'), {});
 
-      return _.extend(defaults, { 
-        el: '#workspace-sidebar', 
-        workspace: this 
+      return _.extend(defaults, {
+        el: '#workspace-sidebar',
+        workspace: this
       });
     },
 

@@ -1,29 +1,19 @@
-from os import path
-from kmapper import KeplerMapper, Cover
 import numpy as np
-import sklearn
+from sklearn import cluster
+from kmapper import KeplerMapper, Cover
 
-__all__ = ['KeplerMapper']
-
-
-class KeplerMapper:
-
-    @staticmethod
-    def setup(server, file=None, data=None):
-        runner = KeplerMapperRunner(file, data)
-
-        def kepler_mapper(**kwargs):
-            return runner.run(**kwargs)
-
-        server.register_function('kepler_mapper', kepler_mapper)
+__all__ = ['KeplerMapperConfig']
 
 
-class KeplerMapperRunner:
+class KeplerMapperConfig:
 
-    def __init__(self, file=None, data=None):
-        self.original_data = None
-        self.data_source = None
-        self.original_data = self._load_data(file) if file is not None else data
+    def setup(self, server):
+        server.register_function('kepler_mapper', lambda **kwargs: self.run(**kwargs))
+
+    def __init__(self, data=None, target=None):
+        self._data = np.array(data)
+        self._target = np.array(target)
+        self._mapper = KeplerMapper()
 
     def run(self, interval, overlap, dbscan_eps, dbscan_min_samples):
         km_result = self._call_kmapper(
@@ -34,25 +24,32 @@ class KeplerMapperRunner:
         )
         return self._parse_result(km_result)
 
+    def set_data(self, data):
+        self._data = data
+
+    def set_target(self, target):
+        self._target = target
+
+    @property
+    def mapper(self):
+        return self._mapper
+
     def _call_kmapper(self, interval, overlap, eps, min_samples):
 
-        input_data = self.original_data.copy()
-        input_data /= np.max(np.max(input_data, 1))
+        input_data = self._data.copy()
+        # input_data /= np.max(np.max(input_data, 1))
+
+        target_data = self._target.copy()
 
         mapper = KeplerMapper()
-        lens = mapper.fit_transform(input_data, projection=[2])
         graph = mapper.map(
-            lens,
+            target_data,
             input_data,
-            clusterer=sklearn.cluster.DBSCAN(eps=eps, min_samples=min_samples),
+            clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples),
             cover=Cover(n_cubes=interval, perc_overlap=overlap)
         )
-        return graph
 
-    def _get_median(self, cluster_points, index):
-        return np.median(
-            [self.original_data[p][index] for p in cluster_points]
-        )
+        return graph
 
     @staticmethod
     def _load_data(filename):
@@ -78,9 +75,6 @@ class KeplerMapperRunner:
             data['nodes'].append({
                 "id": str(i),
                 "size": len(graph['nodes'][key]),
-                "x_median": self._get_median(graph['nodes'][key], 0),
-                "y_median": self._get_median(graph['nodes'][key], 1),
-                "z_median": self._get_median(graph['nodes'][key], 2)
             })
             i += 1
 

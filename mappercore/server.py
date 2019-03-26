@@ -1,12 +1,11 @@
 import inspect
 import jinja2
 import traceback
+import json
 
 from os import path
 from flask import Flask, render_template, jsonify, send_from_directory, request
 from flask_httpauth import HTTPBasicAuth
-
-from .helpers.func import run_mapper
 
 PERMITTED_ROUTE_PREFIXES = ['core', 'app']
 PERMITTED_STATIC_FOLDERS = ['modules', 'stylesheets', 'vendors', 'images', 'javascripts', 'files']
@@ -17,17 +16,21 @@ class Server:
         self.title = title
 
         # setup paths
-        self.core_root_path = path.join(path.dirname(__file__), 'static')
-        self.app_root_path = self._auto_find_root_path()
+        self._core_root_path = path.join(path.dirname(__file__), 'static')
+        self._app_root_path = self._auto_find_root_path()
 
-        self.users = {} if users is None else users
+        # read app config
+        self._load_config_json()
+        self._should_load_config_js = self._config_js_exists()
+
+        self.users = users
         self.functions = {} if functions is None else functions
 
         self.flask = self._make_flask_instance()
 
     def __repr__(self):
         return 'Server(title="{}", app_root_path="{}", core_root_path="{}", users={})' \
-            .format(self.title, self.app_root_path, self.core_root_path, self.users)
+            .format(self.title, self._app_root_path, self._core_root_path, self.users)
 
     def __call__(self, *args, **kwargs):
         return self.flask(*args, **kwargs)
@@ -75,8 +78,8 @@ class Server:
 
     def _config_templates(self, flask):
         flask.jinja_loader = jinja2.PrefixLoader({
-            'core': jinja2.FileSystemLoader(path.join(self.core_root_path, 'templates')),
-            'app': jinja2.FileSystemLoader(path.join(self.app_root_path, 'templates'))
+            'core': jinja2.FileSystemLoader(path.join(self._core_root_path, 'templates')),
+            'app': jinja2.FileSystemLoader(path.join(self._app_root_path, 'templates'))
         })
 
     def _config_routes(self, flask, auth):
@@ -87,6 +90,7 @@ class Server:
         if auth is not None:
             route_index = auth.login_required(route_index)
             route_static = auth.login_required(route_static)
+            route_call = auth.login_required(route_call)
 
         flask.route("/")(route_index)
         flask.route("/app/call/<string:name>", methods=["POST"])(route_call)
@@ -99,9 +103,9 @@ class Server:
             if folder in PERMITTED_STATIC_FOLDERS:
 
                 if group == 'app':
-                    root_path = self.app_root_path
+                    root_path = self._app_root_path
                 else:
-                    root_path = self.core_root_path
+                    root_path = self._core_root_path
 
                 directory = path.join(root_path, path.dirname(file_path))
                 filename = path.basename(file_path)
@@ -134,21 +138,18 @@ class Server:
         return response, 403
 
     def _route_index(self):
-        return render_template('core/index.html', title=self.title)
+        return render_template('core/index.html',
+                               title=self.title,
+                               should_load_config_js=self._should_load_config_js)
 
+    def _load_config_json(self):
+        json_file_path = path.join(self._app_root_path, 'config.json')
+        if path.isfile(json_file_path):
+            with open(json_file_path) as f:
+                return json.load(f)
 
-class KMServer(Server):
-    def __init__(self, title, app_root_path=None, users=None):
-        super().__init__(title, app_root_path, users)
+        return {}
 
-        # Add kmapper as a default setup
-        self.register_function('run_mapper', run_mapper)
-
-    @staticmethod
-    def _auto_find_root_path():
-        """
-        your_script.py (2) => server.py (1) => _find_root_path
-        """
-        frame = inspect.stack()[3]
-        module = inspect.getmodule(frame[0])
-        return path.dirname(path.abspath(module.__file__))
+    def _config_js_exists(self):
+        config_js = path.join(self._app_root_path, 'modules', 'config.js')
+        return path.isfile(config_js)
