@@ -12,7 +12,7 @@ PERMITTED_STATIC_FOLDERS = ['modules', 'stylesheets', 'vendors', 'images', 'java
 
 
 class Server:
-    def __init__(self, title, users=None, functions=None):
+    def __init__(self, title, users=None, functions=None, conf=None):
         self.title = title
 
         # setup paths
@@ -23,23 +23,39 @@ class Server:
         self._load_config_json()
         self._should_load_config_js = self._config_js_exists()
 
-        self.users = users
-        self.functions = {} if functions is None else functions
+        self._conf = conf
+        self._js_initializer = None
 
-        self.flask = self._make_flask_instance()
+        self._users = users
+        self._functions = {} if functions is None else functions
+
+        self._flask = self._make_flask_instance()
+
+        if self._conf:
+            if getattr(self._conf, 'configure', None) is None:
+                raise RuntimeError("Your conf object should respond to method 'configure'")
+
+            self._conf.configure(self)
 
     def __repr__(self):
         return 'Server(title="{}", app_root_path="{}", core_root_path="{}", users={})' \
-            .format(self.title, self._app_root_path, self._core_root_path, self.users)
+            .format(self.title, self._app_root_path, self._core_root_path, self._users)
 
     def __call__(self, *args, **kwargs):
-        return self.flask(*args, **kwargs)
+        return self._flask(*args, **kwargs)
 
     def register_function(self, name, func):
-        self.functions[name] = func
+        self._functions[name] = func
 
-    def test_client(self):
-        return self.flask.test_client()
+    def set_js_initializer(self, module):
+        self._js_initializer = module
+
+    def get_test_client(self):
+        return self._flask.test_client()
+
+    @property
+    def flask(self):
+        return self._flask
 
     @staticmethod
     def _auto_find_root_path():
@@ -62,9 +78,9 @@ class Server:
         return flask
 
     def _get_auth(self):
-        if self.users is not None:
+        if self._users is not None:
             auth = HTTPBasicAuth()
-            users = self.users
+            users = self._users
 
             @auth.get_password
             def get_pw(username):
@@ -114,13 +130,13 @@ class Server:
         return self._response_forbidden()
 
     def _route_function_call(self, name):
-        if name in self.functions:
+        if name in self._functions:
             kwargs = request.json
             try:
                 if kwargs:
-                    result = self.functions[name](**kwargs)
+                    result = self._functions[name](**kwargs)
                 else:
-                    result = self.functions[name]()
+                    result = self._functions[name]()
 
                 status = 200
             except Exception as e:
@@ -140,7 +156,8 @@ class Server:
     def _route_index(self):
         return render_template('core/index.html',
                                title=self.title,
-                               should_load_config_js=self._should_load_config_js)
+                               should_load_config_js=self._should_load_config_js,
+                               js_initializer=self._js_initializer)
 
     def _load_config_json(self):
         json_file_path = path.join(self._app_root_path, 'config.json')

@@ -1,4 +1,3 @@
-import numpy as np
 from sklearn import cluster
 from kmapper import KeplerMapper, Cover
 
@@ -7,15 +6,28 @@ __all__ = ['KeplerMapperConfig']
 
 class KeplerMapperConfig:
 
-    def setup(self, server):
-        server.register_function('kepler_mapper', lambda **kwargs: self.run(**kwargs))
+    def configure(self, server):
+        server.register_function('run_mapper', self.run_mapper)
+        server.set_js_initializer('conf/KeplerMapperConf')
 
-    def __init__(self, data=None, target=None):
-        self._data = np.array(data)
-        self._target = np.array(target)
+    def __init__(self, data=None, lens=None):
+        self._data = data
+        self._lens = lens
         self._mapper = KeplerMapper()
 
-    def run(self, interval, overlap, dbscan_eps, dbscan_min_samples):
+    def set_data(self, data):
+        self._data = data
+        return self
+
+    def set_lens(self, lens):
+        self._lens = lens
+        return self
+
+    @property
+    def mapper(self):
+        return self._mapper
+
+    def run_mapper(self, interval, overlap, dbscan_eps, dbscan_min_samples):
         km_result = self._call_kmapper(
             int(interval),
             float(overlap) / 100,
@@ -24,44 +36,28 @@ class KeplerMapperConfig:
         )
         return self._parse_result(km_result)
 
-    def set_data(self, data):
-        self._data = data
-
-    def set_target(self, target):
-        self._target = target
-
-    @property
-    def mapper(self):
-        return self._mapper
-
     def _call_kmapper(self, interval, overlap, eps, min_samples):
-
-        input_data = self._data.copy()
-        # input_data /= np.max(np.max(input_data, 1))
-
-        target_data = self._target.copy()
-
         mapper = KeplerMapper()
         graph = mapper.map(
-            target_data,
-            input_data,
+            self._generate_data(),
+            X=self._generate_lens(),
             clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples),
             cover=Cover(n_cubes=interval, perc_overlap=overlap)
         )
 
         return graph
 
-    @staticmethod
-    def _load_data(filename):
-        # TODO: make loader adapt to common sources (numpy saves and panda saves)
+    def _generate_data(self):
+        if self._data is None:
+            raise RuntimeError("No data or a function to generate the data.")
 
-        original_data = np.genfromtxt(
-            filename,
-            dtype=float,
-            delimiter=','
-        )
+        return self._data if not callable(self._data) else self._data.copy()
 
-        return original_data
+    def _generate_lens(self):
+        if self._lens is None:
+            raise RuntimeError("No lens or a function to generate the lens.")
+
+        return self._lens if not callable(self._lens) else self._lens.copy()
 
     def _parse_result(self, graph):
         data = {"nodes": [], "links": []}
