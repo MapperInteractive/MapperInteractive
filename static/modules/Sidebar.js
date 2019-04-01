@@ -1,7 +1,6 @@
 "use strict";
 
 
-
 /**
  * Right side bar, contains block instances.
  */
@@ -55,7 +54,7 @@ define(function (require) {
     },
 
     render() {
-      _.map(this._blocks, (p) => p.render());
+      _.map(this._blocks, (b) => b.render());
     }
 
   });

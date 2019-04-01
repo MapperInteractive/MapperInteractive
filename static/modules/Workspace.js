@@ -50,8 +50,8 @@ define((require) => {
       this.$el.append($(this.template));
 
       // init graph
-      const graphConfig = this._composeGraphConfig()
-      const sidebarConfig = this._composeSidebarConfig()
+      const graphConfig = this._composeGraphConfig();
+      const sidebarConfig = this._composeSidebarConfig();
 
       this._graph = new Graph(graphConfig);
       this._sidebar = new Sidebar(sidebarConfig);

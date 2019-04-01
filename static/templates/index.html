@@ -1,4 +1,5 @@
 <!doctype html>
+<html>
 <head>
   <title>{{ title }}</title>
   <link rel=stylesheet type=text/css href="/core/stylesheets/styles.css">
@@ -7,17 +8,18 @@
   <script src="/core/vendors/jquery.min.js"></script>
   <script src="/core/vendors/bootstrap.bundle.min.js"></script>
   <script src="/core/vendors/require.min.js"></script>
-  <script src="/core/modules/main.js" defer></script>
+  <script src="/core/modules/Setup.js" defer></script>
   {% block head %}{% endblock %}
 </head>
 <body>
 <div id="root" class="container-fluid"></div>
 
-{% if should_load_config_js %}
-  <script type="text/javascript" defer>
-    require(['modules/config']);
-  </script>
-{% endif %}
+<!-- modules -->
+<script type="text/javascript" defer>
+  {% if js_initializer %}
+    require(['{{ js_initializer }}']);
+  {% endif %}
+</script>
 
 {# Enable live reload when in debugging mode.
 In order to use this feature, browser-sync is needed.
@@ -26,5 +28,7 @@ The documentation is at https://browsersync.io #}
   <script id="__bs_script__">//<![CDATA[
   document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.23.6'><\/script>".replace("HOST", location.hostname));
   //]]></script>
-  </body>
+
 {% endif %}
+</body>
+</html>
