@@ -9,11 +9,18 @@ class KeplerMapperConfig:
 
     def configure(self, server):
         server.register_function('run_mapper', self.run_mapper)
-        server.set_js_initializer('conf/KeplerMapperConf')
+        server.set_js_initializer(self._js_initializer)
+        server.set_user_specs(self._user_config)
 
-    def __init__(self, data=None, lens=None):
+    def __init__(self, data=None, lens=None, config=None):
+
+        # KM specific interface configurations
+        self._js_initializer = 'conf/KeplerMapperConf'
+        self._user_config = config
+
         self._data = data
         self._lens = lens
+
         self._mapper = KeplerMapper()
 
     def set_data(self, data):
@@ -28,20 +35,24 @@ class KeplerMapperConfig:
     def mapper(self):
         return self._mapper
 
-    def run_mapper(self, interval, overlap, dbscan_eps, dbscan_min_samples):
+    def run_mapper(self, interval, overlap, dbscan_eps, dbscan_min_samples, filter_function):
         km_result = self._call_kmapper(
             int(interval),
             float(overlap) / 100,
             float(dbscan_eps),
-            float(dbscan_min_samples)
+            float(dbscan_min_samples),
+            filter_function
         )
         return self._parse_result(km_result)
 
-    def _call_kmapper(self, interval, overlap, eps, min_samples):
+    def _call_kmapper(self, interval, overlap, eps, min_samples, filter_function):
         mapper = KeplerMapper()
+
+        data = self._generate_data()
+        lens = mapper.project(data, projection=filter_function)
+
         graph = mapper.map(
-            self._generate_data(),
-            X=self._generate_lens(),
+            lens, data,
             clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples),
             cover=Cover(n_cubes=interval, perc_overlap=overlap)
         )

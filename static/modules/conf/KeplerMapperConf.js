@@ -2,7 +2,7 @@
 
 define((require) => {
 
-  const form = [
+  const default_form = [
     {
       type: 'range',
       config: {
@@ -48,6 +48,18 @@ define((require) => {
       }
     },
   ];
+  const default_plugins = ['force-simulation', 'draggable', 'labeled'];
+  const default_selection = [
+    {
+      name: 'size of node',
+      attr: 'size'
+    }
+  ];
+
+
+  const form = user_specs.form ? user_specs.form : default_form;
+  const plugins = user_specs.plugins ? user_specs.plugins : default_plugins;
+  const selection = user_specs.selection ? user_specs.selection : default_selection;
 
   let Workspace = require('Workspace');
 
@@ -57,7 +69,7 @@ define((require) => {
   let workspace = new Workspace({
     title: "demo",
     graph: {
-      plugins: ['force-simulation', 'draggable', 'labeled'],
+      plugins: plugins,
     }
   });
 
@@ -80,18 +92,15 @@ define((require) => {
     }
   );
 
+
+
   /**
    * Add color function in sidebar
    */
   workspace.getSidebar().addBlock(
     require('blocks/ColorFunctions'),
     {
-      'selection': [
-        {
-          name: 'size of node',
-          attr: 'size'
-        }
-      ]
+      'selection': selection
     });
 
   workspace.render();

@@ -25,6 +25,7 @@ class Server:
 
         self._conf = conf
         self._js_initializer = None
+        self._user_config = None
 
         self._users = users
         self._functions = {} if functions is None else functions
@@ -49,6 +50,12 @@ class Server:
 
     def set_js_initializer(self, module):
         self._js_initializer = module
+
+    def set_user_specs(self, spec_file):
+        with open(spec_file) as json_file:  
+            user_config = json.load(json_file)
+
+        self._user_config = user_config
 
     def get_test_client(self):
         return self._flask.test_client()
@@ -154,10 +161,12 @@ class Server:
         return response, 403
 
     def _route_index(self):
+        print(f"Render index with js: {self._js_initializer} and user config {self._user_config}")
         return render_template('core/index.html',
                                title=self.title,
                                should_load_config_js=self._should_load_config_js,
-                               js_initializer=self._js_initializer)
+                               js_initializer=self._js_initializer,
+                               user_config=self._user_config)
 
     def _load_config_json(self):
         json_file_path = path.join(self._app_root_path, 'config.json')
