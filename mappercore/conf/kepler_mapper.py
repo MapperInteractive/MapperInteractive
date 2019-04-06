@@ -6,12 +6,6 @@ __all__ = ['KeplerMapperConfig']
 
 
 class KeplerMapperConfig:
-
-    def configure(self, server):
-        server.register_function('run_mapper', self.run_mapper)
-        server.set_js_initializer(self._js_initializer)
-        server.set_user_specs(self._user_config)
-
     def __init__(self, data=None, lens=None, config=None):
 
         # KM specific interface configurations
@@ -23,19 +17,43 @@ class KeplerMapperConfig:
 
         self._mapper = KeplerMapper()
 
-    def set_data(self, data):
-        self._data = data
-        return self
-
-    def set_lens(self, lens):
-        self._lens = lens
-        return self
+    def configure(self, server):
+        server.register_function('run_mapper', self.run_mapper)
+        server.set_js_initializer(self._js_initializer)
+        server.set_user_specs(self._user_config)
 
     @property
     def mapper(self):
         return self._mapper
 
     def run_mapper(self, interval, overlap, dbscan_eps, dbscan_min_samples, filter_function):
+        """This function is called when the form is submitted. It triggers construction of Mapper. 
+
+        Each parameter of this function is defined in the configuration.
+
+        To customize the Mapper construction, you can inherit from :code:`KeplerMapperConfig` and customize this function.
+
+
+        Parameters
+        -------------
+
+        interval: int
+            Number of intervals 
+
+        overlap: float
+            Percentage of overlap. This value will be divided by 100 to produce proporition.
+        
+        dbscan_eps: float
+            :code:`eps` parameter for the DBSCAN clustering used in Kepler Mapper construction.
+        
+        dbscan_min_samples: int
+            :code:`min_samples` parameter for the DBSCAN clustering used in Kepler Mapper construction.
+
+        filter_function: str
+            Projection for constructing the lens for Kepler Mapper. Should be one of :code:`["sum", "mean", "median", "max", "min", "std", "dist_mean"]`.
+
+        """
+
         km_result = self._call_kmapper(
             int(interval),
             float(overlap) / 100,
@@ -44,6 +62,14 @@ class KeplerMapperConfig:
             filter_function
         )
         return self._parse_result(km_result)
+
+    def set_data(self, data):
+        self._data = data
+        return self
+
+    def set_lens(self, lens):
+        self._lens = lens
+        return self
 
     def _call_kmapper(self, interval, overlap, eps, min_samples, filter_function):
         mapper = KeplerMapper()
