@@ -1,27 +1,50 @@
 Getting Started
 ------------------
 
-
-
 Setup
 =======
+
+Running MapperCore with the Kepler Mapper backend is very easy. Simply install MapperCore from pip, load your data, and initialize the server.
 
 
 Install MapperCore with pip:
 
 ::
 
-    pip install mappercore
+    >>> pip install mappercore
 
 
-Then, create a file :code:`run.py` and a file :code:`config.py`.
+Setup your data:
+
+:: 
+
+    from sklearn import datasets
+    # Load example data
+    data, labels = datasets.make_circles(n_samples=5000, noise=0.03, factor=0.3)
 
 
-::
+and initialize the server:
+
+:: 
 
     from mappercore import Server
-    server = Server("Mapper Example Demo")
-    server.flask.run()
+    from mappercore.conf.kepler_mapper import KeplerMapperConfig
+
+    # Create kepler mapper config
+    conf = KeplerMapperConfig(data=data)
+    server = Server("Mapper Example", conf=conf)
+
+
+To provide further customization, you can supply a JSON file:
+
+:: 
+
+    conf = KeplerMapperConfig(data=data, config="config.json")
+
+For more information on how to configure the system, see the `Configuration` page.
+
+
+
 
 
 Basic Customization
