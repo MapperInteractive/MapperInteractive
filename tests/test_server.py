@@ -10,7 +10,7 @@ def client():
 
     s = Server("test")
     s.register_function("dummy", dummy)
-    return s._flask.get_test_client()
+    return s._flask.test_client()
 
 
 def test_call_no_params(client):

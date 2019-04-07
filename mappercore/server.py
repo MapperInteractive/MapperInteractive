@@ -158,7 +158,6 @@ class Server:
         return response, 403
 
     def _route_index(self):
-        print(f"Render index with js: {self._js_initializer} and user config {self._user_config}")
         return render_template('core/index.html',
                                title=self.title,
                                should_load_config_js=self._should_load_config_js,
