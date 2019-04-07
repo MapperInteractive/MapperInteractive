@@ -57,9 +57,6 @@ class Server:
 
         self._user_config = user_config
 
-    def get_test_client(self):
-        return self._flask.test_client()
-
     @property
     def flask(self):
         return self._flask
