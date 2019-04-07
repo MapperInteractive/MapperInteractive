@@ -1,5 +1,7 @@
-Getting Started
-------------------
+.. _Getting Started Guide:
+
+Getting Started Guide
+------------------------
 
 Setup
 =======

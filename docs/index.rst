@@ -13,28 +13,35 @@ The Mapper algorithm is a method for topological data analysis invented by Gurje
 
 Please find the source `on Github <https://github.com/mappercore/mappercore>`_.
 
+We provide out of the box configuration for using Kepler Mapper on the backend. 
+
 
 Installation
 ==============
 
 MapperCore can be installed from PyPI by:
 
-..
+::
 
-    pip install mappercore==1.2.6
+    pip install mappercore
 
 
 
 .. toctree::
     :hidden:
     :maxdepth: 1
-    :caption: Contents:
+    :caption: User Guide:
 
-    about
-    started
-    configuration
-    reference
+    general/about
+    general/customization/index
+    general/reference
 
+.. toctree::
+    :hidden:
+    :maxdepth: 1
+    :caption: KM User Guide:
+
+    km/index
 
 
 .. |PyPI version| image:: https://badge.fury.io/py/mappercore.svg

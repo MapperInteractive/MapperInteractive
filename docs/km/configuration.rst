@@ -1,4 +1,6 @@
-Configuration
+.. _KM Configuration:
+
+KM Configuration
 ------------------
 
 
