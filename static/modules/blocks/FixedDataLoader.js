@@ -28,7 +28,7 @@ define((require) => {
       });
 
       this.on('error', (error) => {
-        console.log(error);
+        console.error(error);
       });
     },
 
