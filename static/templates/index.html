@@ -30,8 +30,8 @@
         return ;
       }
       if (typeof window.mapper_loaded !== "undefined") {
-        {% if js_initializer %}
-          require(['{{ js_initializer }}']);
+        {% if config_js %}
+          require(['{{ config_js }}']);
         {% endif %}
       } else {
         setTimeout(waitForLoaded, 250);

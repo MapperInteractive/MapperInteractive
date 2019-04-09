@@ -19,7 +19,7 @@ class KeplerMapperConfig:
 
     def configure(self, server):
         server.register_function('run_mapper', self.run_mapper)
-        server.set_js_initializer(self._js_initializer)
+        server.set_config_js(self._js_initializer)
 
         if self._user_config:
             server.set_user_specs(self._user_config)
