@@ -55,7 +55,7 @@ define((require) => {
       let finder = (startId) => {
         cluster.push(startId);
 
-        links.map((link) => {
+        links.each((link) => {
           let found = null;
 
           if (link['source']['id'] === startId) {

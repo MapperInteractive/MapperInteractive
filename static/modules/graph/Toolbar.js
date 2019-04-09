@@ -38,12 +38,14 @@ define(function () {
         target.addClass('active');
       });
 
-      this.listenTo(this.graph.model, 'change:data', () => {
+      let graphData = this.graph.getData();
 
-        let data = this.graph.model.get('data');
+      this.listenTo(graphData, 'change', () => {
+
+        let graph = graphData.attributes;
         let buttons = this.$('button');
 
-        if (data) {
+        if (graph) {
           buttons.removeClass('disabled').attr('disabled', false);
         } else {
           buttons.addClass('disabled').attr('disabled', true);
