@@ -41,29 +41,29 @@ define(function () {
       if (!this.name || !this.label) {
         throw "A graph mode should have a name and a label.";
       }
-      console.log(`[${this.name}] willMount`);
+      console.debug(`[${this.name}] willMount`);
     }
 
     didMount() {
-      console.log(`[${this.name}] didMount`);
+      console.debug(`[${this.name}] didMount`);
     }
 
     willActivate() {
-      console.log(`[${this.name}] willActivate`);
+      console.debug(`[${this.name}] willActivate`);
     }
 
     didActivate() {
       this.activated = true;
-      console.log(`[${this.name}] didActivate`);
+      console.debug(`[${this.name}] didActivate`);
     }
 
     willDeactivate() {
-      console.log(`[${this.name}] willDeactivate`);
+      console.debug(`[${this.name}] willDeactivate`);
     }
 
     didDeactivate() {
       this.activated = false;
-      console.log(`[${this.name}] didDeactivate`);
+      console.debug(`[${this.name}] didDeactivate`);
     }
   };
 });

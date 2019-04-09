@@ -24,7 +24,11 @@ class Server:
         self._should_load_config_js = self._config_js_exists()
 
         self._conf = conf
-        self._js_initializer = None
+        self._config_js = None
+
+        if self._config_js_exists():
+            self._config_js = 'modules/config'
+
         self._user_config = None
 
         self._users = users
@@ -48,11 +52,11 @@ class Server:
     def register_function(self, name, func):
         self._functions[name] = func
 
-    def set_js_initializer(self, module):
-        self._js_initializer = module
+    def set_config_js(self, module):
+        self._config_js = module
 
     def set_user_specs(self, spec_file):
-        with open(spec_file) as json_file:  
+        with open(spec_file) as json_file:
             user_config = json.load(json_file)
 
         self._user_config = user_config
@@ -160,8 +164,7 @@ class Server:
     def _route_index(self):
         return render_template('core/index.html',
                                title=self.title,
-                               should_load_config_js=self._should_load_config_js,
-                               js_initializer=self._js_initializer,
+                               config_js=self._config_js,
                                user_config=self._user_config)
 
     def _load_config_json(self):

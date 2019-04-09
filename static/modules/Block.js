@@ -7,6 +7,7 @@ define(function () {
 
   const { b: { View, Model } } = window;
 
+
   return View.extend({
 
     initialize: function (config) {

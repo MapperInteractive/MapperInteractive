@@ -39,12 +39,12 @@ define(() => {
 
     pause() {
       this.paused = true;
-      console.log('[' + this.constructor.name + '] paused');
+      console.debug('[' + this.constructor.name + '] paused');
     }
 
     resume() {
       this.paused = false;
-      console.log('[' + this.constructor.name + '] resume');
+      console.debug('[' + this.constructor.name + '] resume');
     }
   }
 });

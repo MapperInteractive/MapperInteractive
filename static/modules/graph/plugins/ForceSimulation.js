@@ -15,7 +15,6 @@ define((require) => {
 
     didMount() {
       super.didMount();
-      console.log('force-simulation');
       this.events.listenTo(this.graph, 'didRender', () => {
         this._graphDidRender();
       });

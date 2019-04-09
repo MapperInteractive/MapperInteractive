@@ -66,6 +66,7 @@ window.jQuery(function () {
       }
       return variable;
     };
+    window.mapper_loaded = true;
   });
 
 });
