@@ -15,7 +15,7 @@ Mapper Interactive is a web-based visualization of Mapper algorithm. It is open 
 Mapper Interactive can be installed from PyPI by:
 
 ```shell
-pip install mapper_interactive
+pip install mapper-interactive
 ```
 
 ## Documentation
