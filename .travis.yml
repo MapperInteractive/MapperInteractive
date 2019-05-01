@@ -8,6 +8,19 @@ python:
 
 install:
   - pip install -e ".[testing]"
+  - pip install -r requirements-docs.txt
 
 script:
   - pytest
+  - sphinx-build -b html docs docs/_build/html
+
+deploy:
+  local_dir: docs/_build/html
+  provider: pages
+  repo: MapperInteractive/website
+  target_branch: master
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  keep_history: true
+  on:
+    branch: master
