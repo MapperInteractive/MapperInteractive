@@ -5,7 +5,7 @@
 API Reference
 ----------------
 
-.. currentmodule:: mappercore
+.. currentmodule:: mapper_interactive
 
 .. autosummary::
     :toctree: stubs

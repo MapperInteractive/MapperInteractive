@@ -1,6 +1,6 @@
 import pytest
-from mappercore import Server
-from mappercore.conf.kepler_mapper import KeplerMapperConfig
+from mapper_interactive import Server
+from mapper_interactive.conf.kepler_mapper import KeplerMapperConfig
 
 
 @pytest.fixture

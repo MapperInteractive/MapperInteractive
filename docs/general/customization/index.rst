@@ -3,7 +3,7 @@
 Configurations
 ------------------
 
-The MapperCore framework provides three three main ways of customization: :ref:`Blocks`, :ref:`Tools`, and :ref:`Plugins`.  
+The Mapper Interactive framework provides three three main ways of customization: :ref:`Blocks`, :ref:`Tools`, and :ref:`Plugins`.
 
 
 .. toctree::

@@ -1,6 +1,6 @@
 import pytest
 import json
-from mappercore import Server
+from mapper_interactive import Server
 
 
 @pytest.fixture

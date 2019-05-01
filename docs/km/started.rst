@@ -6,14 +6,14 @@ Getting Started Guide
 Setup
 =======
 
-Running MapperCore with the Kepler Mapper backend is very easy. Simply install MapperCore from pip, load your data, and initialize the server.
+Running Mapper Interactive with the Kepler Mapper backend is very easy. Simply install Mapper Interactive from pip, load your data, and initialize the server.
 
 
-Install MapperCore with pip:
+Install Mapper Interactive with pip:
 
 ::
 
-    >>> pip install mappercore
+    >>> pip install mapper_interactive
 
 
 Setup your data:
@@ -29,8 +29,8 @@ and initialize the server:
 
 :: 
 
-    from mappercore import Server
-    from mappercore.conf.kepler_mapper import KeplerMapperConfig
+    from mapper_interactive import Server
+    from mapper_interactive.conf.kepler_mapper import KeplerMapperConfig
 
     # Create kepler mapper config
     conf = KeplerMapperConfig(data=data)

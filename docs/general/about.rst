@@ -1,15 +1,15 @@
 About
 -------
 
-MapperInteractive is a lightweight server to help rapidly explore parameters for Mapper construction and easily explore the constructed Mappers. It provides integration with Kepler Mapper.
+Mapper Interactive is a lightweight server to help rapidly explore parameters for Mapper construction and easily explore the constructed Mappers. It provides integration with Kepler Mapper.
 
 
-MapperInteractive was developed by ... [blurb about who originally developed the project and where funding came from]
+Mapper Interactive was developed by ... [blurb about who originally developed the project and where funding came from]
 
-Softwares and Frameworks Used in MapperCore
-===============================================
+Softwares and Frameworks Used in Mapper Interactive
+===================================================
 
-Mappercore using the following software/frameworks:
+Mapper Interactive using the following software/frameworks:
 
 - Flask, for web server
 - Redis, for data cache
@@ -19,4 +19,4 @@ Mappercore using the following software/frameworks:
 Why not React, Angular, or EmberJS
 =========================================
 
-Because mappercore is designed for people with academic backgrounds, not web developers. So we avoid introducing too much complexity. Researchers who has basic JavaScript knowledge can understand and use the frameworks we choosed.
+Because Mapper Interactive is designed for people with academic backgrounds, not web developers. So we avoid introducing too much complexity. Researchers who has basic JavaScript knowledge can understand and use the frameworks we choosed.
