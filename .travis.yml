@@ -21,6 +21,7 @@ deploy:
   target_branch: master
   skip_cleanup: true
   github_token: $GITHUB_TOKEN
-  keep_history: true
+  keep_history: false
   on:
+    python: "3.6"
     branch: master
