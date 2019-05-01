@@ -8,7 +8,7 @@ Prebuilt Blocks
 
 Blocks define regions on the right-hand pane of the page. These include things like data loaders, mapper configurations, coloring selectors, and data viewers.
 
-Currently implemented blocks can be found at `static/modules/blocks <https://github.com/mappercore/mappercore/static/modules/blocks>`_. These include
+Currently implemented blocks can be found at `static/modules/blocks <https://github.com/MapperInteractive/MapperInteractive/static/modules/blocks>`_. These include
 
 - :code:`ColorFunction`
 - :code:`FixedDataLoader`

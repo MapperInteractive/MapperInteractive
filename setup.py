@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='mappercore',
-    version='1.4.5',
+    name='mapper_interactive',
+    version='0.0.1',
     keywords='mapper',
-    description='A framework for data analysis and visualization',
+    description='Mapper Interactive is a highly customizable visualization framework for you to visualize and explore Mapper algorithm.',
     license='MIT',
-    url='https://github.com/mappercore/mappercore',
+    url='https://github.com/MapperInteractive/MapperInteractive',
     author='Yaodong Zhao',
     author_email='yaodong.zhao@utah.edu',
     packages=find_packages(),

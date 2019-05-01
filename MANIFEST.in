@@ -1,1 +1,1 @@
-recursive-include mappercore/static *.html *.js *.css *.png *.svg *.jpg
+recursive-include mapper_interactive/static *.html *.js *.css *.png *.svg *.jpg
