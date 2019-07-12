@@ -1,15 +1,22 @@
 About
 -------
 
-Mapper Interactive is a lightweight server to help rapidly explore parameters for Mapper construction and easily explore the constructed Mappers. It provides integration with Kepler Mapper.
+Mapper Interactive is a lightweight server to help rapidly explore the Mapper construction, a topological descriptor, and its associated parameters. It provides a library of easily-extendable modules for developing interactive visualization of high-dimensional data using the Mapper construction. It provides integration with Kepler Mapper (https://kepler-mapper.scikit-tda.org/) and in the near future, with HYPPO-X (https://xperthut.github.io/HYPPO-X/). 
 
+Mapper Interactive is developed by the Topological Data Analysis and Visualization Lab (PI: Bei Wang) at the SCI Institute, University of Utah, with Yaodong Zhao as the lead developer. 
 
-Mapper Interactive was developed by ... [blurb about who originally developed the project and where funding came from]
+The project is partially supported by NSF grants DBI-1661375, DBI-1661348, and IIS-1513616. 
+
+Citations
+-------
+Mapper Interactive: A Toolbox for Visual Exploration of High-Dimensional Data.
+Yaodong Zhao, Lin Yan, Nathaniel Saul, Youjia Zhou, Bei Wang. 
+In preparation, 2019. 
 
 Softwares and Frameworks Used in Mapper Interactive
 ===================================================
 
-Mapper Interactive using the following software/frameworks:
+Mapper Interactive uses the following software/frameworks:
 
 - Flask, for web server
 - Redis, for data cache
@@ -19,4 +26,4 @@ Mapper Interactive using the following software/frameworks:
 Why not React, Angular, or EmberJS
 =========================================
 
-Because Mapper Interactive is designed for people with academic backgrounds, not web developers. So we avoid introducing too much complexity. Researchers who has basic JavaScript knowledge can understand and use the frameworks we choosed.
+Mapper Interactive is designed for people with some academic backgrounds, not necessarily web developers. We avoid introducing too much complexity. Researchers who have basic JavaScript knowledge could understand and use our chosen frameworks.
