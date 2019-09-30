@@ -45,8 +45,8 @@ Mapper Interactive can be installed from PyPI by:
     km/index
 
 
-.. |PyPI version| image:: https://badge.fury.io/py/mapper_interactive.svg
-   :target: https://badge.fury.io/py/mapper_interactive
+.. |PyPI version| image:: https://badge.fury.io/py/mapper-interactive.svg
+   :target: https://badge.fury.io/py/mapper-interactive
 
 .. |Build Status| image:: https://travis-ci.org/MapperInteractive/MapperInteractive.svg?branch=master
    :target: https://travis-ci.org/MapperInteractive/MapperInteractive
