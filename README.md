@@ -12,7 +12,7 @@ Mapper Interactive is a web-based visualization tool for high-dimensional data a
 
 ## Installation
 
-Mapper Interactive can be installed from PyPI by:
+Mapper Interactive is listed in [PyPI](https://pypi.org/project/mapper-interactive/) and can be installed with `pip`.
 
 ```shell
 pip install mapper-interactive
