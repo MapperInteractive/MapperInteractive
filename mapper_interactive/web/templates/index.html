@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <title>{{ title }}</title>
+  <link rel=stylesheet type=text/css href="/core/stylesheets/styles.css">
+  <link rel=stylesheet type=text/css href="/core/stylesheets/styles.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <script src="/core/vendors/jquery.min.js"></script>
+  <script src="/core/vendors/bootstrap.bundle.min.js"></script>
+  <script src="/core/vendors/require.min.js"></script>
+  <script src="/core/modules/Setup.js"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div id="root" class="container-fluid"></div>
+
+<!-- User configuration -->
+<script type="text/javascript">
+  var user_specs = {{ user_config|tojson|safe }}
+</script>
+
+
+<!-- modules -->
+<script type="text/javascript" defer>
+  $(document).ready(function () {
+    var loadChecked = 0;
+    function waitForLoaded() {
+      loadChecked += 1;
+      if (loadChecked > 100) {
+        return ;
+      }
+      if (typeof window.mapper_loaded !== "undefined") {
+        {% if config_js %}
+          require(['{{ config_js }}']);
+        {% endif %}
+      } else {
+        setTimeout(waitForLoaded, 250);
+      }
+    }
+    waitForLoaded();
+  });
+</script>
+
+{# Enable live reload when in debugging mode.
+In order to use this feature, browser-sync is needed.
+The documentation is at https://browsersync.io #}
+{% if config['DEBUG'] %}
+  <script id="__bs_script__">//<![CDATA[
+  document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.23.6'><\/script>".replace("HOST", location.hostname));
+  //]]></script>
+
+{% endif %}
+</body>
+</html>

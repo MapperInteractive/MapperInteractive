@@ -9,22 +9,22 @@ const plumber = require('gulp-plumber');
 const clean = require('gulp-clean');
 
 const paths = {
-  'dist': '../mapper_interactive/static/*',
+  'dist': '../mapper_interactive/web/*',
 
   'tpl.src': './templates/**/*.html',
-  'tpl.dest': '../mapper_interactive/static/templates',
+  'tpl.dest': '../mapper_interactive/web/templates',
 
   'js.src': './modules/**/*.js',
-  'js.dest': '../mapper_interactive/static/modules',
+  'js.dest': '../mapper_interactive/web/modules',
 
   'vendor.src': './vendors/**/*',
-  'vendor.dest': '../mapper_interactive/static/vendors',
+  'vendor.dest': '../mapper_interactive/web/vendors',
 
   'less.src': './stylesheets/styles.less',
-  'less.dest': '../mapper_interactive/static/stylesheets',
+  'less.dest': '../mapper_interactive/web/stylesheets',
 
   'icons.src': './stylesheets/icons/*',
-  'icons.dest': '../mapper_interactive/static/stylesheets/icons'
+  'icons.dest': '../mapper_interactive/web/stylesheets/icons'
 };
 
 gulp.task('clean', function () {
