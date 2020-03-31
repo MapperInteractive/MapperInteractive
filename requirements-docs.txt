@@ -1,0 +1,2 @@
+Sphinx==1.8.5
+sktda_docs_config==0.0.7
