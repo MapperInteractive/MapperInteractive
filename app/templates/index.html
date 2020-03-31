@@ -1,0 +1,251 @@
+<!doctype html>
+<html>
+<head>
+  <title>Mapper Interactive</title>
+  <script src="https://d3js.org/d3.v5.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  {% assets "js" %}
+  <script type="text/javascript" src="{{ ASSET_URL }}" defer></script>
+  {% endassets %}
+  {% assets "css" %}
+  <link rel="stylesheet" href="{{ ASSET_URL }}" />
+  {% endassets %}
+</head>
+
+<body>
+  <div style="padding-top: 10px; padding-left:20px;">
+      <h4>Mapper Interactive</h4>
+
+  </div>
+<div id="root" class="container-fluid">
+  <div class="row" style="margin-top: 10px;" id="workspace">
+    <div class="col-md-6">
+          <div id="workspace-graph">
+            <div class="viewer-graph__toolbar">
+                <button id="unselect-view" class="viewer-graph__toolbar-item btn">View</button>
+                <button id="select-node" class="viewer-graph__toolbar-item btn">Select Node</button>
+                <button id="select-cluster" class="viewer-graph__toolbar-item btn">Select Cluster</button>
+                <button id="select-path" class="viewer-graph__toolbar-item btn">Select Path</button>
+
+            </div>
+            <div class="viewer-graph__graph">
+                <svg id="graphSVG"></svg>
+
+            </div>
+          </div>
+    </div>
+    <div class="col-md-3">
+      <div id="workspace-sidebar" class="block">
+        <div class="block_title">Graph Loader</div>
+        <div class="block_body" style="max-height: 1000px">
+          <div class="block_body-inner">
+            <div class="import-group" style="padding-bottom:10px;">
+              <form method="post" id="upload" enctype="multipart/form-data" action="" >
+                <input type="file" style="display:none" id="files" name="files">
+                <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="import" value="Import Data">
+              </form>
+            </div>
+            <div class="normalization-group">
+              <div class="group-title">Normalization</div>
+              <form id="norm-type-form">
+                <input type="radio" name="norm-type" class="form-radio" value="none" id="norm-none" checked>
+                <label for="norm-none" class="radio-label">None</label>&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="norm-type" class="form-radio" value="0-1" id="norm-0-1" checked>
+                <label for="norm-0-1" class="radio-label">0-1</label>&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="norm-type" class="form-radio" value="l2" id="norm-l2">
+                <label for="norm-l2" class="radio-label">L2</label>&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="norm-type" class="form-radio" value="l1" id="norm-l1">
+                <label for="norm-l1" class="radio-label">L1</label>
+              </form>
+            </div>
+            <div class="clustering-group">
+              <div class="group-title">
+                Clustering &nbsp;
+                <i class="fas fa-pen" style="font-size:14px;" id="clustering-para-range"></i>
+              </div>
+              <div class="columns-group" style="max-height:0; visibility: hidden;padding:0;">
+                <div class="columns-group-inner">
+                  <div class="columns-selection" id="all-columns-group">
+                    <div class="column-title" style="height:20%;">All Columns</div>
+                    <div class="scrollable" id="all-columns-list" style="height:75%;"><ul></ul></div>
+                  </div>
+                  <div class="columns-selection" id="selected-columns-group">
+                    <div class="column-title" style="height:20%;">Selected Columns</div>
+                    <div class="scrollable" id="selected-columns-list" style="height:75%;"><ul></ul></div>
+                  </div>
+                </div>
+              </div>
+              <div class="parameter-group">
+                <div class="form-group ui-form-range">
+                  <label class="ui-form-range__label">eps (DBSCAN)</label>
+                  <span class="ui-form-range__value" id="eps_label">0.1</span>
+                  <div class="param-range-container_clustering">
+                    <div class="param-range-container-inner_clustering" style="padding:0px;">
+                      <span class="param-range left"><input type="number" id="range-eps-left" min="0.01" max="1" value="0.1" step=0.01></span>
+                      <span class="param-range right"><input type="number" id="range-eps-right" min="0.01" max="1" value="0.5" step=0.01></span>
+                    </div>    
+                  </div>
+                  <input class="ui-form-range__input" id="eps_input" name="dbscan_eps" type="range" value="0.1" max="0.5" min="0.1" step="0.01">
+                </div>
+                <div class="form-group ui-form-range">
+                  <label class="ui-form-range__label">min samples (DBSCAN)</label>
+                  <span class="ui-form-range__value" id="min_samples_label">5</span>
+                  <div class="param-range-container_clustering">
+                    <div class="param-range-container-inner_clustering" style="padding:0px;">
+                    <span class="param-range left"><input type="number" id="range-min_samples-left" min="1" max="100" value="5"></span>
+                    <span class="param-range right"><input type="number" id="range-min_samples-right" min="1" max="100" value="10"></span>
+                    </div>    
+                  </div>
+                  <input class="ui-form-range__input" id="min_samples_input" name="dbscan_min_samples" type="range" value="5" max="10" min="2" step="1">
+                </div>
+              </div>
+            </div>
+                   
+            <div class="filter-group">
+              <div class="group-title">
+                Filter Functions 
+              </div>                   
+              <form id="mapper-dim-form">
+                <input type="radio" name="mapper-dim" class="form-radio" value="mapper_1d" id="mapper_1d" checked>
+                <label for="mapper_1d" class="radio-label">1D Mapper</label> &nbsp;&nbsp;&nbsp;
+                <input type="radio" name="mapper-dim" class="form-radio" value="mapper_2d" id="mapper_2d">
+                <label for="mapper_2d" class="radio-label">2D Mapper</label>
+              </form>
+              <div class="filter-inner">
+                Dimension 1 &nbsp;
+                <i class="fas fa-pen" style="font-size:14px;" id="filtering-para-range1"></i>
+                <select name="filter_function" class="custom-select" id="filter_function_selection"></select>
+                <div class="form-group ui-form-range">
+                  <label class="ui-form-range__label">Interval</label>
+                  <span class="ui-form-range__value" id="interval1_label">5</span>
+                  <div class="param-range-container_filtering1">
+                    <div class="param-range-container-inner_filtering1" style="padding:0px;">
+                      <span class="param-range left"><input type="number" id="range-interval1-left" min="1" max="100" value="5"></span>
+                      <span class="param-range right"><input type="number" id="range-interval1-right" min="1" max="100" value="50"></span>
+                    </div>    
+                  </div>
+                  <input class="ui-form-range__input" id="interval1_input" name="interval1" type="range" value="5" max="50" min="5" step="1">
+                </div>
+
+                <div class="form-group ui-form-range">
+                  <label class="ui-form-range__label">Overlap %</label>
+                  <span class="ui-form-range__value" id="overlap1_label" >50</span>
+                  <div class="param-range-container_filtering1">
+                    <div class="param-range-container-inner_filtering1" style="padding:0px;">
+                      <span class="param-range left"><input type="number" id="range-overlap1-left" min="0" max="100" value="5"></span>
+                      <span class="param-range right"><input type="number" id="range-overlap1-right" min="0" max="100" value="50"></span>
+                    </div>    
+                  </div>
+                  <input class="ui-form-range__input" id="overlap1_input" name="overlap1" type="range" value="50" max="50" min="5" step="1">
+                </div>
+              </div>
+
+              <div class="filter-inner" id="filter-inner-2">
+                Dimension 2 &nbsp;
+                <i class="fas fa-pen" style="font-size:14px;" id="filtering-para-range2"></i>
+                <select name="filter_function2" class="custom-select" id="filter_function_selection2"></select>
+                <div class="form-group ui-form-range">
+                  <label class="ui-form-range__label">Interval</label>
+                  <span class="ui-form-range__value" id="interval2_label">5</span>
+                  <div class="param-range-container_filtering2">
+                    <div class="param-range-container-inner_filtering2" style="padding:0px;">
+                      <span class="param-range left"><input type="number" id="range-interval2-left" min="1" max="100" value="5"></span>
+                      <span class="param-range right"><input type="number" id="range-interval2-right" min="1" max="100" value="50"></span>
+                    </div>    
+                  </div>
+                  <input class="ui-form-range__input" id="interval2_input" name="interval2" type="range" value="5" max="50" min="5" step="1">
+                </div>
+                <div class="form-group ui-form-range">
+                  <label class="ui-form-range__label">Overlap %</label>
+                  <span class="ui-form-range__value" id="overlap2_label" >50</span>
+                  <div class="param-range-container_filtering2">
+                    <div class="param-range-container-inner_filtering2" style="padding:0px;">
+                      <span class="param-range left"><input type="number" id="range-overlap2-left" min="0" max="100" value="5"></span>
+                      <span class="param-range right"><input type="number" id="range-overlap2-right" min="0" max="100" value="50"></span>
+                    </div>    
+                  </div>
+                  <input class="ui-form-range__input" id="overlap2_input" name="overlap2" type="range" value="50" max="50" min="5" step="1">
+                </div> 
+              </div>       
+            </div>
+            <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="mapper_loader" value="Compute Mapper">
+          </div>   
+        </div>
+      </div>
+      <div id="workspace-color_functions" class="block"> 
+        <div class="block_title">Color Functions</div>
+        <div class="block_body" style="max-height: 1000px"> 
+          <div class="block_body-inner" id = "block_body-inner_color">
+            <div class="row" style="padding-top:5px; padding-bottom:5px;">
+                <div class="col-sm-2 col-form-label">Value</div>
+                <div class="col-sm-10" id="color-function-values-container"> <select class="custom-select"  name="color_function_values" id="color_function_values"></select></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2 col-form-label">Map</div>
+                <div class="col-sm-10" id="color-function-maps-container"><select class="custom-select"  name="color_function_maps" id="color_function_maps"></select></div>
+            </div>
+            <svg width="0" height="0" id="color-legend-svg"></svg>
+          </div>
+        </div>  
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div id="workspace-size_functions" class="block">
+        <div class="block_title">Size Functions</div>
+        <div class="block_body" style="max-height: 1000px">
+          <div class="block_body-inner">
+            <div class="row" style="padding-top:5px; padding-bottom:5px;">
+              <div class="col-sm-2 col-form-label">Value</div>
+              <div class="col-sm-10" id="size-function-container"> <select class="custom-select"  name="size_function_values" id="size_function_values"></select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="regression-panel" class="block">
+        <div class="block_title">Linear Regression</div>
+        <div class="block_body" style="max-height: 1000px">
+          <div class="block_body-inner">
+            <div class="row" style="padding-top:5px; padding-bottom:5px;"> 
+              <div class="col-sm-6 col-form-label">Dependent Variable </div>
+              <div class="col-sm-5"> <select class="custom-select"  name="regression-dependent" id="regression-dependent" style="width:100%"></select></div>
+            </div>
+            <div class="row" style="padding-bottom:10px;"> 
+              <div class="col-sm-6 col-form-label">Independent Variables </div>
+              <div class="col-sm-6" id="regression-independent-container">
+                <div class="row">
+                  <div class="col-sm-10">
+                    <select class="custom-select"  name="regression-independent-1" id="regression-independent-1" style="width:100%"></select>
+                  </div>
+                  <div class="col-sm-2" style="padding:0; padding-top:5px;">
+                    <i class="fas fa-plus-circle" style="font-size:15px;" id="adding-var"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="linear_regression" value="Run Linear Regression">
+          </div>
+        </div>
+      </div>
+      <div id="PCA-panel" class="block"> 
+        <div class="block_title">PCA</div>
+        <div class="block_body" style="max-height: 1000px">
+          <div class="block_body-inner">
+            <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="pca" value="Run PCA">
+          </div>
+        </div>
+      </div>
+      <div id="workspace-histogram" class="block">
+        <div class="block_title">Histogram</div>
+        <div class="block_body" style="max-height: 500px; overflow: auto;" id="block_body_histogram">
+          <div class="block_body-inner"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
