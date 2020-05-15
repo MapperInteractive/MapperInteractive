@@ -62,7 +62,10 @@ def process_text_data():
     data_new = pd.DataFrame(data_new, columns=columns_new, dtype=float)
     data_new.columns = columns_new
     data_new.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False)
-    return {"columns":columns_new}
+    print("testing")
+    print(columns_new)
+    # return {"columns":columns_new}
+    return jsonify(columns=columns_new)
 
 @app.route('/mapper_loader', methods=['POST','GET'])
 def get_graph():
@@ -96,7 +99,7 @@ def get_graph():
     data = pd.DataFrame(data, columns = all_cols)
     mapper_result = run_mapper(data, selected_cols, interval, overlap, eps, min_samples, filter_function)
     connected_components = compute_cc(mapper_result)
-    return {"mapper":mapper_result, "connected_components":connected_components}
+    return jsonify(mapper=mapper_result, connected_components=connected_components)
 
 @app.route('/linear_regression', methods=['POST','GET'])
 def linear_regression():
@@ -121,7 +124,7 @@ def linear_regression():
     conf_int_new = []
     for i in range(conf_int.shape[0]):
         conf_int_new.append(list(conf_int[i,:]))
-    return {"params":list(result.params), "pvalues":list(result.pvalues), "conf_int":conf_int_new, "stderr": list(result.bse)}
+    return jsonify(params=list(result.params), pvalues=list(result.pvalues), conf_int=conf_int_new, stderr=list(result.bse))
 
 @app.route('/pca', methods=['POST','GET'])
 def pca():
@@ -152,7 +155,7 @@ def pca():
     for i in range(data_new.shape[0]):
         data_new2+=str(list(data_new.iloc[i,:]))+'n'
     # print(data_new2)
-    return {"pca":data_new2}
+    return jsonify(pca=data_new2)
 
 def run_mapper(data_array, col_names, interval, overlap, dbscan_eps, dbscan_min_samples, filter_function):
         """This function is called when the form is submitted. It triggers construction of Mapper. 

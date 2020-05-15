@@ -9,8 +9,8 @@ Mapper Interactive is a web-based visualization tool for high-dimensional data a
 ## Installation
 
 ```bash
-git clone git@github.com:zhou325/MapperInteractive_new.git
-cd MapperInteractive_new
+git clone git@github.com:MapperInteractive/MapperInteractive.git
+cd MapperInteractive
 python3 run.py
 ```
 
