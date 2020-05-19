@@ -1,7 +1,5 @@
 # Mapper Interactive
 
-[![PyPI version](https://badge.fury.io/py/mapper-interactive.svg)](https://badge.fury.io/py/mapper-interactive)
-[![Build Status](https://travis-ci.org/MapperInteractive/MapperInteractive.svg?branch=master)](https://travis-ci.org/MapperInteractive/MapperInteractive)
 
 The Mapper algorithm is a method for topological data analysis first proposed by Gurjeet Singh, Facundo Mémoli and Gunnar Carlsson in 2007 [^1]. 
 Mapper Interactive is a web-based visualization tool for high-dimensional data analysis build upon the Mapper algorithm. It is an open source software and is released under the MIT License.
