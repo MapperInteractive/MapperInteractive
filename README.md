@@ -28,7 +28,7 @@ Pull requests are welcomed.
 
 ## Cite
 
-Mapper Interactive: A Toolbox for Visual Exploration of High-Dimensional Data.
+Mapper Interactive: A Toolbox for the Visual Exploration of High-Dimensional Data.
 Youjia Zhou, Yaodong Zhao, Lin Yan, Nathaniel Saul, Bei Wang.
 2020.
 
