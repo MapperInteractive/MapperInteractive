@@ -20,12 +20,15 @@ class Graph{
         this.graphSvg = d3.select("#graphSVG")
             .attr("width", this.width)
             .attr("height", this.height);
-        this.link_group = this.graphSvg.append("g")
+        this.graphSvg_g = this.graphSvg.append("g");
+        this.link_group = this.graphSvg_g.append("g")
             .attr("id","graph-link-group");
-        this.node_group = this.graphSvg.append("g")
+        this.node_group = this.graphSvg_g.append("g")
             .attr("id","graph-node-group");
-        this.label_group = this.graphSvg.append("g")
+        this.label_group = this.graphSvg_g.append("g")
             .attr("id","graph-label-group");
+
+        d3.select(".sidebar-container").style("height", this.height)
             
         // histogram SVG
         this.hist_margin = {"top":15, "left":10, "between":20, "bar_height":5};
@@ -64,7 +67,8 @@ class Graph{
         this.selection_nodes();
     }
     color_functions(){
-        let vg = d3.select("#color_function_values").selectAll("option").data(this.col_keys);
+        let selections = ['Number of points'].concat(this.col_keys);
+        let vg = d3.select("#color_function_values").selectAll("option").data(selections);
         vg.exit().remove();
         vg = vg.enter().append("option").merge(vg)
             .html(d=>d);
@@ -153,7 +157,7 @@ class Graph{
     }
 
     size_functions(){
-        let selections = ['- None -'].concat(this.col_keys);
+        let selections = ['- None -', 'Number of points'].concat(this.col_keys);
         let sg = d3.select("#size_function_values").selectAll("option").data(selections);
         sg.exit().remove();
         sg = sg.enter().append("option").merge(sg)
@@ -167,12 +171,19 @@ class Graph{
                 .domain([Math.min(...v), Math.max(...v)])
                 .range([6,18])
         }
+        let v = this.nodes.map(d=>d.size);
+        col_scales['Number of points'] = d3.scaleLinear()
+            .domain([Math.min(...v), Math.max(...v)])
+            .range([6,18])
 
         let size_dropdown = document.getElementById("size_function_values");
         let size = size_dropdown.options[size_dropdown.selectedIndex].text;
         size_dropdown.onchange = function(){
             size = size_dropdown.options[size_dropdown.selectedIndex].text;
-            if(col_scales[size]){
+            if(size === "Number of points"){
+                d3.selectAll(".viewer-graph__vertex")
+                    .attr("r", d=>col_scales[size](d.size));
+            } else if(col_scales[size]){
                 d3.selectAll(".viewer-graph__vertex")
                     .attr("r", d=>col_scales[size](d.avgs[size]));
             } else {
@@ -603,10 +614,12 @@ class Graph{
             let radius = 8;
             ng
                 .attr("cx", function(d) {
-                    return (d.x = Math.max(radius, Math.min(that.width - radius, d.x)));
+                    return d.x;
+                    // return (d.x = Math.max(radius, Math.min(that.width - radius, d.x)));
                 })
                 .attr("cy", function(d) {
-                    return (d.y = Math.max(radius, Math.min(that.height - radius, d.y)));
+                    return d.y;
+                    // return (d.y = Math.max(radius, Math.min(that.height - radius, d.y)));
                 })
     
             // **** TODO **** how to make the label centered?
@@ -631,19 +644,41 @@ class Graph{
             d.fx = null;
             d.fy = null;}
         }
+
+        const zoom_handler = d3.zoom()
+            .on("zoom", zoom_actions);
+
+        // drag_handler(ng);
+        zoom_handler(this.graphSvg);
+
+        function zoom_actions() {
+            that.graphSvg_g.attr("transform", d3.event.transform);
+        }
     }
 
     find_col_domain(col_key){
         let min_val = Infinity;
         let max_val = -Infinity;
-        this.nodes.forEach(node=>{
-            if(node.avgs[col_key]<min_val){
-                min_val = node.avgs[col_key];
-            }
-            if(node.avgs[col_key]>max_val){
-                max_val = node.avgs[col_key];
-            }
-        })
+        if(col_key === 'Number of points') {
+            this.nodes.forEach(node=>{
+                if(node.size<min_val){
+                    min_val = node.size;
+                }
+                if(node.size>max_val){
+                    max_val = node.size;
+                }
+            })
+        } else {
+            this.nodes.forEach(node=>{
+                if(node.avgs[col_key]<min_val){
+                    min_val = node.avgs[col_key];
+                }
+                if(node.avgs[col_key]>max_val){
+                    max_val = node.avgs[col_key];
+                }
+            })
+        }
+        
         return [min_val,max_val];
     }
 
@@ -652,7 +687,11 @@ class Graph{
         d3.selectAll(".viewer-graph__vertex")
             .style("fill", d=>{
                 if(d3.select("#node"+d.id).classed("selected")===false){
-                    return this.colorScale(d.avgs[col_key]);
+                    if(col_key === "Number of points"){
+                        return this.colorScale(d.size)
+                    } else{
+                        return this.colorScale(d.avgs[col_key]);
+                    }
                 }
                 });
         d3.selectAll(".viewer-graph__label")

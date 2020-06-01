@@ -34,6 +34,10 @@ To perform linear regression, please also make sure you have [statsmodels](https
 pip install statsmodels
 ```
 
+## Video
+
+[![Screenshot of video](app/static/assets/video-teaser.png)](https://www.youtube.com/watch?v=z2VEkv1apF8)
+
 ## License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.

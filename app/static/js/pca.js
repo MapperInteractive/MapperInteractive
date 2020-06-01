@@ -11,6 +11,7 @@ class PCA{
     }
 
     draw_PCA(arr){
+        console.log('pca',arr)
         this.clear_canvas();
         let arr_new = [];
         arr.split("n").forEach(d=>{

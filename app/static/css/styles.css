@@ -12,13 +12,23 @@ body {
 }
 
 #workspace-graph {
-    height: 700px;
+    /* height: 700px; */
+    height: 91vh;
     background-color:#FFF;
     border: 1px solid #C5CBD0;
     border-radius: 5px;
     -webkit-box-shadow: 1px 1px 2px 1px rgba(221, 221, 221, 0.7);
     -moz-box-shadow: 1px 1px 2px 1px rgba(221, 221, 221, 0.7);
     box-shadow: 1px 1px 2px 1px rgba(221, 221, 221, 0.7);
+}
+
+.sidebar-container {
+  background-color: whitesmoke;
+  border: 1px solid #C5CBD0;
+  border-radius: 5px;
+  height: 91vh;
+  padding: 10px;
+  overflow-y: scroll;
 }
 
 .viewer-graph__toolbar {
