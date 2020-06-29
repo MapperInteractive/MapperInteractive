@@ -6,7 +6,9 @@ import json
 import numpy as np
 import pandas as pd
 import os
-from kmapper import KeplerMapper, Cover
+import re
+# from kmapper import KeplerMapper, Cover
+from .kmapper import KeplerMapper, Cover
 from sklearn import cluster
 import networkx as nx
 import sklearn
@@ -25,47 +27,57 @@ def process_text_data():
     '''
     Check for:
     1. Missing value
-    2. Non-numerical elements
+    2. Non-numerical elements in numerical cols
+    3. If cols are non-numerical, check if cols are categorical
     '''
-    text_data = request.form.get('data')
-    text_data = json.loads(text_data)['data'].split("\n")
-    columns = text_data[0].split("\r")[0].split(",")
-    columns = [str(c) for c in columns]
-    col_dist = {}
-    for i in range(len(columns)):
-        col_dist[i] = [] # record non-numerical lines for each column
-    data_new = []
-    for i in range(1,len(text_data)):
-        d = text_data[i].split(",")
-        if len(d) == len(columns): # if len(d)!=len(columns): there are missing values, eliminate this data point
-            d_new = []
-            for j in range(len(d)):
-                try:
-                    float(d[j])
-                except ValueError:
-                    col_dist[j].append(i-1)
-                d_new.append(d[j])
-            data_new.append(d_new)
-    data_new = np.array(data_new)
-    rows2delete = []
+    text_data = request.get_data().decode('utf-8').splitlines()
+    cols = text_data[0].split(',')
+    mat = [n.split(',') for n in text_data] # csv: if an element is empty, it will be "".
+    newdf1 = np.array(mat)[1:]
+    rows2delete = np.array([])
     cols2delete = []
-    print(columns)
-    # print(col_dist)
-    for c_idx in col_dist:
-        if len(col_dist[c_idx]) > 0.8*data_new.shape[0]: # if less than 80% elements in this column are numerical, delete the whole column
-            cols2delete.append(c_idx)
-        else: # else, delete the non-numerical rows
-            rows2delete += col_dist[c_idx]
-    columns_new = [columns[c_idx] for c_idx in range(len(columns)) if c_idx not in cols2delete]
-    data_new = np.delete(data_new, cols2delete, axis=1)
-    data_new = np.delete(data_new, list(set(rows2delete)), axis=0)
-    data_new = pd.DataFrame(data_new, columns=columns_new, dtype=float)
-    data_new.columns = columns_new
-    data_new.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False)
-    print("testing")
-    print(columns_new)
-    # return {"columns":columns_new}
-    return jsonify(columns=columns_new)
+    
+    ### Delete missing values ###
+    for i in range(len(cols)):
+        col = newdf1[:,i]
+        if np.sum(col == "") >= 0.2*len(newdf1): # if less than 80% elements in this column are numerical, delete the whole column
+            cols2delete.append(i)
+        else:
+            rows2delete = np.concatenate((rows2delete, np.where(col=="")[0]))
+    rows2delete = np.unique(rows2delete).astype("int")
+    newdf2 = np.delete(np.delete(newdf1, cols2delete, axis=1), rows2delete, axis=0)
+    cols = [cols[i] for i in range(len(cols)) if i not in cols2delete]
+
+    ### check if numerical cols ###
+    cols_numerical_idx = []
+    cols_categorical_idx = []
+    rows2delete = np.array([])
+    r = re.compile(r'^-?\d+(?:\.\d+)?$')
+    vmatch = np.vectorize(lambda x:bool(r.match(x)))
+    for i in range(len(cols)):
+        col = newdf2[:,i]
+        col_match = vmatch(col)
+        if np.sum(col_match) >= 0.8*len(newdf1): # if more than 90% elements can be converted to float, keep the col, and delete rows that cannot be convert to float:
+            cols_numerical_idx.append(i)
+            rows2delete = np.concatenate((rows2delete, np.where(col_match==False)[0]))
+        else: 
+            ### check if categorical cols### 
+            if len(np.unique(col)) <= 10: # if less than 10 different values: categorical
+                cols_categorical_idx.append(i)
+    newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx]
+    newdf3 = np.delete(newdf3, rows2delete, axis=0)
+    newdf3_cols = [cols[idx] for idx in cols_numerical_idx+cols_categorical_idx]
+    newdf3 = pd.DataFrame(newdf3)
+    newdf3.columns = newdf3_cols
+    # write the data frame
+    newdf3.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False) 
+    # write the cols info
+    cols_numerical = [cols[idx] for idx in cols_numerical_idx]
+    cols_categorical = [cols[idx] for idx in cols_categorical_idx]
+    cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical}
+    with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
+        f.write(json.dumps(cols_dict, indent=4))
+    return jsonify(columns=cols_numerical)
 
 @app.route('/mapper_loader', methods=['POST','GET'])
 def get_graph():
@@ -219,7 +231,7 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
 
     # print(np.max(data_new, axis=0), np.min(data_new, axis=0))
     # print(np.max(lens, axis=0), np.min(lens, axis=0))
-    graph = mapper.map(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+    graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
 
     return graph
 

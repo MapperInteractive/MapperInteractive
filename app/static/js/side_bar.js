@@ -1,5 +1,6 @@
 class DataLoader{
     constructor(all_cols){
+        console.log(all_cols)
         this.all_cols = all_cols;
         this.selected_cols = all_cols.slice(0);
         this.selectable_cols = [];

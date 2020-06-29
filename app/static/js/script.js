@@ -11,12 +11,26 @@ d3.select("#files")
         let fileReader = new FileReader();
         fileReader.onload = function(fileLoadedEvent) {
             let textFromFileLoaded = fileLoadedEvent.target.result;
-            $.post("/data_process", {
-                data:JSON.stringify({"data":textFromFileLoaded})
-            }, function(res){
-                console.log(res);
-                that.side_bar = new DataLoader(res.columns);
+            // console.log(textFromFileLoaded)
+            $.ajax({
+                type: "POST",
+                url: "/data_process",
+                data: textFromFileLoaded,
+                dataType:'text',
+                success: function (response) {
+                    console.log(JSON.parse(response));
+                    that.side_bar = new DataLoader(JSON.parse(response).columns);
+                },
+                error: function (error) {
+                    console.log("error",error);
+                }
             })
+            // $.post("/data_process", {
+            //     data:JSON.stringify({"data":textFromFileLoaded})
+            // }, function(res){
+            //     console.log(res);
+            //     that.side_bar = new DataLoader(res.columns);
+            // })
             d3.select(".columns-group")
                 .style("max-height","1000px")
                 .style("visibility", "visible")
