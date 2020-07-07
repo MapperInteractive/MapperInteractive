@@ -79,7 +79,7 @@ d3.select("#pca")
                 data: JSON.stringify({"nodes":selected_nodes})
             }, function(res){
                 that.pca = new PCA(that.side_bar.selected_cols, selected_nodes);
-                that.pca.draw_PCA(res.pca);
+                that.pca.draw_PCA(JSON.parse(res.pca));
             })
         }
     })

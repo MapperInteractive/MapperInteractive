@@ -18,6 +18,8 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import KernelDensity
 from scipy.spatial import distance
+from sklearn.cluster import KMeans
+
 
 @app.route('/')
 @app.route('/MapperInteractive_new')
@@ -150,29 +152,27 @@ def pca():
     n_components = 2
     '''
     selected_nodes = json.loads(request.form.get('data'))['nodes']
-    # print(selected_nodes)
+    print(selected_nodes)
     data = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
     cols = data.columns
-    # print(cols)
+    print(cols)
     with open(APP_STATIC+"/uploads/nodes_detail.json") as f:
         nodes_detail = json.load(f)
-    node_labels = np.repeat(-999, data.shape[0])
+    selected_rows = []
     for node in selected_nodes:
-        node_labels[nodes_detail[node]] = node
-    data['node_label'] = node_labels
-    data = data.iloc[np.where(data['node_label']!=-999)[0],:] # only selected rows
-    # print(data)
+        selected_rows += nodes_detail[node]
+    selected_rows = list(set(selected_rows))
+    data = data.iloc[selected_rows, :]
+    data.index = range(len(data))
     pca = PCA(n_components=2)
-    pca.fit(data.loc[:,cols])
-    data_new = pca.transform(data.loc[:,cols])
+    data_new = pca.fit_transform(data.loc[:,cols])
     data_new = pd.DataFrame(data_new)
-    # data_new.columns = cols
-    data_new['node_label'] = data['node_label']
-    data_new2 = ''
-    for i in range(data_new.shape[0]):
-        data_new2+=str(list(data_new.iloc[i,:]))+'n'
-    # print(data_new2)
-    return jsonify(pca=data_new2)
+    data_new.columns = ['pc1', 'pc2']
+    # clustering
+    data_new['kmeans_cluster'] = KMeans(n_clusters=min(len(selected_nodes), 6), random_state=0).fit(data_new).labels_
+
+    data_new = data_new.to_json(orient='records')
+    return jsonify(pca=data_new)
 
 def run_mapper(data_array, col_names, interval, overlap, dbscan_eps, dbscan_min_samples, filter_function):
         """This function is called when the form is submitted. It triggers construction of Mapper. 
@@ -221,44 +221,45 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
 
     if len(filter_function) == 1:
         f = filter_function[0]
-        if f in ["sum", "mean", "median", "max", "min", "std", "l2norm"]:
-            lens = mapper.fit_transform(data, projection=f)
-        elif f == "Density":
-            ### TODO: Allow users to select kernel and bandwidth ###
-            kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(data)
-            lens = kde.score_samples(data).reshape(-1,1)
-            scaler = MinMaxScaler()
-            lens = scaler.fit_transform(lens)
-        elif f == "Eccentricity":
-            ### TODO: Allow users to select p and distance_matrix ###
-            p = 0.5
-            distance_matrix = "euclidean"
-            pdist = distance.squareform(distance.pdist(data, metric=distance_matrix))
-            lens = np.array([(np.sum(pdist**p, axis=1)/len(data))**(1/p)]).reshape(-1,1)
-        elif f == "PC1":
-            pca = PCA(n_components=min(2, data.shape[1]))
-            lens = pca.fit_transform(data)[:,0]
-        elif f == "PC2":
-            print(data.shape)
-            if data.shape[1] > 1:
-                pca = PCA(n_components=2)
-                lens = pca.fit_transform(data)[:,1]
-        else:
-            lens = np.array(data[f]).reshape(-1,1)
+        lens = compute_lens(f, data, mapper)
+        
     elif len(filter_function) == 2:
         lens = []
         for f in filter_function:
-            if f in ["sum", "mean", "median", "max", "min", "std", "l2norm"]:
-                lens.append(mapper.fit_transform(data_new, projection=f))
-            else:
-                lens.append(np.array(data[f]).reshape(-1,1))
+            lens_f = compute_lens(f, data, mapper)
+            lens.append(lens_f)
         lens = np.concatenate((lens[0], lens[1]), axis=1)
 
-    # print(np.max(data_new, axis=0), np.min(data_new, axis=0))
-    # print(np.max(lens, axis=0), np.min(lens, axis=0))
     graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
 
     return graph
+
+def compute_lens(f, data, mapper):
+    data_array = np.array(data)
+    if f in ["sum", "mean", "median", "max", "min", "std", "l2norm"]:
+        lens = mapper.fit_transform(data_array, projection=f).reshape(-1,1)
+    elif f == "Density":
+        ### TODO: Allow users to select kernel and bandwidth ###
+        kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(data_array)
+        lens = kde.score_samples(data_array).reshape(-1,1)
+        scaler = MinMaxScaler()
+        lens = scaler.fit_transform(lens)
+    elif f == "Eccentricity":
+        ### TODO: Allow users to select p and distance_matrix ###
+        p = 0.5
+        distance_matrix = "euclidean"
+        pdist = distance.squareform(distance.pdist(data_array, metric=distance_matrix))
+        lens = np.array([(np.sum(pdist**p, axis=1)/len(data_array))**(1/p)]).reshape(-1,1)
+    elif f == "PC1":
+        pca = PCA(n_components=min(2, data_array.shape[1]))
+        lens = pca.fit_transform(data_array)[:,0].reshape(-1,1)
+    elif f == "PC2":
+        if data_array.shape[1] > 1:
+            pca = PCA(n_components=2)
+            lens = pca.fit_transform(data_array)[:,1].reshape(-1,1)
+    else:
+        lens = np.array(data[f]).reshape(-1,1)
+    return lens
 
 
 def _parse_result(data_array, graph):
