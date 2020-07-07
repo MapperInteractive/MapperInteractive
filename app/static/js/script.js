@@ -11,7 +11,6 @@ d3.select("#files")
         let fileReader = new FileReader();
         fileReader.onload = function(fileLoadedEvent) {
             let textFromFileLoaded = fileLoadedEvent.target.result;
-            // console.log(textFromFileLoaded)
             $.ajax({
                 type: "POST",
                 url: "/data_process",
@@ -25,12 +24,6 @@ d3.select("#files")
                     console.log("error",error);
                 }
             })
-            // $.post("/data_process", {
-            //     data:JSON.stringify({"data":textFromFileLoaded})
-            // }, function(res){
-            //     console.log(res);
-            //     that.side_bar = new DataLoader(res.columns);
-            // })
             d3.select(".columns-group")
                 .style("max-height","1000px")
                 .style("visibility", "visible")

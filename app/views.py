@@ -16,6 +16,8 @@ import sklearn
 import statsmodels.api as sm
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.neighbors import KernelDensity
+from scipy.spatial import distance
 
 @app.route('/')
 @app.route('/MapperInteractive_new')
@@ -31,6 +33,7 @@ def process_text_data():
     3. If cols are non-numerical, check if cols are categorical
     '''
     text_data = request.get_data().decode('utf-8').splitlines()
+    print(len(text_data))
     cols = text_data[0].split(',')
     mat = [n.split(',') for n in text_data] # csv: if an element is empty, it will be "".
     newdf1 = np.array(mat)[1:]
@@ -52,8 +55,9 @@ def process_text_data():
     cols_numerical_idx = []
     cols_categorical_idx = []
     rows2delete = np.array([])
-    r = re.compile(r'^-?\d+(?:\.\d+)?$')
-    vmatch = np.vectorize(lambda x:bool(r.match(x)))
+    r1 = re.compile(r'^-?\d+(?:\.\d+)?$')
+    r2 = re.compile(r'[+\-]?[^A-Za-z]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)') # scientific notation
+    vmatch = np.vectorize(lambda x:bool(r1.match(x) or r2.match(x)))
     for i in range(len(cols)):
         col = newdf2[:,i]
         col_match = vmatch(col)
@@ -85,6 +89,7 @@ def get_graph():
     mapper_data = json.loads(mapper_data)
     selected_cols = mapper_data['cols']
     data = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
+    data = data[selected_cols].astype("float")
     all_cols = list(data.columns)
     config = mapper_data["config"]
     norm_type = config["norm_type"]
@@ -102,10 +107,10 @@ def get_graph():
     # normalization
     if norm_type == "none":
         pass
-    elif norm_type == "0-1":
+    elif norm_type == "0-1": # axis=0, min-max norm for each column
         scaler = MinMaxScaler()
-        scaler.fit(data)
-        data = scaler.transform(data)
+        # scaler.fit(data)
+        data = scaler.fit_transform(data)
     else:
         data = sklearn.preprocessing.normalize(data, norm=norm_type, axis=0, copy=False, return_norm=False)
     data = pd.DataFrame(data, columns = all_cols)
@@ -216,14 +221,32 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
 
     if len(filter_function) == 1:
         f = filter_function[0]
-        if f in ["sum", "mean", "median", "max", "min", "std"]:
+        if f in ["sum", "mean", "median", "max", "min", "std", "l2norm"]:
             lens = mapper.fit_transform(data_new, projection=f)
+        elif f == "Density":
+            ### TODO: Allow users to select kernel and bandwidth ###
+            kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(data_new)
+            lens = kde.score_samples(data_new).reshape(-1,1)
+            scaler = MinMaxScaler()
+            lens = scaler.fit_transform(lens)
+        elif f == "Eccentricity":
+            ### TODO: Allow users to select p and distance_matrix ###
+            p = 0.5
+            distance_matrix = "euclidean"
+            pdist = distance.squareform(distance.pdist(data_new, metric=distance_matrix))
+            lens = np.array([(np.sum(pdist**p, axis=1)/len(data_new))**(1/p)]).reshape(-1,1)
+        elif f == "PC1":
+            pca = PCA(n_components=2)
+            lens = pca.fit_transform(data_new)[:,0]
+            print("PCA")
+            print(data_new.shape)
+            print(pca.fit_transform(data_new))
         else:
             lens = np.array(data[f]).reshape(-1,1)
     elif len(filter_function) == 2:
         lens = []
         for f in filter_function:
-            if f in ["sum", "mean", "median", "max", "min", "std"]:
+            if f in ["sum", "mean", "median", "max", "min", "std", "l2norm"]:
                 lens.append(mapper.fit_transform(data_new, projection=f))
             else:
                 lens.append(np.array(data[f]).reshape(-1,1))
@@ -258,7 +281,8 @@ def _parse_result(data_array, graph):
         data['nodes'].append({
             "id": str(i),
             "size": len(graph['nodes'][key]),
-            "avgs": cluster_avg_dict
+            "avgs": cluster_avg_dict,
+            "vertices": cluster
             })
         i += 1
     

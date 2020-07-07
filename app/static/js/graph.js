@@ -515,6 +515,13 @@ class Graph{
             .on("click",(d)=>{
                 this.clicking = true;
                 if(this.if_select_node){
+                    console.log("node", d)
+                    let details_text = "";
+                    d.vertices.forEach(nn=>{
+                        details_text += nn+" ";
+                    })
+                    d3.select("#nodes-details-labels").html(details_text);
+
                     this.unhighlight_selectable();
                     if(this.selected_nodes.indexOf(d.id)===-1){ // Selecting nodes
                         this.selected_nodes.push(d.id);
