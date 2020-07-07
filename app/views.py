@@ -89,8 +89,9 @@ def get_graph():
     mapper_data = json.loads(mapper_data)
     selected_cols = mapper_data['cols']
     data = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
-    data = data[selected_cols].astype("float")
     all_cols = list(data.columns)
+
+    # data = data[selected_cols].astype("float")
     config = mapper_data["config"]
     norm_type = config["norm_type"]
     eps = config["eps"]
@@ -109,7 +110,6 @@ def get_graph():
         pass
     elif norm_type == "0-1": # axis=0, min-max norm for each column
         scaler = MinMaxScaler()
-        # scaler.fit(data)
         data = scaler.fit_transform(data)
     else:
         data = sklearn.preprocessing.normalize(data, norm=norm_type, axis=0, copy=False, return_norm=False)
@@ -222,25 +222,27 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
     if len(filter_function) == 1:
         f = filter_function[0]
         if f in ["sum", "mean", "median", "max", "min", "std", "l2norm"]:
-            lens = mapper.fit_transform(data_new, projection=f)
+            lens = mapper.fit_transform(data, projection=f)
         elif f == "Density":
             ### TODO: Allow users to select kernel and bandwidth ###
-            kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(data_new)
-            lens = kde.score_samples(data_new).reshape(-1,1)
+            kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(data)
+            lens = kde.score_samples(data).reshape(-1,1)
             scaler = MinMaxScaler()
             lens = scaler.fit_transform(lens)
         elif f == "Eccentricity":
             ### TODO: Allow users to select p and distance_matrix ###
             p = 0.5
             distance_matrix = "euclidean"
-            pdist = distance.squareform(distance.pdist(data_new, metric=distance_matrix))
-            lens = np.array([(np.sum(pdist**p, axis=1)/len(data_new))**(1/p)]).reshape(-1,1)
+            pdist = distance.squareform(distance.pdist(data, metric=distance_matrix))
+            lens = np.array([(np.sum(pdist**p, axis=1)/len(data))**(1/p)]).reshape(-1,1)
         elif f == "PC1":
-            pca = PCA(n_components=2)
-            lens = pca.fit_transform(data_new)[:,0]
-            print("PCA")
-            print(data_new.shape)
-            print(pca.fit_transform(data_new))
+            pca = PCA(n_components=min(2, data.shape[1]))
+            lens = pca.fit_transform(data)[:,0]
+        elif f == "PC2":
+            print(data.shape)
+            if data.shape[1] > 1:
+                pca = PCA(n_components=2)
+                lens = pca.fit_transform(data)[:,1]
         else:
             lens = np.array(data[f]).reshape(-1,1)
     elif len(filter_function) == 2:

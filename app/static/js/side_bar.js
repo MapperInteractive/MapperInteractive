@@ -175,6 +175,9 @@ class DataLoader{
         if(this.selected_cols.length >= 1){
             // this.filters = this.selectable_cols.concat(["sum", "mean", "median", "max", "min", "std"]);
             this.filters = this.all_cols.concat(["l2norm", "Density", "Eccentricity", "PC1", "PC2", "sum", "mean", "median", "max", "min", "std"]);
+            if(this.all_cols.length === 1){
+                this.filters = this.all_cols.concat(["l2norm", "Density", "Eccentricity", "PC1", "sum", "mean", "median", "max", "min", "std"]);
+            }
         } else {
             this.filters = this.selectable_cols.slice(0);
         }
