@@ -35,7 +35,6 @@ def process_text_data():
     3. If cols are non-numerical, check if cols are categorical
     '''
     text_data = request.get_data().decode('utf-8').splitlines()
-    print(len(text_data))
     cols = text_data[0].split(',')
     mat = [n.split(',') for n in text_data] # csv: if an element is empty, it will be "".
     newdf1 = np.array(mat)[1:]
@@ -83,15 +82,18 @@ def process_text_data():
     cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical}
     with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
         f.write(json.dumps(cols_dict, indent=4))
-    return jsonify(columns=cols_numerical)
+    return jsonify(columns=cols_numerical, categorical_columns=cols_categorical)
 
 @app.route('/mapper_loader', methods=['POST','GET'])
 def get_graph():
     mapper_data = request.form.get('data')
     mapper_data = json.loads(mapper_data)
     selected_cols = mapper_data['cols']
+    all_cols = mapper_data['all_cols'] # all numerical cols
+    categorical_cols = mapper_data['categorical_cols']
     data = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
-    all_cols = list(data.columns)
+    data_categorical = data[categorical_cols]
+    data = data[all_cols]
 
     # data = data[selected_cols].astype("float")
     config = mapper_data["config"]

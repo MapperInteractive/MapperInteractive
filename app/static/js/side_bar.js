@@ -1,13 +1,11 @@
 class DataLoader{
-    constructor(all_cols){
-        console.log(all_cols)
+    constructor(all_cols, categorical_cols){
         this.all_cols = all_cols;
         this.selected_cols = all_cols.slice(0);
         this.selectable_cols = [];
+        this.categorical_cols = categorical_cols;
 
         this.config = {};
-
-        console.log(all_cols)
   
         this.draw_all_cols();
         this.draw_selected_cols();
@@ -180,10 +178,7 @@ class DataLoader{
             }
         } else {
             this.filters = this.selectable_cols.slice(0);
-        }
-
-        console.log(this.filters)
-        
+        }        
 
         let fg = d3.select("#filter_function_selection").selectAll("option").data(this.filters);
         fg.exit().remove();

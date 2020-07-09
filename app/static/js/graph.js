@@ -1,5 +1,5 @@
 class Graph{
-    constructor(graph_data, col_keys, connected_components){
+    constructor(graph_data, col_keys, connected_components, categorical_cols){
         this.nodes = graph_data.nodes;
         this.links = graph_data.links;
         this.col_keys = col_keys;
@@ -7,6 +7,8 @@ class Graph{
         for(let i=0; i<connected_components.length; i++){
             this.connected_components["cluster"+i] = connected_components[i];
         }
+        this.categorical_cols = categorical_cols;
+        console.log("categorical cols", this.categorical_cols)
         this.assign_cc2node();
         this.find_neighbor_nodes();
         console.log(this.nodes)
@@ -67,7 +69,7 @@ class Graph{
         this.selection_nodes();
     }
     color_functions(){
-        let selections = ['Number of points'].concat(this.col_keys);
+        let selections = ['- None -', 'Number of points'].concat(this.col_keys);
         let vg = d3.select("#color_function_values").selectAll("option").data(selections);
         vg.exit().remove();
         vg = vg.enter().append("option").merge(vg)
@@ -81,8 +83,6 @@ class Graph{
         let that=this;
         let value_dropdown = document.getElementById("color_function_values");
         let value = value_dropdown.options[value_dropdown.selectedIndex].text;
-        this.color_col = value;
-        this.colorScale.domain(this.find_col_domain(value));
         value_dropdown.onchange = function(){
             value = value_dropdown.options[value_dropdown.selectedIndex].text;
             that.color_col = value;
@@ -92,9 +92,6 @@ class Graph{
     
         let map_dropdown = document.getElementById("color_function_maps");
         let map = map_dropdown.options[map_dropdown.selectedIndex].text;
-        if(this.COLORMAPS[map]){
-            this.colorScale.range(this.COLORMAPS[map]);
-        } else { this.colorScale.range([undefined, undefined]); }
         map_dropdown.onchange = function(){
             map = map_dropdown.options[map_dropdown.selectedIndex].text;
             if(that.COLORMAPS[map]){
@@ -103,10 +100,6 @@ class Graph{
             } else { that.colorScale.range([undefined, undefined]); }
             that.fill_vertex(value);
         }
-
-        
-
-
     }
 
 
@@ -214,28 +207,45 @@ class Graph{
     }
 
     get_scale(){
-        let hist_scale = {};
-        let col_ranges = {};
-        for(let i=0; i<this.col_keys.length; i++){
-            col_ranges[this.col_keys[i]] = {"max":-Infinity, "min":Infinity};
-        }
+        // let hist_scale = {};
+        // let col_ranges = {};
+        // for(let i=0; i<this.col_keys.length; i++){
+        //     col_ranges[this.col_keys[i]] = {"max":-Infinity, "min":Infinity};
+        // }
+        // this.nodes.forEach(n=>{
+        //     for(let col_key in n.avgs){
+        //         if(n.avgs[col_key]<col_ranges[col_key].min){
+        //             col_ranges[col_key].min = n.avgs[col_key];
+        //         }
+        //         if(n.avgs[col_key]>col_ranges[col_key].max){
+        //             col_ranges[col_key].max = n.avgs[col_key];
+        //         }
+        //     }
+        // })
+        // for(let i=0; i<this.col_keys.length; i++){
+        //     let col_key = this.col_keys[i]
+        //     hist_scale[col_key] = d3.scaleLinear()
+        //         .domain([col_ranges[col_key].min, col_ranges[col_key].max])
+        //         .range([this.hist_margin.left*6, this.hist_width-this.hist_margin.left*10]);
+        // }
+        // return hist_scale;
+        let max_val = -Infinity;
+        let min_val = Infinity;
         this.nodes.forEach(n=>{
             for(let col_key in n.avgs){
-                if(n.avgs[col_key]<col_ranges[col_key].min){
-                    col_ranges[col_key].min = n.avgs[col_key];
+                if(n.avgs[col_key]<min_val){
+                    min_val = n.avgs[col_key];
                 }
-                if(n.avgs[col_key]>col_ranges[col_key].max){
-                    col_ranges[col_key].max = n.avgs[col_key];
+                if(n.avgs[col_key]>max_val){
+                    max_val = n.avgs[col_key];
                 }
             }
         })
-        for(let i=0; i<this.col_keys.length; i++){
-            let col_key = this.col_keys[i]
-            hist_scale[col_key] = d3.scaleLinear()
-                .domain([col_ranges[col_key].min, col_ranges[col_key].max])
-                .range([this.hist_margin.left*6, this.hist_width-this.hist_margin.left*10]);
-        }
-        return hist_scale;
+        min_val = Math.min(0, min_val);
+        let hist_scale = d3.scaleLinear()
+            .domain([min_val, max_val])
+            .range([0, this.hist_width-this.hist_margin.left*10]);
+        return hist_scale
     }
 
     clear_mapper(){
@@ -371,7 +381,8 @@ class Graph{
                     .attr("x",this.hist_margin.left*6)
                     .attr("y",j*(this.hist_margin.between+this.hist_margin.bar_height)+this.hist_margin.top)
                     .attr("height", 5)
-                    .attr("width", this.hist_scale[avgs[j].key](avgs[j].value))
+                    // .attr("width", this.hist_scale[avgs[j].key](avgs[j].value))
+                    .attr("width", this.hist_scale(avgs[j].value))
                     .attr("fill", colorScale(j));
                 
                 hist_svg.append("text")
@@ -515,7 +526,6 @@ class Graph{
             .on("click",(d)=>{
                 this.clicking = true;
                 if(this.if_select_node){
-                    console.log("node", d)
                     let details_text = "";
                     d.vertices.forEach(nn=>{
                         details_text += nn+" ";
