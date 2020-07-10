@@ -84,35 +84,44 @@ class Graph{
         let that=this;
         let value_dropdown = document.getElementById("color_function_values");
         let value = value_dropdown.options[value_dropdown.selectedIndex].text;
+        let map_dropdown = document.getElementById("color_function_maps");
+        let map = map_dropdown.options[map_dropdown.selectedIndex].text;
+        
         value_dropdown.onchange = function(){
             value = value_dropdown.options[value_dropdown.selectedIndex].text;
             that.color_col = value;
-            if(that.col_keys.indexOf(value)!=-1){
+            if(that.col_keys.indexOf(value)!=-1 || value==="Number of points"){
+                $('#color-legend-svg').remove();
                 that.colorScale.domain(that.find_col_domain(value));
                 that.fill_vertex(value);
-                d3.select("#color_function_maps-container").style("visibility", "visible");
+                if(map!='- None -'){
+                    that.draw_color_legend(that.colorScale);
+                }
+                $("#color_function_maps").prop("disabled", false);
             } else if(that.categorical_cols.indexOf(value)!=-1){
                 console.log(value)
-                that.fill_vertex_categorical(value);
-                d3.select("#color_function_maps-container").style("visibility", "hidden");
+                let color_dict = that.fill_vertex_categorical(value);
+                that.draw_color_legend_categorical(color_dict);
+                $("#color_function_maps").prop("disabled", true);
             }
             
         }
-    
-        let map_dropdown = document.getElementById("color_function_maps");
-        let map = map_dropdown.options[map_dropdown.selectedIndex].text;
+        
         map_dropdown.onchange = function(){
             map = map_dropdown.options[map_dropdown.selectedIndex].text;
             if(that.COLORMAPS[map]){
                 that.colorScale.range(that.COLORMAPS[map]);
-                // that.draw_color_legend();
-            } else { that.colorScale.range([undefined, undefined]); }
+                that.draw_color_legend(that.colorScale);
+            } else { 
+                that.colorScale.range([undefined, undefined]); 
+                $('#color-legend-svg').remove();
+            }
             that.fill_vertex(value);
         }
     }
 
 
-    draw_color_legend(){
+    draw_color_legend(color_scale){
         // reset svg 
         $('#color-legend-svg').remove();
         $('#block_body-inner_color').append('<svg width="0" height="0" id="color-legend-svg"></svg>');
@@ -126,35 +135,63 @@ class Graph{
         let axisDomain = this.find_col_domain(this.color_col);
         let svg = d3.select("#color-legend-svg").attr('width', width).attr('height', height);
 
-
         // axis
         let tickValues = [axisDomain[0], d3.mean(axisDomain), axisDomain[1]];
-        let axisScale = d3.scaleLinear().domain(axisDomain).range([axisMargin, width - axisMargin]);
+        let axisScale = d3.scaleLinear().domain(axisDomain).range([axisMargin, width - axisMargin*3]);
         let axis = d3.axisBottom(axisScale).tickValues(tickValues);
 
-        svg.append("g").attr("transform", "translate(0,25)").call(axis);
+        svg.append("g").attr("transform", "translate(0,40)").call(axis);
 
-
-
-        let tilesGroup = svg.append("g")
+        let legendGroup = svg.append("g")
 
         let domainStep = (axisDomain[1] - axisDomain[0])/colorTileNumber;
         let rects = d3.range(axisDomain[0], axisDomain[1], domainStep)
-        let rg = this.titlesGroup.selectAll("rect").data(rects);
+        let rg = legendGroup.selectAll("rect").data(rects);
+        console.log(rects)
         rg.exit().remove();
         rg = rg.enter().append("rect").merge(rg);
         rg
-            .attr('x', (d)=>axisScale(d))
-            .attr('y', )
-        .map((d)=>{
-            let color = this.colorScale(d);
-            tilesGroup.append('rect')
-                .attr('x', x)
-                .attr('width', colorTileWidth)
-                .attr('height', colorTileHeight)
-                .attr('fill', color)
-                .classed('color_legend', true);
-        })
+            .attr('x', d=>axisScale(d))
+            .attr('y', 10)
+            .attr('width', colorTileWidth-1)
+            .attr('height',colorTileHeight)
+            .attr('fill', d=>color_scale(d));
+    }
+
+    draw_color_legend_categorical(color_dict){
+        // reset svg 
+        $('#color-legend-svg').remove();
+        $('#block_body-inner_color').append('<svg width="0" height="0" id="color-legend-svg"></svg>');
+        // draw legend
+        let color_array = d3.entries(color_dict);
+        let width = $(d3.select("#workspace-color_functions").node()).width();
+        let margin = 10;
+        let rect_height = 10;
+        let rect_width = 25;
+        let rect_margin = 8;
+        let height = color_array.length*(rect_height+rect_margin)+margin*2
+        let svg = d3.select("#color-legend-svg").attr('width', width).attr('height', height);
+
+        console.log(color_array)
+
+        let lg = svg.selectAll("g").data(color_array);
+        lg.exit().remove();
+        lg = lg.enter().append("g").merge(lg)
+            .attr("transform", "translate("+margin+","+margin+")")
+        lg.append("rect")
+            .attr("x",0)
+            .attr("y",(d,i)=>i*(rect_height+rect_margin))
+            .attr("height", rect_height)
+            .attr("width",rect_width)
+            .attr("fill", d=>d.value)
+            .style("opacity", 0.8);
+
+        lg.append("text")
+            .attr("x", rect_width+margin*3)
+            .attr("y", (d,i)=>i*(rect_height+rect_margin)+8)
+            .text(d=>d.key);
+
+
 
     }
 
@@ -274,6 +311,7 @@ class Graph{
         $('#color_function_maps').remove();
         $('#color-function-values-container').append('<select class="custom-select"  name="color_function_values" id="color_function_values"></select>');
         $('#color-function-maps-container').append('<select class="custom-select"  name="color_function_maps" id="color_function_maps"></select>');
+        $('#color-legend-svg').remove();
     }
 
     selection_nodes(){
@@ -789,7 +827,7 @@ class Graph{
             return pie_data;
         }
 
-
+        return color_dict;
     }
 
 
