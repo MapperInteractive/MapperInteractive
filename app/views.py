@@ -119,6 +119,14 @@ def get_graph():
         data = sklearn.preprocessing.normalize(data, norm=norm_type, axis=0, copy=False, return_norm=False)
     data = pd.DataFrame(data, columns = all_cols)
     mapper_result = run_mapper(data, selected_cols, interval, overlap, eps, min_samples, filter_function)
+    if len(categorical_cols) > 0:
+        for node in mapper_result['nodes']:
+            print("node", node['id'])
+            vertices = node['vertices']
+            data_categorical_i = data_categorical.iloc[vertices]
+            node['categorical_cols_summary'] = {}
+            for col in categorical_cols:
+                node['categorical_cols_summary'][col] = data_categorical_i[col].value_counts().to_dict()
     connected_components = compute_cc(mapper_result)
     return jsonify(mapper=mapper_result, connected_components=connected_components)
 

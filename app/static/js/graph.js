@@ -70,6 +70,7 @@ class Graph{
     }
     color_functions(){
         let selections = ['- None -', 'Number of points'].concat(this.col_keys);
+        selections = selections.concat(this.categorical_cols);
         let vg = d3.select("#color_function_values").selectAll("option").data(selections);
         vg.exit().remove();
         vg = vg.enter().append("option").merge(vg)
@@ -86,8 +87,16 @@ class Graph{
         value_dropdown.onchange = function(){
             value = value_dropdown.options[value_dropdown.selectedIndex].text;
             that.color_col = value;
-            that.colorScale.domain(that.find_col_domain(value));
-            that.fill_vertex(value);
+            if(that.col_keys.indexOf(value)!=-1){
+                that.colorScale.domain(that.find_col_domain(value));
+                that.fill_vertex(value);
+                d3.select("#color_function_maps-container").style("visibility", "visible");
+            } else if(that.categorical_cols.indexOf(value)!=-1){
+                console.log(value)
+                that.fill_vertex_categorical(value);
+                d3.select("#color_function_maps-container").style("visibility", "hidden");
+            }
+            
         }
     
         let map_dropdown = document.getElementById("color_function_maps");
@@ -156,33 +165,41 @@ class Graph{
         sg = sg.enter().append("option").merge(sg)
             .html(d=>d);
 
-        let col_scales = {};
+        this.size_scales = {};
         for(let i=0; i<this.col_keys.length; i++){
             let c = this.col_keys[i];
             let v = this.nodes.map(d=>d.avgs[c]);
-            col_scales[c] = d3.scaleLinear()
+            this.size_scales[c] = d3.scaleLinear()
                 .domain([Math.min(...v), Math.max(...v)])
                 .range([6,18])
         }
         let v = this.nodes.map(d=>d.size);
-        col_scales['Number of points'] = d3.scaleLinear()
+        this.size_scales['Number of points'] = d3.scaleLinear()
             .domain([Math.min(...v), Math.max(...v)])
             .range([6,18])
 
         let size_dropdown = document.getElementById("size_function_values");
         let size = size_dropdown.options[size_dropdown.selectedIndex].text;
+        let that = this;
         size_dropdown.onchange = function(){
             size = size_dropdown.options[size_dropdown.selectedIndex].text;
             if(size === "Number of points"){
                 d3.selectAll(".viewer-graph__vertex")
-                    .attr("r", d=>col_scales[size](d.size));
-            } else if(col_scales[size]){
+                    .attr("r", d=>that.size_scales[size](d.size));
+            } else if(that.size_scales[size]){
                 d3.selectAll(".viewer-graph__vertex")
-                    .attr("r", d=>col_scales[size](d.avgs[size]));
+                    .attr("r", d=>that.size_scales[size](d.avgs[size]));
             } else {
                 d3.selectAll(".viewer-graph__vertex")
                     .attr("r", 12);
             }
+            let arc = d3.arc().innerRadius(0);
+            d3.selectAll(".pie-group-piece")
+                .attr("d", d=>{
+                    let r = d3.select("#node"+d.data.node_id).attr("r")
+                    arc.outerRadius(r);
+                    return arc(d);
+                })
         }
     }
 
@@ -480,10 +497,11 @@ class Graph{
             .force("x", d3.forceX().strength(0.2))
             .force("y", d3.forceY().strength(0.2));
         
-        let ng = this.node_group.selectAll("circle").data(this.nodes);
+        let ng = this.node_group.selectAll("g").data(this.nodes);
         ng.exit().remove();
-        ng = ng.enter().append("circle").merge(ng);
-        ng
+        ng = ng.enter().append("g").merge(ng)
+            .attr("class", "viewer-graph__vertex-group");
+        ng.append("circle")
             .classed("viewer-graph__vertex",true)
             .attr("id",(d)=>"node"+d.id)
             .attr("r", 12)
@@ -630,14 +648,17 @@ class Graph{
         
             let radius = 8;
             ng
-                .attr("cx", function(d) {
-                    return d.x;
-                    // return (d.x = Math.max(radius, Math.min(that.width - radius, d.x)));
-                })
-                .attr("cy", function(d) {
-                    return d.y;
-                    // return (d.y = Math.max(radius, Math.min(that.height - radius, d.y)));
-                })
+                .attr("transform", function (d) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                });
+                // .attr("cx", function(d) {
+                //     return d.x;
+                //     // return (d.x = Math.max(radius, Math.min(that.width - radius, d.x)));
+                // })
+                // .attr("cy", function(d) {
+                //     return d.y;
+                //     // return (d.y = Math.max(radius, Math.min(that.height - radius, d.y)));
+                // })
     
             // **** TODO **** how to make the label centered?
             lbg
@@ -700,6 +721,7 @@ class Graph{
     }
 
     fill_vertex(col_key){
+        d3.selectAll(".pie-group").remove();
         console.log(col_key)
         d3.selectAll(".viewer-graph__vertex")
             .style("fill", d=>{
@@ -719,4 +741,56 @@ class Graph{
                 return 'rgb(' + rgb.join(',') + ')';
             })
     }
+
+    fill_vertex_categorical(col_key){
+        d3.selectAll(".pie-group").remove();
+        let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
+        let color_dict = {};
+        let idx = 0;
+
+        // let that = this;
+        let pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+
+        let pg = d3.selectAll(".viewer-graph__vertex-group").append("g")
+            .attr("class", "pie-group");
+        
+        let arc = d3.arc().innerRadius(0);
+
+        pg.selectAll("path").data(d=>pie(prepare_pie_data(d)))
+            .enter().append("path")
+            .attr("class", "pie-group-piece")
+            .attr("d", d=> {
+                let r = d3.select("#node"+d.data.node_id).attr("r")
+                arc.outerRadius(r);
+                return arc(d);
+            })
+            .attr("fill", d=>d.data.color)
+            .attr("stroke", "#696969")
+            .style("opacity", 0.6);
+
+        function prepare_pie_data(node){
+            let pie_data = [];
+            for(let c in node.categorical_cols_summary[col_key]){
+                let p = {};
+                p.category_id = c;
+                p.value = node.categorical_cols_summary[col_key][c];
+                p.node_id = node.id;
+                if(Object.keys(color_dict).indexOf(c)!=-1){
+                    p.color = color_dict[c];
+                } else {
+                    p.color = color_categorical(idx);
+                    idx += 1;
+                    color_dict[c] = p.color;
+                }
+                pie_data.push(p);
+            }
+            return pie_data;
+        }
+
+
+    }
+
+
 }
