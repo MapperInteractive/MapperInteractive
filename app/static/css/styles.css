@@ -182,35 +182,9 @@ li{
 
 .viewer-graph__vertex {
     cursor: pointer;
-    /* r: 12px;; */
     fill: white;
     stroke: #696969;
     stroke-width: 2px;
-  
-    /* &:hover {
-      stroke: @vertex-hover-stroke-color;
-      stroke-width: @vertex-hover-stroke-width;
-    }
-  
-    &.--unavailable {
-      fill-opacity: 0.3;
-      stroke-opacity: 0.3;
-    }
-  
-    &.--selected {
-      stroke: @vertex-selected-stroke-color;
-      stroke-dasharray: none !important;
-    }
-  
-    &.--candidate {
-      stroke: @vertex-candidate-stroke-color;
-      stroke-dasharray: @vertex-candidate-stroke-dash;
-    }
-  
-    &.--anchor {
-      stroke: @vertex-anchor-stroke-color !important;
-      stroke-width: @vertex-anchor-stroke-width;
-    } */
   }
 
   .viewer-graph__vertex.selected{
@@ -239,11 +213,6 @@ li{
     cursor: pointer;
     stroke: #B3BCC3;
     stroke-width: 2px;
-  
-    /* &.--selected {
-      stroke: @edge-selected-stroke-color;
-      stroke-width: @edge-selected-stroke-width;
-    } */
   }
 
   .viewer-graph__edge.selected {
@@ -261,9 +230,6 @@ li{
     pointer-events: none;
     font: 10px sans-serif;
     fill: #555;  
-    /* &:hover {
-      display: none;
-    } */
 }
 
 /* select nodes/cluster/path */
