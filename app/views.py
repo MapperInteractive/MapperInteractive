@@ -67,7 +67,7 @@ def process_text_data():
             rows2delete = np.concatenate((rows2delete, np.where(col_match==False)[0]))
         else: 
             ### check if categorical cols### 
-            if len(np.unique(col)) <= 10: # if less than 10 different values: categorical
+            if len(np.unique(col)) <= 60: # if less than 10 different values: categorical
                 cols_categorical_idx.append(i)
     newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx]
     newdf3 = np.delete(newdf3, rows2delete, axis=0)

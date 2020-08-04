@@ -169,7 +169,7 @@ class Graph{
         let rect_height = 10;
         let rect_width = 25;
         let rect_margin = 8;
-        let height = color_array.length*(rect_height+rect_margin)+margin*2
+        let height = color_array.length*(rect_height+rect_margin)+margin*2;
         let svg = d3.select("#color-legend-svg").attr('width', width).attr('height', height);
 
         console.log(color_array)
@@ -190,9 +190,6 @@ class Graph{
             .attr("x", rect_width+margin*3)
             .attr("y", (d,i)=>i*(rect_height+rect_margin)+8)
             .text(d=>d.key);
-
-
-
     }
 
     size_functions(){
@@ -350,7 +347,11 @@ class Graph{
         d3.selectAll(".viewer-graph__vertex").classed("selected",false);
         d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
         d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        this.fill_vertex(this.color_col);
+        if(this.col_keys.indexOf(this.color_col)!=-1 || this.color_col==="Number of points"){
+            this.fill_vertex(this.color_col);
+        } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
+            let color_dict = this.fill_vertex_categorical(this.color_col);
+        }
     }
 
     select_cluster(){
@@ -370,7 +371,11 @@ class Graph{
         d3.selectAll(".viewer-graph__vertex").classed("selected",false);
         d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
         d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        this.fill_vertex(this.color_col);
+        if(this.col_keys.indexOf(this.color_col)!=-1 || this.color_col==="Number of points"){
+            this.fill_vertex(this.color_col);
+        } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
+            let color_dict = this.fill_vertex_categorical(this.color_col);
+        }
     }
 
     select_path(){
@@ -391,7 +396,11 @@ class Graph{
         d3.select("#select-node").classed("selected", false);
         this.if_select_cluster = false;
         d3.select("#select-cluster").classed("selected", false);
-        this.fill_vertex(this.color_col);
+        if(this.col_keys.indexOf(this.color_col)!=-1 || this.color_col==="Number of points"){
+            this.fill_vertex(this.color_col);
+        } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
+            let color_dict = this.fill_vertex_categorical(this.color_col);
+        }
     }
 
     select_view(){
@@ -408,7 +417,11 @@ class Graph{
         d3.selectAll(".viewer-graph__vertex").classed("selected",false);
         d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
         d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        this.fill_vertex(this.color_col);
+        if(this.col_keys.indexOf(this.color_col)!=-1 || this.color_col==="Number of points"){
+            this.fill_vertex(this.color_col);
+        } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
+            let color_dict = this.fill_vertex_categorical(this.color_col);
+        }
 
     }
 
@@ -582,12 +595,6 @@ class Graph{
             .on("click",(d)=>{
                 this.clicking = true;
                 if(this.if_select_node){
-                    let details_text = "";
-                    d.vertices.forEach(nn=>{
-                        details_text += nn+" ";
-                    })
-                    d3.select("#nodes-details-labels").html(details_text);
-
                     this.unhighlight_selectable();
                     if(this.selected_nodes.indexOf(d.id)===-1){ // Selecting nodes
                         this.selected_nodes.push(d.id);
@@ -652,6 +659,8 @@ class Graph{
                     })
                     this.draw_hist();
                 }
+                console.log(this.selected_nodes)
+                this.text_cluster_details(this.selected_nodes);
             });
 
         let lg = this.link_group.selectAll("line").data(this.links);
@@ -732,6 +741,33 @@ class Graph{
         }
     }
 
+    text_cluster_details(nodes){
+        let details_text = "";
+        let vertices_list = [];
+        nodes.forEach(nId => {
+            let node_index = parseInt(nId)-1;
+            let node = this.nodes[node_index];
+            // details_text += "<h6>Node "+node.id+"<\h6>";
+            // details_text += "<p>"
+            // node.vertices.forEach(v=>{
+            //     details_text += v + " ";
+            // })
+            // details_text += "<\p>";
+            node.vertices.forEach(v=>{
+                if(vertices_list.indexOf(v)===-1){
+                    vertices_list.push(parseInt(v));
+                }
+            })
+        })
+        vertices_list.sort((a,b)=>d3.ascending(a,b));
+        // console.log(vertices_list)
+        vertices_list.forEach(v=>{
+            details_text += v + " ";
+        })
+        d3.select("#nodes-details-labels").html(details_text);
+
+    }
+
     find_col_domain(col_key){
         let min_val = Infinity;
         let max_val = -Infinity;
@@ -760,7 +796,6 @@ class Graph{
 
     fill_vertex(col_key){
         d3.selectAll(".pie-group").remove();
-        console.log(col_key)
         d3.selectAll(".viewer-graph__vertex")
             .style("fill", d=>{
                 if(d3.select("#node"+d.id).classed("selected")===false){
