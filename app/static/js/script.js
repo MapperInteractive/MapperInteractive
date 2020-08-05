@@ -1,6 +1,6 @@
 let that = this;
 
-this.side_bar = new DataLoader([]);
+this.side_bar = new DataLoader([], []);
 
 $("#import").click(function(){
     $("#files").click();
@@ -139,3 +139,37 @@ clustering_para_range.addEventListener("click", function(){
         }
     }
 })
+
+let label_column_dropdown = document.getElementById("label_column_selection");
+label_column_dropdown.onchange = function(){
+    let label_column = label_column_dropdown.options[label_column_dropdown.selectedIndex].text;
+    console.log(label_column)
+    if(that.graph){
+        let labels;
+        if(label_column != "row index"){
+            $.ajax({
+                type: "POST",
+                url: "/update_cluster_details",
+                data: label_column,
+                dataType:'text',
+                success: function (response) {
+                    labels = JSON.parse(response).labels;
+                    that.graph.label_column = label_column;
+                    that.graph.labels = labels;        
+                    that.graph.text_cluster_details(that.graph.selected_nodes, label_column, labels);
+
+                },
+                error: function (error) {
+                    console.log("error",error);
+                }
+            })
+        } else {
+            that.graph.label_column = label_column;
+            that.graph.labels = labels;  
+            that.graph.text_cluster_details(that.graph.selected_nodes, label_column, labels);
+        }
+    }
+    
+    
+
+}

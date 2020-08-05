@@ -62,6 +62,8 @@ class Graph{
         //     // { 'label': 'Blue, Purple', 'scheme': 'interpolateBuPu' }
         //   ]      
         
+        this.label_column = "row index";
+
         this.color_functions();
         this.size_functions();
         this.select_view();
@@ -660,7 +662,7 @@ class Graph{
                     this.draw_hist();
                 }
                 console.log(this.selected_nodes)
-                this.text_cluster_details(this.selected_nodes);
+                this.text_cluster_details(this.selected_nodes, this.label_column, this.labels);
             });
 
         let lg = this.link_group.selectAll("line").data(this.links);
@@ -741,18 +743,13 @@ class Graph{
         }
     }
 
-    text_cluster_details(nodes){
+    text_cluster_details(nodes, label_column, labels){
+        console.log(labels)
         let details_text = "";
         let vertices_list = [];
         nodes.forEach(nId => {
             let node_index = parseInt(nId)-1;
             let node = this.nodes[node_index];
-            // details_text += "<h6>Node "+node.id+"<\h6>";
-            // details_text += "<p>"
-            // node.vertices.forEach(v=>{
-            //     details_text += v + " ";
-            // })
-            // details_text += "<\p>";
             node.vertices.forEach(v=>{
                 if(vertices_list.indexOf(v)===-1){
                     vertices_list.push(parseInt(v));
@@ -760,10 +757,17 @@ class Graph{
             })
         })
         vertices_list.sort((a,b)=>d3.ascending(a,b));
-        // console.log(vertices_list)
-        vertices_list.forEach(v=>{
-            details_text += v + " ";
-        })
+        if(label_column === "row index"){
+            vertices_list.forEach(v=>{
+                details_text += v + " ";
+            })
+        } else{
+            if(labels){
+                vertices_list.forEach(v=>{
+                    details_text += labels[v] + " ";
+                })
+            }
+        }
         d3.select("#nodes-details-labels").html(details_text);
 
     }

@@ -11,6 +11,7 @@ class DataLoader{
         this.draw_selected_cols();
         this.draw_filter_dropdown();
         this.draw_filter_dropdown2();
+        this.draw_label_dropdown();
         this.initialize_config();
         this.edit_param();
     }
@@ -200,6 +201,17 @@ class DataLoader{
             let fg2 = d3.select("#filter_function_selection2").selectAll("option").data(filter2);
             fg2.exit().remove();
             fg2 = fg2.enter().append("option").merge(fg2)
+                .classed("select-items", true)
+                .html(d=>d);
+        }
+    }
+
+    draw_label_dropdown(){
+        if(this.all_cols.length > 0){
+            let label_cols = ["row index"].concat(this.categorical_cols.concat(this.all_cols));
+            let cg = d3.select("#label_column_selection").selectAll("option").data(label_cols);
+            cg.exit().remove();
+            cg = cg.enter().append("option").merge(cg)
                 .classed("select-items", true)
                 .html(d=>d);
         }

@@ -184,6 +184,18 @@ def pca():
     data_new = data_new.to_json(orient='records')
     return jsonify(pca=data_new)
 
+@app.route('/update_cluster_details', methods=['POST','GET'])
+def update_cluster_details():
+    label_column = request.get_data().decode('utf-8')
+    df = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv") 
+    with open(APP_STATIC+"/uploads/cols_info.json") as f:
+        cols_dict = json.load(f)
+    labels = df[label_column]
+    if label_column in cols_dict['cols_numerical']:
+        labels = np.round(labels,2)
+    labels = list(labels)
+    return jsonify(labels=labels)
+
 def run_mapper(data_array, col_names, interval, overlap, dbscan_eps, dbscan_min_samples, filter_function):
         """This function is called when the form is submitted. It triggers construction of Mapper. 
 
