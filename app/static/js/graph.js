@@ -162,10 +162,8 @@ class Graph{
 
         d3.select("#apply_scale")
             .on("click", ()=>{
-                console.log("apply")
                 let scale_left = parseFloat(d3.select("#scale-interval-left").node().value);
                 let scale_right = parseFloat(d3.select("#scale-interval-right").node().value);
-                console.log(scale_left, scale_right)
                 if(scale_left > scale_right){
                     alert("Invalid range!")
                 } else{

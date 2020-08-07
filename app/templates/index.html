@@ -120,7 +120,16 @@
                     <div class="density-param-container-inner" id="density-param-container-inner">
                       <div class="row" style="padding-top:10px; padding-bottom:3px;">
                         <div class="col-sm-4 density-form-label" style="padding-top:5px;">Kernel</div>
-                        <div class="col-sm-8" id="density-kernel-container"> <select class="custom-select"  name="density_kernel_selection" id="density_kernel_selection"></select></div>
+                        <div class="col-sm-8" id="density-kernel-container"> 
+                          <select class="custom-select"  name="density_kernel_selection" id="density_kernel_selection">
+                            <option>gaussian</option>
+                            <option>tophat</option>
+                            <option>epanechnikov</option>
+                            <option>exponential</option>
+                            <option>linear</option>
+                            <option>cosine</option>
+                          </select>
+                        </div>
                       </div>
                       <div class="row" style="padding-bottom:15px;">
                         <div class="col-sm-4 density-form-label" style="padding-top:3px;">Bandwidth</div>
@@ -137,7 +146,15 @@
                       </div>
                       <div class="row" style="padding-bottom:15px;">
                         <div class="col-sm-4 eccent-form-label" style="padding-top:5px;">Distance</div>
-                        <div class="col-sm-8" id="eccent-dist-container"> <select class="custom-select"  name="eccent_dist_selection" id="eccent_dist_selection"></select></div>
+                        <div class="col-sm-8" id="eccent-dist-container"> 
+                          <select class="custom-select"  name="eccent_dist_selection" id="eccent_dist_selection">
+                            <option>euclidean</option>
+                            <option>jaccard</option>
+                            <option>cosine</option>
+                            <option>chebyshev</option>
+                            <option>yule</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                   </div>

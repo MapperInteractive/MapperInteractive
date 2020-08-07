@@ -55,11 +55,19 @@ class DataLoader{
                 let density_param_container = document.getElementById("density-param-container-inner");
                 if(filter === "Eccentricity"){
                     eccent_param_container.style.maxHeight = eccent_param_container.scrollHeight + "px";
+                    that.config.eccent_p = parseFloat(d3.select("#eccent_p_values").node().value);
+                    let eccent_dist_dropdown = document.getElementById("eccent_dist_selection")
+                    that.config.eccent_dist = eccent_dist_dropdown.options[eccent_dist_dropdown.selectedIndex].text;
+                    console.log(that.config)
                 } else {
                     eccent_param_container.style.maxHeight = null;
                 }
                 if(filter === "Density"){
                     density_param_container.style.maxHeight = density_param_container.scrollHeight + "px";
+                    that.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
+                    let density_kernel_dropdown = document.getElementById("density_kernel_selection");
+                    that.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
+                    console.log(that.config)
                 } else {
                     density_param_container.style.maxHeight = null;
                 }
