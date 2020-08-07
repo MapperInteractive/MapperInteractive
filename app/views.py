@@ -100,6 +100,10 @@ def get_graph():
     norm_type = config["norm_type"]
     eps = config["eps"]
     min_samples = config["min_samples"]
+
+    #### TODO: update filter_parameters ####
+    filter_parameters = config
+
     # filter functions
     filter_function = config["filter"]
     if len(filter_function) == 1:
@@ -118,7 +122,7 @@ def get_graph():
     else:
         data = sklearn.preprocessing.normalize(data, norm=norm_type, axis=0, copy=False, return_norm=False)
     data = pd.DataFrame(data, columns = all_cols)
-    mapper_result = run_mapper(data, selected_cols, interval, overlap, eps, min_samples, filter_function)
+    mapper_result = run_mapper(data, selected_cols, interval, overlap, eps, min_samples, filter_function, filter_parameters)
     if len(categorical_cols) > 0:
         for node in mapper_result['nodes']:
             print("node", node['id'])
@@ -196,7 +200,7 @@ def update_cluster_details():
     labels = list(labels)
     return jsonify(labels=labels)
 
-def run_mapper(data_array, col_names, interval, overlap, dbscan_eps, dbscan_min_samples, filter_function):
+def run_mapper(data_array, col_names, interval, overlap, dbscan_eps, dbscan_min_samples, filter_function, filter_parameters=None):
         """This function is called when the form is submitted. It triggers construction of Mapper. 
 
         Each parameter of this function is defined in the configuration.
@@ -230,11 +234,13 @@ def run_mapper(data_array, col_names, interval, overlap, dbscan_eps, dbscan_min_
             overlap,
             float(dbscan_eps),
             float(dbscan_min_samples),
-            filter_function
+            filter_function,
+            filter_parameters
         )
         return _parse_result(data_array, km_result)
 
-def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_function):
+def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_function, filter_parameters=None):
+    print(filter_parameters)
     mapper = KeplerMapper()
     if len(col_names) == 1:
         data_new = np.array(data[col_names[0]]).reshape(-1,1)
@@ -243,7 +249,7 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
 
     if len(filter_function) == 1:
         f = filter_function[0]
-        lens = compute_lens(f, data, mapper)
+        lens = compute_lens(f, data, mapper, filter_parameters)
         
     elif len(filter_function) == 2:
         lens = []
@@ -256,20 +262,24 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
 
     return graph
 
-def compute_lens(f, data, mapper):
+def compute_lens(f, data, mapper, filter_parameters=None):
     data_array = np.array(data)
     if f in ["sum", "mean", "median", "max", "min", "std", "l2norm"]:
         lens = mapper.fit_transform(data_array, projection=f).reshape(-1,1)
     elif f == "Density":
         ### TODO: Allow users to select kernel and bandwidth ###
-        kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(data_array)
+        density_kernel = filter_parameters['density_kernel']
+        density_bandwidth = filter_parameters['density_bandwidth']
+        print("density", density_kernel, density_bandwidth)
+        kde = KernelDensity(kernel=density_kernel, bandwidth=density_bandwidth).fit(data_array)
         lens = kde.score_samples(data_array).reshape(-1,1)
         scaler = MinMaxScaler()
         lens = scaler.fit_transform(lens)
     elif f == "Eccentricity":
         ### TODO: Allow users to select p and distance_matrix ###
-        p = 0.5
-        distance_matrix = "euclidean"
+        p = filter_parameters['eccent_p']
+        distance_matrix = filter_parameters['eccent_dist']
+        print("eccent", eccent_p, eccent_dist)
         pdist = distance.squareform(distance.pdist(data_array, metric=distance_matrix))
         lens = np.array([(np.sum(pdist**p, axis=1)/len(data_array))**(1/p)]).reshape(-1,1)
     elif f == "PC1":
