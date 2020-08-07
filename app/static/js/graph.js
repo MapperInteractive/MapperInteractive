@@ -103,10 +103,14 @@ class Graph{
             that.color_col = value;
             if(that.col_keys.indexOf(value)!=-1 || value==="Number of points"){
                 $('#color-legend-svg').remove();
-                that.colorScale.domain(that.find_col_domain(value));
-                that.fill_vertex(value);
+                if(scale === "Default range"){
+                    that.colorScale.domain([0,1]);
+                } else if(scale === "Data range"){
+                    that.colorScale.domain(that.find_col_domain(value));
+                }
                 if(map!='- None -'){
                     that.draw_color_legend(that.colorScale);
+                    that.fill_vertex(value);
                 }
                 $("#color_function_maps").prop("disabled", false);
                 $("#color_function_scale").prop("disabled", false);
@@ -116,6 +120,11 @@ class Graph{
                 that.draw_color_legend_categorical(color_dict);
                 $("#color_function_maps").prop("disabled", true);
                 $("#color_function_scale").prop("disabled", true);
+            } else if(value === "- None -"){
+                that.colorScale.domain([undefined, undefined]); 
+                that.fill_vertex(value);
+                $("#color_function_maps").prop("disabled", false);
+                $("#color_function_scale").prop("disabled", false);
             }
             
         }
@@ -140,11 +149,38 @@ class Graph{
             } else {
                 scale_range_container.style.maxHeight = null;
             }
+            if(scale === "Default range"){
+                that.colorScale.domain([0,1]);
+            } else if (scale === "Data range"){
+                that.colorScale.domain(that.find_col_domain(value));
+            }
+            if(map!='- None -'){
+                that.draw_color_legend(that.colorScale);
+                that.fill_vertex(value);
+            }
         }
+
+        d3.select("#apply_scale")
+            .on("click", ()=>{
+                console.log("apply")
+                let scale_left = parseFloat(d3.select("#scale-interval-left").node().value);
+                let scale_right = parseFloat(d3.select("#scale-interval-right").node().value);
+                console.log(scale_left, scale_right)
+                if(scale_left > scale_right){
+                    alert("Invalid range!")
+                } else{
+                    that.colorScale.domain([scale_left, scale_right]);
+                    if(map!='- None -'){
+                        that.draw_color_legend(that.colorScale);
+                        that.fill_vertex(value);
+                    }
+                }
+            })
     }
 
 
     draw_color_legend(color_scale){
+        console.log(color_scale.domain())
         // reset svg 
         $('#color-legend-svg').remove();
         $('#block_body-inner_color').append('<svg width="0" height="0" id="color-legend-svg"></svg>');
@@ -155,7 +191,7 @@ class Graph{
         let colorTileNumber = 50;
         let colorTileHeight = 20;
         let colorTileWidth = (width - (axisMargin * 2)) / colorTileNumber;
-        let axisDomain = this.find_col_domain(this.color_col);
+        let axisDomain = color_scale.domain();
         let svg = d3.select("#color-legend-svg").attr('width', width).attr('height', height);
 
         // axis
@@ -840,6 +876,12 @@ class Graph{
                 return 'rgb(' + rgb.join(',') + ')';
             })
     }
+
+    // unfill_vertex(){
+    //     d3.selectAll(".pie-group").remove();
+    //     d3.selectAll(".viewer-graph__vertex").style("fill", "white");
+    //     d3.selectAll(".viewer-graph__label").style("fill", "#555");
+    // }
 
     fill_vertex_categorical(col_key){
         d3.selectAll(".pie-group").remove();

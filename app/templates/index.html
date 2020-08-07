@@ -219,9 +219,22 @@
               </div>
               <div class="scale-range-container">
                 <div class="scale-range-container-inner" id="scale-range-container-inner" style="padding:0px; padding-top: 10px;">
-                  <span class="param-range left"><input type="number" id="scale-interval-left" min="1" max="100" value="5"></span>
-                  <span class="param-range right"><input type="number" id="scale-interval-right" min="1" max="100" value="50"></span>
-                </div>    
+                  <div class="row">
+                    <div class="col-12">
+                      <span class="param-range left"><input type="number" id="scale-interval-left" min="0" value="0" step="0.1"></span>
+                      <span class="param-range right"><input type="number" id="scale-interval-right" min="0" value="1" step="0.1"></span>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-5"></div>
+                    <div class="col-3" style="padding-left:0;">
+                      <input type="button" class="btn btn-outline-dark ui-form-button" id="apply_scale" value="Apply">
+                    </div>
+                    
+                  </div>
+                   
+                </div>  
+                
               </div>
               <svg width="0" height="0" id="color-legend-svg"></svg>
             </div>
