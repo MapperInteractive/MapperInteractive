@@ -29,11 +29,9 @@
                 <button id="select-node" class="viewer-graph__toolbar-item btn">Select Nodes</button>
                 <button id="select-cluster" class="viewer-graph__toolbar-item btn">Select Clusters</button>
                 <button id="select-path" class="viewer-graph__toolbar-item btn">Select Path</button>
-
             </div>
             <div class="viewer-graph__graph">
                 <svg id="graphSVG"></svg>
-
             </div>
           </div>
     </div>
@@ -103,8 +101,7 @@
                     <input class="ui-form-range__input" id="min_samples_input" name="dbscan_min_samples" type="range" value="5" max="10" min="2" step="1">
                   </div>
                 </div>
-              </div>
-                     
+              </div>       
               <div class="filter-group">
                 <div class="group-title">
                   Filter Functions 
@@ -119,6 +116,31 @@
                   Dimension 1 &nbsp;
                   <i class="fas fa-pen" style="font-size:14px;" id="filtering-para-range1"></i>
                   <select name="filter_function" class="custom-select" id="filter_function_selection"></select>
+                  <div class="density-param-container">
+                    <div class="density-param-container-inner" id="density-param-container-inner">
+                      <div class="row" style="padding-top:10px; padding-bottom:3px;">
+                        <div class="col-sm-4 density-form-label" style="padding-top:5px;">Kernel</div>
+                        <div class="col-sm-8" id="density-kernel-container"> <select class="custom-select"  name="density_kernel_selection" id="density_kernel_selection"></select></div>
+                      </div>
+                      <div class="row" style="padding-bottom:15px;">
+                        <div class="col-sm-4 density-form-label" style="padding-top:3px;">Bandwidth</div>
+                        <div class="col-sm-8" id="density-bandwidth-container"><input type="number" id="density_bandwidth_values" min="0" value="0.1" step=".01"></div>
+                      </div>
+                    </div>
+                    
+                  </div>
+                  <div class="eccent-param-container">
+                    <div class="eccent-param-container-inner" id="eccent-param-container-inner">
+                      <div class="row" style="padding-top:10px; padding-bottom:5px;">
+                        <div class="col-sm-4 eccent-form-label">p</div>
+                        <div class="col-sm-8" id="eccent-p-container"> <input type="number" id="eccent_p_values" min="1" value="1" step=".1"></div>
+                      </div>
+                      <div class="row" style="padding-bottom:15px;">
+                        <div class="col-sm-4 eccent-form-label" style="padding-top:5px;">Distance</div>
+                        <div class="col-sm-8" id="eccent-dist-container"> <select class="custom-select"  name="eccent_dist_selection" id="eccent_dist_selection"></select></div>
+                      </div>
+                    </div>
+                  </div>
                   <div class="form-group ui-form-range">
                     <label class="ui-form-range__label">Interval</label>
                     <span class="ui-form-range__value" id="interval1_label">5</span>
@@ -184,9 +206,22 @@
                   <div class="col-sm-2 col-form-label">Value</div>
                   <div class="col-sm-10" id="color-function-values-container"> <select class="custom-select"  name="color_function_values" id="color_function_values"></select></div>
               </div>
-              <div class="row" id="color_function_maps-container">
+              <div class="row" id="color_function_maps-container" style="padding-bottom:5px;">
                   <div class="col-sm-2 col-form-label">Map</div>
                   <div class="col-sm-10" id="color-function-maps-container"><select class="custom-select"  name="color_function_maps" id="color_function_maps"></select></div>
+              </div>
+              <div class="row" id="color_function_scale-container">
+                <div class="col-sm-2 col-form-label">Scale</div>
+                <div class="col-sm-10" id="color-function-scale-container">
+                  <select class="custom-select"  name="color_function_scale" id="color_function_scale"></select>
+                  
+                </div>
+              </div>
+              <div class="scale-range-container">
+                <div class="scale-range-container-inner" id="scale-range-container-inner" style="padding:0px; padding-top: 10px;">
+                  <span class="param-range left"><input type="number" id="scale-interval-left" min="1" max="100" value="5"></span>
+                  <span class="param-range right"><input type="number" id="scale-interval-right" min="1" max="100" value="50"></span>
+                </div>    
               </div>
               <svg width="0" height="0" id="color-legend-svg"></svg>
             </div>

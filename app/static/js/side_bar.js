@@ -50,10 +50,23 @@ class DataLoader{
         filter_dropdown.onchange = function(){
             let mapper_dim = d3.select('input[name="mapper-dim"]:checked').node().value;
             if(filter_dropdown.options){
+                let filter = filter_dropdown.options[filter_dropdown.selectedIndex].text;
+                let eccent_param_container = document.getElementById("eccent-param-container-inner");
+                let density_param_container = document.getElementById("density-param-container-inner");
+                if(filter === "Eccentricity"){
+                    eccent_param_container.style.maxHeight = eccent_param_container.scrollHeight + "px";
+                } else {
+                    eccent_param_container.style.maxHeight = null;
+                }
+                if(filter === "Density"){
+                    density_param_container.style.maxHeight = density_param_container.scrollHeight + "px";
+                } else {
+                    density_param_container.style.maxHeight = null;
+                }
                 if(mapper_dim === "mapper_1d"){
-                    that.config.filter = [filter_dropdown.options[filter_dropdown.selectedIndex].text];
+                    that.config.filter = [filter];
                 } else if(mapper_dim === "mapper_2d"){
-                    that.config.filter[0] = filter_dropdown.options[filter_dropdown.selectedIndex].text;
+                    that.config.filter[0] = filter;
                     that.draw_filter_dropdown2();
                 }
             }

@@ -271,7 +271,12 @@ button.selected {
   padding-right: 10px;
 }
 
-.param-range-container-inner, .param-range-container-inner_clustering, .param-range-container-inner_filtering1, .param-range-container-inner_filtering2, #filter-inner-2{
+.scale-range-container {
+  padding-top: 0px;
+  padding-right: 10px;
+}
+
+.param-range-container-inner, .param-range-container-inner_clustering, .param-range-container-inner_filtering1, .param-range-container-inner_filtering2, #filter-inner-2, .scale-range-container-inner, .eccent-param-container-inner, .density-param-container-inner{
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
@@ -288,6 +293,11 @@ button.selected {
 
 .param-range.right {
   float: right;
+}
+
+#density_bandwidth_values, #eccent_p_values {
+  width: 80%;
+  border:1px solid rgba(0, 0, 0, 0.2);
 }
 
 /* Slider */

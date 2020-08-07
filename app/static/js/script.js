@@ -169,7 +169,4 @@ label_column_dropdown.onchange = function(){
             that.graph.text_cluster_details(that.graph.selected_nodes, label_column, labels);
         }
     }
-    
-    
-
 }

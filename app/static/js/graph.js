@@ -70,6 +70,7 @@ class Graph{
         this.draw_mapper();
         this.selection_nodes();
     }
+
     color_functions(){
         let selections = ['- None -', 'Number of points'].concat(this.col_keys);
         selections = selections.concat(this.categorical_cols);
@@ -83,11 +84,19 @@ class Graph{
         mg = mg.enter().append("option").merge(mg)
             .html(d=>d);
 
+        let scale_options = ["Default range", "Data range", "Custom range"];
+        let sg = d3.select("#color_function_scale").selectAll("option").data(scale_options);
+        sg.exit().remove();
+        sg = sg.enter().append("option").merge(sg)
+            .html(d=>d);
+
         let that=this;
         let value_dropdown = document.getElementById("color_function_values");
         let value = value_dropdown.options[value_dropdown.selectedIndex].text;
         let map_dropdown = document.getElementById("color_function_maps");
         let map = map_dropdown.options[map_dropdown.selectedIndex].text;
+        let scale_dropdown = document.getElementById("color_function_scale");
+        let scale = scale_dropdown.options[scale_dropdown.selectedIndex].text;
         
         value_dropdown.onchange = function(){
             value = value_dropdown.options[value_dropdown.selectedIndex].text;
@@ -100,11 +109,13 @@ class Graph{
                     that.draw_color_legend(that.colorScale);
                 }
                 $("#color_function_maps").prop("disabled", false);
+                $("#color_function_scale").prop("disabled", false);
             } else if(that.categorical_cols.indexOf(value)!=-1){
                 console.log(value)
                 let color_dict = that.fill_vertex_categorical(value);
                 that.draw_color_legend_categorical(color_dict);
                 $("#color_function_maps").prop("disabled", true);
+                $("#color_function_scale").prop("disabled", true);
             }
             
         }
@@ -119,6 +130,16 @@ class Graph{
                 $('#color-legend-svg').remove();
             }
             that.fill_vertex(value);
+        }
+
+        scale_dropdown.onchange = function(){
+            scale = scale_dropdown.options[scale_dropdown.selectedIndex].text;
+            let scale_range_container = document.getElementById("scale-range-container-inner");
+            if(scale === "Custom range"){
+                scale_range_container.style.maxHeight = scale_range_container.scrollHeight + "px";
+            } else {
+                scale_range_container.style.maxHeight = null;
+            }
         }
     }
 
@@ -424,6 +445,7 @@ class Graph{
         } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
             let color_dict = this.fill_vertex_categorical(this.color_col);
         }
+        this.text_cluster_details([], this.label_column, this.labels);
 
     }
 
