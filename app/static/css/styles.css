@@ -295,7 +295,7 @@ button.selected {
   float: right;
 }
 
-#density_bandwidth_values, #eccent_p_values {
+.density_bandwidth_values, .eccent_p_values {
   width: 80%;
   border:1px solid rgba(0, 0, 0, 0.2);
 }

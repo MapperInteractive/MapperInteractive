@@ -254,7 +254,7 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
     elif len(filter_function) == 2:
         lens = []
         for f in filter_function:
-            lens_f = compute_lens(f, data, mapper)
+            lens_f = compute_lens(f, data, mapper, filter_parameters)
             lens.append(lens_f)
         lens = np.concatenate((lens[0], lens[1]), axis=1)
 
@@ -267,7 +267,6 @@ def compute_lens(f, data, mapper, filter_parameters=None):
     if f in ["sum", "mean", "median", "max", "min", "std", "l2norm"]:
         lens = mapper.fit_transform(data_array, projection=f).reshape(-1,1)
     elif f == "Density":
-        ### TODO: Allow users to select kernel and bandwidth ###
         density_kernel = filter_parameters['density_kernel']
         density_bandwidth = filter_parameters['density_bandwidth']
         print("density", density_kernel, density_bandwidth)
@@ -276,7 +275,6 @@ def compute_lens(f, data, mapper, filter_parameters=None):
         scaler = MinMaxScaler()
         lens = scaler.fit_transform(lens)
     elif f == "Eccentricity":
-        ### TODO: Allow users to select p and distance_matrix ###
         p = filter_parameters['eccent_p']
         distance_matrix = filter_parameters['eccent_dist']
         print("eccent", p, distance_matrix)

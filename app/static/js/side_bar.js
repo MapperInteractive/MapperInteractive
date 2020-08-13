@@ -55,22 +55,11 @@ class DataLoader{
                 let density_param_container = document.getElementById("density-param-container-inner");
                 if(filter === "Eccentricity"){
                     eccent_param_container.style.maxHeight = eccent_param_container.scrollHeight + "px";
-                    that.config.eccent_p = parseFloat(d3.select("#eccent_p_values").node().value);
-                    let eccent_dist_dropdown = document.getElementById("eccent_dist_selection")
-                    that.config.eccent_dist = eccent_dist_dropdown.options[eccent_dist_dropdown.selectedIndex].text;
-                    console.log(that.config)
                 } else {
                     eccent_param_container.style.maxHeight = null;
                 }
                 if(filter === "Density"){
                     density_param_container.style.maxHeight = density_param_container.scrollHeight + "px";
-                    // that.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
-                    // let density_kernel_dropdown = document.getElementById("density_kernel_selection");
-                    // that.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
-                    // density_kernel_dropdown.onchange = function(){
-                    //     that.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
-                    // }
-                    // console.log(that.config)
                 } else {
                     density_param_container.style.maxHeight = null;
                 }
@@ -86,7 +75,21 @@ class DataLoader{
         let filter_dropdown2 = document.getElementById("filter_function_selection2");
         filter_dropdown2.onchange = function(){
             if(filter_dropdown2.options){
-                that.config.filter[1] = filter_dropdown2.options[filter_dropdown2.selectedIndex].text;
+                let filter = filter_dropdown2.options[filter_dropdown2.selectedIndex].text
+                that.config.filter[1] = filter;
+                let eccent_param_container = document.getElementById("eccent-param-container-inner2");
+                let density_param_container = document.getElementById("density-param-container-inner2");
+                if(filter === "Eccentricity"){
+                    eccent_param_container.style.maxHeight = eccent_param_container.scrollHeight + "px";
+                } else{
+                    eccent_param_container.style.maxHeight = null;
+                }
+                if(filter === "Density"){
+                    density_param_container.style.maxHeight = density_param_container.scrollHeight + "px";
+                } else{
+                    density_param_container.style.maxHeight = null;
+                }
+                that.draw_filter_dropdown();
             }
         }
 
@@ -203,9 +206,22 @@ class DataLoader{
             }
         } else {
             this.filters = this.selectable_cols.slice(0);
+        }
+        let filter = [];
+        this.filters.forEach(f=>{
+            filter.push(f);
+        })
+        let mapper_dim = d3.select('input[name="mapper-dim"]:checked').node().value;
+        if(mapper_dim === "mapper_2d"){
+            let filter_dropdown2 = document.getElementById("filter_function_selection2");
+            if(filter_dropdown2.options[filter_dropdown2.selectedIndex]){
+                let selected_filter = filter_dropdown2.options[filter_dropdown2.selectedIndex].text;
+                filter.splice(filter.indexOf(selected_filter),1);
+
+            }
         }        
 
-        let fg = d3.select("#filter_function_selection").selectAll("option").data(this.filters);
+        let fg = d3.select("#filter_function_selection").selectAll("option").data(filter);
         fg.exit().remove();
         fg = fg.enter().append("option").merge(fg)
             .classed("select-items", true)

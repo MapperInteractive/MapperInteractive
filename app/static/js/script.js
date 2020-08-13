@@ -37,12 +37,24 @@ d3.select("#mapper_loader")
     .on("click",()=>{
         if(that.side_bar.all_cols.length>0){
             console.log(that.side_bar.config.filter)
-            if(that.side_bar.config.filter.indexOf("Density")!=-1){
-                console.log(that.side_bar.config.filter)
+            if(that.side_bar.config.filter[0] === "Density"){
                 that.side_bar.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
                 let density_kernel_dropdown = document.getElementById("density_kernel_selection");
                 that.side_bar.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
 
+            } else if(that.side_bar.config.filter[1] === "Density"){
+                that.side_bar.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values2").node().value);
+                let density_kernel_dropdown = document.getElementById("density_kernel_selection2");
+                that.side_bar.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
+            }
+            if(that.side_bar.config.filter[0] === "Eccentricity"){
+                that.side_bar.config.eccent_p = parseFloat(d3.select("#eccent_p_values").node().value);
+                let eccent_dist_dropdown = document.getElementById("eccent_dist_selection")
+                that.side_bar.config.eccent_dist = eccent_dist_dropdown.options[eccent_dist_dropdown.selectedIndex].text;
+            } else if(that.side_bar.config.filter[1] === "Eccentricity"){
+                that.side_bar.config.eccent_p = parseFloat(d3.select("#eccent_p_values2").node().value);
+                let eccent_dist_dropdown = document.getElementById("eccent_dist_selection2")
+                that.side_bar.config.eccent_dist = eccent_dist_dropdown.options[eccent_dist_dropdown.selectedIndex].text;
             }
             let mapper_data = {"cols":that.side_bar.selected_cols, "all_cols":that.side_bar.all_cols, "categorical_cols":that.side_bar.categorical_cols, "config":that.side_bar.config};
             $.post("/mapper_loader",{

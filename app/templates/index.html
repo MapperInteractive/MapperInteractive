@@ -39,7 +39,7 @@
       <div class="sidebar-container">
         <div id="workspace-sidebar" class="block">
           <div class="block_title">Graph Loader</div>
-          <div class="block_body" style="max-height: 1000px">
+          <div class="block_body" style="max-height: 1500px">
             <div class="block_body-inner">
               <div class="import-group" style="padding-bottom:10px;">
                 <form method="post" id="upload" enctype="multipart/form-data" action="" >
@@ -133,16 +133,15 @@
                       </div>
                       <div class="row" style="padding-bottom:15px;">
                         <div class="col-sm-4 density-form-label" style="padding-top:3px;">Bandwidth</div>
-                        <div class="col-sm-8" id="density-bandwidth-container"><input type="number" id="density_bandwidth_values" min="0" value="0.1" step=".01"></div>
+                        <div class="col-sm-8" id="density-bandwidth-container"><input type="number" class="density_bandwidth_values" id="density_bandwidth_values" min="0" value="0.1" step=".01"></div>
                       </div>
-                    </div>
-                    
+                    </div>   
                   </div>
                   <div class="eccent-param-container">
                     <div class="eccent-param-container-inner" id="eccent-param-container-inner">
                       <div class="row" style="padding-top:10px; padding-bottom:5px;">
                         <div class="col-sm-4 eccent-form-label">p</div>
-                        <div class="col-sm-8" id="eccent-p-container"> <input type="number" id="eccent_p_values" min="1" value="1" step=".1"></div>
+                        <div class="col-sm-8" id="eccent-p-container"> <input type="number" class="eccent_p_values" id="eccent_p_values" min="1" value="1" step=".1"></div>
                       </div>
                       <div class="row" style="padding-bottom:15px;">
                         <div class="col-sm-4 eccent-form-label" style="padding-top:5px;">Distance</div>
@@ -169,7 +168,6 @@
                     </div>
                     <input class="ui-form-range__input" id="interval1_input" name="interval1" type="range" value="5" max="50" min="5" step="1">
                   </div>
-  
                   <div class="form-group ui-form-range">
                     <label class="ui-form-range__label">Overlap %</label>
                     <span class="ui-form-range__value" id="overlap1_label" >50</span>
@@ -187,6 +185,47 @@
                   Dimension 2 &nbsp;
                   <i class="fas fa-pen" style="font-size:14px;" id="filtering-para-range2"></i>
                   <select name="filter_function2" class="custom-select" id="filter_function_selection2"></select>
+                  <div class="density-param-container">
+                    <div class="density-param-container-inner" id="density-param-container-inner2">
+                      <div class="row" style="padding-top:10px; padding-bottom:3px;">
+                        <div class="col-sm-4 density-form-label" style="padding-top:5px;">Kernel</div>
+                        <div class="col-sm-8" id="density-kernel-container2"> 
+                          <select class="custom-select"  name="density_kernel_selection2" id="density_kernel_selection2">
+                            <option>gaussian</option>
+                            <option>tophat</option>
+                            <option>epanechnikov</option>
+                            <option>exponential</option>
+                            <option>linear</option>
+                            <option>cosine</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="row" style="padding-bottom:15px;">
+                        <div class="col-sm-4 density-form-label" style="padding-top:3px;">Bandwidth</div>
+                        <div class="col-sm-8" id="density-bandwidth-container2"><input type="number" class="density_bandwidth_values" id="density_bandwidth_values2" min="0" value="0.1" step=".01"></div>
+                      </div>
+                    </div>   
+                  </div>
+                  <div class="eccent-param-container">
+                    <div class="eccent-param-container-inner" id="eccent-param-container-inner2">
+                      <div class="row" style="padding-top:10px; padding-bottom:5px;">
+                        <div class="col-sm-4 eccent-form-label">p</div>
+                        <div class="col-sm-8" id="eccent-p-container2"> <input type="number" class="eccent_p_values" id="eccent_p_values2" min="1" value="1" step=".1"></div>
+                      </div>
+                      <div class="row" style="padding-bottom:15px;">
+                        <div class="col-sm-4 eccent-form-label" style="padding-top:5px;">Distance</div>
+                        <div class="col-sm-8" id="eccent-dist-container2"> 
+                          <select class="custom-select"  name="eccent_dist_selection" id="eccent_dist_selection2">
+                            <option>euclidean</option>
+                            <option>jaccard</option>
+                            <option>cosine</option>
+                            <option>chebyshev</option>
+                            <option>yule</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div class="form-group ui-form-range">
                     <label class="ui-form-range__label">Interval</label>
                     <span class="ui-form-range__value" id="interval2_label">5</span>
