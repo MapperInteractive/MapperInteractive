@@ -64,10 +64,13 @@ class DataLoader{
                 }
                 if(filter === "Density"){
                     density_param_container.style.maxHeight = density_param_container.scrollHeight + "px";
-                    that.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
-                    let density_kernel_dropdown = document.getElementById("density_kernel_selection");
-                    that.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
-                    console.log(that.config)
+                    // that.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
+                    // let density_kernel_dropdown = document.getElementById("density_kernel_selection");
+                    // that.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
+                    // density_kernel_dropdown.onchange = function(){
+                    //     that.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
+                    // }
+                    // console.log(that.config)
                 } else {
                     density_param_container.style.maxHeight = null;
                 }

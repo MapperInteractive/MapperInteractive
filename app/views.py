@@ -279,7 +279,7 @@ def compute_lens(f, data, mapper, filter_parameters=None):
         ### TODO: Allow users to select p and distance_matrix ###
         p = filter_parameters['eccent_p']
         distance_matrix = filter_parameters['eccent_dist']
-        print("eccent", eccent_p, eccent_dist)
+        print("eccent", p, distance_matrix)
         pdist = distance.squareform(distance.pdist(data_array, metric=distance_matrix))
         lens = np.array([(np.sum(pdist**p, axis=1)/len(data_array))**(1/p)]).reshape(-1,1)
     elif f == "PC1":

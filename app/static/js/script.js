@@ -36,6 +36,14 @@ d3.select("#files")
 d3.select("#mapper_loader")
     .on("click",()=>{
         if(that.side_bar.all_cols.length>0){
+            console.log(that.side_bar.config.filter)
+            if(that.side_bar.config.filter.indexOf("Density")!=-1){
+                console.log(that.side_bar.config.filter)
+                that.side_bar.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
+                let density_kernel_dropdown = document.getElementById("density_kernel_selection");
+                that.side_bar.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
+
+            }
             let mapper_data = {"cols":that.side_bar.selected_cols, "all_cols":that.side_bar.all_cols, "categorical_cols":that.side_bar.categorical_cols, "config":that.side_bar.config};
             $.post("/mapper_loader",{
                 data: JSON.stringify(mapper_data)
