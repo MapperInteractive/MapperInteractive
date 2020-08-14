@@ -55,6 +55,7 @@ def process_text_data():
     ### check if numerical cols ###
     cols_numerical_idx = []
     cols_categorical_idx = []
+    cols_others_idx = []
     rows2delete = np.array([])
     r1 = re.compile(r'^-?\d+(?:\.\d+)?$')
     r2 = re.compile(r'[+\-]?[^A-Za-z]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)') # scientific notation
@@ -69,9 +70,11 @@ def process_text_data():
             ### check if categorical cols### 
             if len(np.unique(col)) <= 60: # if less than 10 different values: categorical
                 cols_categorical_idx.append(i)
-    newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx]
+            else:
+                cols_others_idx.append(i)
+    newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx+cols_others_idx]
     newdf3 = np.delete(newdf3, rows2delete, axis=0)
-    newdf3_cols = [cols[idx] for idx in cols_numerical_idx+cols_categorical_idx]
+    newdf3_cols = [cols[idx] for idx in cols_numerical_idx+cols_categorical_idx+cols_others_idx]
     newdf3 = pd.DataFrame(newdf3)
     newdf3.columns = newdf3_cols
     # write the data frame
@@ -79,10 +82,11 @@ def process_text_data():
     # write the cols info
     cols_numerical = [cols[idx] for idx in cols_numerical_idx]
     cols_categorical = [cols[idx] for idx in cols_categorical_idx]
-    cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical}
+    cols_others = [cols[idx] for idx in cols_others_idx]
+    cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical, 'cols_others':cols_others}
     with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
         f.write(json.dumps(cols_dict, indent=4))
-    return jsonify(columns=cols_numerical, categorical_columns=cols_categorical)
+    return jsonify(columns=cols_numerical, categorical_columns=cols_categorical, other_columns=cols_others)
 
 @app.route('/mapper_loader', methods=['POST','GET'])
 def get_graph():
@@ -168,23 +172,30 @@ def pca():
     selected_nodes = json.loads(request.form.get('data'))['nodes']
     print(selected_nodes)
     data = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
-    cols = data.columns
+    with open(APP_STATIC+"/uploads/cols_info.json") as f:
+        cols_dict = json.load(f)
+    cols = cols_dict['cols_numerical']
     print(cols)
     with open(APP_STATIC+"/uploads/nodes_detail.json") as f:
         nodes_detail = json.load(f)
-    selected_rows = []
-    for node in selected_nodes:
-        selected_rows += nodes_detail[node]
-    selected_rows = list(set(selected_rows))
-    data = data.iloc[selected_rows, :]
-    data.index = range(len(data))
+    if len(selected_nodes) > 0:
+        selected_rows = []
+        for node in selected_nodes:
+            selected_rows += nodes_detail[node]
+        selected_rows = list(set(selected_rows))
+        data = data.iloc[selected_rows, :]
+        data.index = range(len(data))
     pca = PCA(n_components=2)
     data_new = pca.fit_transform(data.loc[:,cols])
     data_new = pd.DataFrame(data_new)
     data_new.columns = ['pc1', 'pc2']
+    print(data.shape)
+    print(data_new)
     # clustering
-    data_new['kmeans_cluster'] = KMeans(n_clusters=min(len(selected_nodes), 6), random_state=0).fit(data_new).labels_
-
+    if len(selected_nodes)>0:
+        data_new['kmeans_cluster'] = KMeans(n_clusters=min(len(selected_nodes), 6), random_state=0).fit(data_new).labels_
+    else:
+        data_new['kmeans_cluster'] = KMeans(n_clusters=4, random_state=0).fit(data_new).labels_
     data_new = data_new.to_json(orient='records')
     return jsonify(pca=data_new)
 

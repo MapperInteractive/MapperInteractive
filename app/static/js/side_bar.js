@@ -1,9 +1,10 @@
 class DataLoader{
-    constructor(all_cols, categorical_cols){
+    constructor(all_cols, categorical_cols, other_cols){
         this.all_cols = all_cols;
         this.selected_cols = all_cols.slice(0);
         this.selectable_cols = [];
         this.categorical_cols = categorical_cols;
+        this.other_cols = other_cols;
 
         this.config = {};
   
@@ -248,7 +249,7 @@ class DataLoader{
 
     draw_label_dropdown(){
         if(this.all_cols.length > 0){
-            let label_cols = ["row index"].concat(this.categorical_cols.concat(this.all_cols));
+            let label_cols = ["row index"].concat(this.categorical_cols.concat(this.all_cols).concat(this.other_cols));
             let cg = d3.select("#label_column_selection").selectAll("option").data(label_cols);
             cg.exit().remove();
             cg = cg.enter().append("option").merge(cg)

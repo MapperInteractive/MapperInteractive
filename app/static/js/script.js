@@ -18,7 +18,7 @@ d3.select("#files")
                 dataType:'text',
                 success: function (response) {
                     response = JSON.parse(response);
-                    that.side_bar = new DataLoader(response.columns, response.categorical_columns);
+                    that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
                 },
                 error: function (error) {
                     console.log("error",error);
@@ -61,7 +61,7 @@ d3.select("#mapper_loader")
                 data: JSON.stringify(mapper_data)
             }, function(res){
                 console.log(res);
-                that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols);
+                that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols, that.side_bar.other_cols);
                 that.regression = new Regression(that.side_bar.all_cols);
             })
         } else{
@@ -91,9 +91,9 @@ d3.select("#pca")
     .on("click", ()=>{
         if(that.graph){
             let selected_nodes = [...that.graph.selected_nodes];
-            if(that.graph.selected_nodes.length===0){
-                selected_nodes = that.graph.nodes.map(d=>d.id);
-            } 
+            // if(that.graph.selected_nodes.length===0){
+            //     selected_nodes = that.graph.nodes.map(d=>d.id);
+            // } 
             $.post("/pca", {
                 data: JSON.stringify({"nodes":selected_nodes})
             }, function(res){

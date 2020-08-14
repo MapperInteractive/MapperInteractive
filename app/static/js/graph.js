@@ -1,5 +1,5 @@
 class Graph{
-    constructor(graph_data, col_keys, connected_components, categorical_cols){
+    constructor(graph_data, col_keys, connected_components, categorical_cols, other_cols){
         this.nodes = graph_data.nodes;
         this.links = graph_data.links;
         this.col_keys = col_keys;
@@ -8,6 +8,7 @@ class Graph{
             this.connected_components["cluster"+i] = connected_components[i];
         }
         this.categorical_cols = categorical_cols;
+        this.other_cols = other_cols;
         console.log("categorical cols", this.categorical_cols)
         this.assign_cc2node();
         this.find_neighbor_nodes();
