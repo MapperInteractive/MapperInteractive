@@ -15,7 +15,7 @@ cd MapperInteractive
 python3 run.py
 ```
 
-You can view the page at http://0.0.0.0:8080/ (If possible, please use Chrome).
+You can view the page at http://127.0.0.1:8080/ (If possible, please use Chrome).
 
 ## Dependencies
 This software requires [Kepler Mapper](https://kepler-mapper.scikit-tda.org/), [scikit-learn](https://scikit-learn.org/stable/), [NetworkX](https://networkx.github.io/) and [flask](https://flask.palletsprojects.com/en/1.1.x/) to run.
