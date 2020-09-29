@@ -1,8 +1,15 @@
 * {
   color: #333;
-  font-family: Roboto,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  /* font-family: Roboto,"Helvetica Neue",Helvetica,Arial,sans-serif; */
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: 14px;
   text-align: left;
+}
+
+h4 {
+  color:rgb(51,54,57);
+  font-size:18px;
+  font-weight: bold;
 }
 
 body {
@@ -336,6 +343,8 @@ button.selected {
     width: 15px;
     height: 15px;
     border-radius: 50%; 
+    /* border: 1px solid black; */
+    /* background: whitesmoke; */
     background: #4CAF50;
     cursor: pointer;
   }
@@ -345,6 +354,7 @@ button.selected {
     height: 25px;
     border-radius: 50%;
     background: #4CAF50;
+    /* background: #d3d3d3; */
     cursor: pointer;
   }
 

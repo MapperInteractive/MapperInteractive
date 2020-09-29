@@ -8,6 +8,7 @@ bundles = {
         'js/side_bar.js',
         'js/regression.js',
         'js/pca.js',
+        'js/new_module.js',
         'js/script.js',
         output='gen/script.js'
         ),

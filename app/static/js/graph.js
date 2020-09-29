@@ -42,7 +42,8 @@ class Graph{
         // color functions
         this.COLORMAPS = {"- None -":undefined, 
         "Yellow, Red":["yellow", "red"], 
-        "Purple, Red":["purple", "red"], 
+        "Purple, Red":["purple", "red"],
+        "Yellow, Blue":["yellow", "blue"], 
         "Green, Blue":["green", "blue"]};
         this.colorScale = d3.scaleLinear();
 
@@ -179,7 +180,6 @@ class Graph{
 
 
     draw_color_legend(color_scale){
-        console.log(color_scale.domain())
         // reset svg 
         $('#color-legend-svg').remove();
         $('#block_body-inner_color').append('<svg width="0" height="0" id="color-legend-svg"></svg>');
@@ -205,7 +205,6 @@ class Graph{
         let domainStep = (axisDomain[1] - axisDomain[0])/colorTileNumber;
         let rects = d3.range(axisDomain[0], axisDomain[1], domainStep)
         let rg = legendGroup.selectAll("rect").data(rects);
-        console.log(rects)
         rg.exit().remove();
         rg = rg.enter().append("rect").merge(rg);
         rg
@@ -610,15 +609,15 @@ class Graph{
         let ng = this.node_group.selectAll("g").data(this.nodes);
         ng.exit().remove();
         ng = ng.enter().append("g").merge(ng)
-            .attr("class", "viewer-graph__vertex-group");
+            .attr("class", "viewer-graph__vertex-group")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
         ng.append("circle")
             .classed("viewer-graph__vertex",true)
             .attr("id",(d)=>"node"+d.id)
             .attr("r", 12)
-            .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended))
             .on("mouseover", (d)=>{
                 if(this.if_select_node) {
                     if(this.selected_nodes.indexOf(d.id) === -1){
@@ -861,8 +860,18 @@ class Graph{
             .style("fill", d=>{
                 if(d3.select("#node"+d.id).classed("selected")===false){
                     if(col_key === "Number of points"){
+                        if(d.size < this.colorScale.domain()[0]){
+                            return "rgb(255,255,255)"; // white
+                        } else if(d.size > this.colorScale.domain()[1]){
+                            return "rgb(169,169,169)"; // grey
+                        }
                         return this.colorScale(d.size)
                     } else{
+                        if(d.avgs[col_key] < this.colorScale.domain()[0]){
+                            return "rgb(255,255,255)"; // white
+                        } else if(d.avgs[col_key] > this.colorScale.domain()[1]){
+                            return "rgb(169,169,169)"; // grey
+                        }
                         return this.colorScale(d.avgs[col_key]);
                     }
                 }

@@ -190,3 +190,33 @@ label_column_dropdown.onchange = function(){
         }
     }
 }
+
+// Extendability
+$.post("/module_extension",{
+    data: ""
+}, function(res){
+    console.log(res);
+    if(res.modules){
+        let modules = res.modules;
+        modules.forEach(m_info => {
+            let module_i = new New_Module(m_info);
+            d3.select("#"+module_i.module_name+"_button")
+            .on("click", ()=>{
+                if(that.graph){
+                    let selected_nodes = [...that.graph.selected_nodes];
+                    console.log(selected_nodes);
+                    $.post("/module_computing",{
+                        data: JSON.stringify({"nodes":selected_nodes, "module_info": m_info})
+                    }, function(res){
+                        module_i.data = JSON.parse(res.module_result);
+                        module_i.components.forEach(c=>{
+                            module_i.add_component(c);
+                        })
+                    })
+                }
+            })
+        })    
+    }
+    
+})
+

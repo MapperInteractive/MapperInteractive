@@ -19,6 +19,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import KernelDensity
 from scipy.spatial import distance
 from sklearn.cluster import KMeans
+import importlib
 
 
 @app.route('/')
@@ -68,11 +69,12 @@ def process_text_data():
             rows2delete = np.concatenate((rows2delete, np.where(col_match==False)[0]))
         else: 
             ### check if categorical cols### 
-            if len(np.unique(col)) <= 60: # if less than 10 different values: categorical
+            if len(np.unique(col)) <= 200: # if less than 10 different values: categorical
                 cols_categorical_idx.append(i)
             else:
                 cols_others_idx.append(i)
     newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx+cols_others_idx]
+    rows2delete = rows2delete.astype(int)
     newdf3 = np.delete(newdf3, rows2delete, axis=0)
     newdf3_cols = [cols[idx] for idx in cols_numerical_idx+cols_categorical_idx+cols_others_idx]
     newdf3 = pd.DataFrame(newdf3)
@@ -363,3 +365,52 @@ def compute_cc(graph):
     for c in cc:
         cc_list.append(list(c))
     return cc_list
+
+def get_selected_data(selected_nodes):
+    data = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
+    with open(APP_STATIC+"/uploads/cols_info.json") as f:
+        cols_dict = json.load(f)
+    cols = cols_dict['cols_numerical']
+    print(cols)
+    with open(APP_STATIC+"/uploads/nodes_detail.json") as f:
+        nodes_detail = json.load(f)
+    if len(selected_nodes) > 0:
+        selected_rows = []
+        for node in selected_nodes:
+            selected_rows += nodes_detail[node]
+        selected_rows = list(set(selected_rows))
+        data = data.iloc[selected_rows, :]
+        data.index = range(len(data))
+    return data, cols
+
+@app.route('/module_extension', methods=['POST','GET'])
+def module_extension():
+    module_info = ""
+    with open(APP_STATIC+"/uploads/new_modules.json") as f:
+        module_info = json.load(f)
+    return module_info
+
+@app.route('/module_computing', methods=['POST','GET'])
+def module_computing():
+    json_data = json.loads(request.form.get('data'))
+    selected_nodes = json_data['nodes']
+    data, cols = get_selected_data(selected_nodes)
+    module_info = json_data['module_info']
+    data_new = call_module_function(data, cols, module_info)
+    data_new = data_new.to_json(orient='records')
+    return jsonify(module_result=data_new)
+
+def call_module_function(data, cols, module_info):
+    mod_name, func_name = module_info['function-name'].rsplit('.',1)
+    mod = importlib.import_module(mod_name)
+    method_to_call = getattr(mod, func_name)
+    result = method_to_call(*module_info['function-parameters'])
+    data_new = result.fit_transform(data.loc[:,cols])
+    data_new = pd.DataFrame(data_new)
+    data_new_cols = []
+    for i in range(data_new.shape[1]):
+        data_new_cols.append("col"+str(i+1))
+    data_new.columns = data_new_cols
+    return data_new
+
+
