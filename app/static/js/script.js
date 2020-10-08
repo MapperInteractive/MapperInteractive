@@ -7,29 +7,48 @@ $("#import").click(function(){
 })
 d3.select("#files")
     .on("change",()=>{
-        let files = $('#files')[0].files[0];
-        let fileReader = new FileReader();
-        fileReader.onload = function(fileLoadedEvent) {
-            let textFromFileLoaded = fileLoadedEvent.target.result;
-            $.ajax({
-                type: "POST",
-                url: "/data_process",
-                data: textFromFileLoaded,
-                dataType:'text',
-                success: function (response) {
-                    response = JSON.parse(response);
-                    that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
-                },
-                error: function (error) {
-                    console.log("error",error);
-                    alert("Incorrect data format!");
-                }
-            })
-            d3.select(".columns-group")
-                .style("max-height","1000px")
-                .style("visibility", "visible")
-        }
-        fileReader.readAsText(files, "UTF-8");
+        let file_name = $('#files')[0].files[0].name;
+        console.log(file_name)
+        $.ajax({
+            type: "POST",
+            url: "/data_process",
+            data: file_name,
+            dataType:'text',
+            success: function (response) {
+                response = JSON.parse(response);
+                that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
+            },
+            error: function (error) {
+                console.log("error",error);
+                alert("Incorrect data format!");
+            }
+        })
+        d3.select(".columns-group")
+            .style("max-height","1000px")
+            .style("visibility", "visible")
+        // let files = $('#files')[0].files[0];
+        // let fileReader = new FileReader();
+        // fileReader.onload = function(fileLoadedEvent) {
+        //     let textFromFileLoaded = fileLoadedEvent.target.result;
+        //     $.ajax({
+        //         type: "POST",
+        //         url: "/data_process",
+        //         data: textFromFileLoaded,
+        //         dataType:'text',
+        //         success: function (response) {
+        //             response = JSON.parse(response);
+        //             that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
+        //         },
+        //         error: function (error) {
+        //             console.log("error",error);
+        //             alert("Incorrect data format!");
+        //         }
+        //     })
+        //     d3.select(".columns-group")
+        //         .style("max-height","1000px")
+        //         .style("visibility", "visible")
+        // }
+        // fileReader.readAsText(files, "UTF-8");
     })
 
 
@@ -73,11 +92,11 @@ d3.select("#linear_regression")
     .on("click", ()=>{
         if(that.graph){
             let selected_nodes = [...that.graph.selected_nodes];
-            if(that.graph.selected_nodes.length===0){
-                selected_nodes = that.graph.nodes.map(d=>d.id);
-            } 
-            console.log(that.regression.dependent_var)
-            console.log(that.regression.indep_vars_selected)
+            // if(that.graph.selected_nodes.length===0){
+            //     selected_nodes = that.graph.nodes.map(d=>d.id);
+            // } 
+            // console.log(that.regression.dependent_var)
+            // console.log(that.regression.indep_vars_selected)
             $.post("/linear_regression", {
                 data: JSON.stringify({"nodes":selected_nodes, "dep_var":that.regression.dependent_var, "indep_vars":that.regression.indep_vars_selected})
             }, function(res){
@@ -198,6 +217,7 @@ $.post("/module_extension",{
     console.log(res);
     if(res.modules){
         let modules = res.modules;
+        console.log(modules)
         modules.forEach(m_info => {
             let module_i = new New_Module(m_info);
             d3.select("#"+module_i.module_name+"_button")

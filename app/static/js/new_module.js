@@ -76,10 +76,10 @@ class New_Module{
             .attr("cx", d=>xScale(d.col1))
             .attr("cy", d=>yScale(d.col2))
             .attr("r", 2)
-            .attr("fill", "grey")
-            // .attr("fill", d=>{
-            //     return color(parseInt(d.kmeans_cluster));
-            // })
+            // .attr("fill", "orange")
+            .attr("fill", d=>{
+                return color(parseInt(d.kmeans_cluster));
+            })
 
         // x-axis
         d3.select("#"+this.module_name+"_axis_group").append("g") 
@@ -93,5 +93,57 @@ class New_Module{
             .classed("axis_line", true)
             .attr("transform", "translate("+margin.left+",0)");
 
+    }
+
+    add_table(){
+        console.log(res)
+        this.clear_result();
+        d3.select("#"+this.module_name+"-block_body-inner").append("div").classed("reg-result_title",true).append("h6").html(this.module_name);
+        let result_container = d3.select("#regression-panel").select(".block_body-inner").append("div")
+            .classed("row", true)
+            .attr("id","regression-result")
+            .style("padding-top","5px");
+        
+        let indep_vars_container = result_container.append("div")
+            .classed("col-sm-3", true)
+            .classed("scrollable-horizontal", true);
+        indep_vars_container.append("text").html("vars").style("visibility", "hidden");
+        let indep_vars_ul = indep_vars_container.append("ul");
+
+        let coef_container = result_container.append("div")
+            .classed("col-sm-2", true);
+        coef_container.append("text").html("coef").classed("reg_title", true);
+        let coef_ul = coef_container.append("ul");
+
+        let std_container = result_container.append("div")
+            .classed("col-sm-3", true);
+        std_container.append("text").html("std err").classed("reg_title", true);
+        let std_ul = std_container.append("ul");
+
+        let pvalue_container = result_container.append("div")
+            .classed("col-sm-4", true);
+        pvalue_container.append("text").html("p-value").classed("reg_title", true);
+        let pvalue_ul = pvalue_container.append("ul");
+
+
+        let ig = indep_vars_ul.selectAll("li").data(['constant'].concat(this.indep_vars_selected));
+        ig.exit().remove();
+        ig = ig.enter().append("ul").merge(ig)
+            .html(d=>d);
+
+        let cg = coef_ul.selectAll("li").data(res.params);
+        cg.exit().remove();
+        cg = cg.enter().append("ul").merge(cg)
+            .html(d=>Math.round(d*1000)/1000);
+
+        let sg = std_ul.selectAll("li").data(res.stderr);
+        sg.exit().remove();
+        sg = sg.enter().append("ul").merge(sg)
+            .html(d=>Math.round(d*1000)/1000);
+
+        let pg = pvalue_ul.selectAll("li").data(res.pvalues);
+        pg.exit().remove();
+        pg = pg.enter().append("li").merge(pg)
+            .html(d=>Math.round(d*1000)/1000);
     }
 }

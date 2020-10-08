@@ -27,65 +27,97 @@ import importlib
 def index():
     return render_template('index.html')
 
-@app.route('/data_process', methods=['POST','GET'])
-def process_text_data():
-    '''
-    Check for:
-    1. Missing value
-    2. Non-numerical elements in numerical cols
-    3. If cols are non-numerical, check if cols are categorical
-    '''
-    text_data = request.get_data().decode('utf-8').splitlines()
-    cols = text_data[0].split(',')
-    mat = [n.split(',') for n in text_data] # csv: if an element is empty, it will be "".
-    newdf1 = np.array(mat)[1:]
-    rows2delete = np.array([])
-    cols2delete = []
+# @app.route('/data_process', methods=['POST','GET'])
+# def process_text_data():
+#     '''
+#     Check for:
+#     1. Missing value
+#     2. Non-numerical elements in numerical cols
+#     3. If cols are non-numerical, check if cols are categorical
+#     '''
+#     text_data = request.get_data().decode('utf-8').splitlines()
+#     cols = text_data[0].split(',')
+#     mat = [n.split(',') for n in text_data] # csv: if an element is empty, it will be "".
+#     newdf1 = np.array(mat)[1:]
+#     rows2delete = np.array([])
+#     cols2delete = []
     
-    ### Delete missing values ###
-    for i in range(len(cols)):
-        col = newdf1[:,i]
-        if np.sum(col == "") >= 0.2*len(newdf1): # if less than 80% elements in this column are numerical, delete the whole column
-            cols2delete.append(i)
-        else:
-            rows2delete = np.concatenate((rows2delete, np.where(col=="")[0]))
-    rows2delete = np.unique(rows2delete).astype("int")
-    newdf2 = np.delete(np.delete(newdf1, cols2delete, axis=1), rows2delete, axis=0)
-    cols = [cols[i] for i in range(len(cols)) if i not in cols2delete]
+#     # ### Delete missing values ###
+#     for i in range(len(cols)):
+#         col = newdf1[:,i]
+#         if np.sum(col == "") >= 0.2*len(newdf1): # if less than 80% elements in this column are numerical, delete the whole column
+#             cols2delete.append(i)
+#         else:
+#             rows2delete = np.concatenate((rows2delete, np.where(col=="")[0]))
+#     rows2delete = np.unique(rows2delete).astype("int")
+#     newdf2 = np.delete(np.delete(newdf1, cols2delete, axis=1), rows2delete, axis=0)
+#     cols = [cols[i] for i in range(len(cols)) if i not in cols2delete]
 
-    ### check if numerical cols ###
+#     ### check if numerical cols ###
+#     cols_numerical_idx = []
+#     cols_categorical_idx = []
+#     cols_others_idx = []
+#     rows2delete = np.array([])
+#     r1 = re.compile(r'^-?\d+(?:\.\d+)?$')
+#     r2 = re.compile(r'[+\-]?[^A-Za-z]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)') # scientific notation
+#     vmatch = np.vectorize(lambda x:bool(r1.match(x) or r2.match(x)))
+#     for i in range(len(cols)):
+#         col = newdf2[:,i]
+#         col_match = vmatch(col)
+#         if np.sum(col_match) >= 0.8*len(newdf1): # if more than 90% elements can be converted to float, keep the col, and delete rows that cannot be convert to float:
+#             cols_numerical_idx.append(i)
+#             rows2delete = np.concatenate((rows2delete, np.where(col_match==False)[0]))
+#         else: 
+#             ### check if categorical cols### 
+#             if len(np.unique(col)) <= 200: # if less than 10 different values: categorical
+#                 cols_categorical_idx.append(i)
+#             else:
+#                 cols_others_idx.append(i)
+#     newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx+cols_others_idx]
+#     rows2delete = rows2delete.astype(int)
+#     newdf3 = np.delete(newdf3, rows2delete, axis=0)
+#     newdf3_cols = [cols[idx] for idx in cols_numerical_idx+cols_categorical_idx+cols_others_idx]
+#     newdf3 = pd.DataFrame(newdf3)
+#     newdf3.columns = newdf3_cols
+#     # write the data frame
+#     newdf3.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False) 
+#     # write the cols info
+#     cols_numerical = [cols[idx] for idx in cols_numerical_idx]
+#     cols_categorical = [cols[idx] for idx in cols_categorical_idx]
+#     cols_others = [cols[idx] for idx in cols_others_idx]
+#     cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical, 'cols_others':cols_others}
+#     with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
+#         f.write(json.dumps(cols_dict, indent=4))
+#     return jsonify(columns=cols_numerical, categorical_columns=cols_categorical, other_columns=cols_others)
+
+@app.route('/data_process', methods=['POST','GET'])
+def load_data():
+    filename = request.get_data().decode('utf-8').splitlines()[0]
+    print(filename)
+    df = pd.read_csv(APP_STATIC+"/uploads/"+filename)
+    cols = list(df.columns)
+    df_0 = df.iloc[0,:]
     cols_numerical_idx = []
     cols_categorical_idx = []
     cols_others_idx = []
     rows2delete = np.array([])
-    r1 = re.compile(r'^-?\d+(?:\.\d+)?$')
-    r2 = re.compile(r'[+\-]?[^A-Za-z]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)') # scientific notation
-    vmatch = np.vectorize(lambda x:bool(r1.match(x) or r2.match(x)))
     for i in range(len(cols)):
-        col = newdf2[:,i]
-        col_match = vmatch(col)
-        if np.sum(col_match) >= 0.8*len(newdf1): # if more than 90% elements can be converted to float, keep the col, and delete rows that cannot be convert to float:
+        c = df_0.iloc[i]
+        try:
+            float(c)
             cols_numerical_idx.append(i)
-            rows2delete = np.concatenate((rows2delete, np.where(col_match==False)[0]))
-        else: 
-            ### check if categorical cols### 
-            if len(np.unique(col)) <= 200: # if less than 10 different values: categorical
-                cols_categorical_idx.append(i)
-            else:
-                cols_others_idx.append(i)
-    newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx+cols_others_idx]
-    rows2delete = rows2delete.astype(int)
-    newdf3 = np.delete(newdf3, rows2delete, axis=0)
-    newdf3_cols = [cols[idx] for idx in cols_numerical_idx+cols_categorical_idx+cols_others_idx]
-    newdf3 = pd.DataFrame(newdf3)
-    newdf3.columns = newdf3_cols
-    # write the data frame
-    newdf3.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False) 
-    # write the cols info
+        except ValueError:
+            cols_categorical_idx.append(i)
+        # if isinstance(c,int) or isinstance(c,float):
+            # cols_numerical_idx.append(i)
+        # else:
+            # cols_categorical_idx.append(i)
+    df.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False) 
     cols_numerical = [cols[idx] for idx in cols_numerical_idx]
     cols_categorical = [cols[idx] for idx in cols_categorical_idx]
     cols_others = [cols[idx] for idx in cols_others_idx]
     cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical, 'cols_others':cols_others}
+    print(cols_dict)
     with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
         f.write(json.dumps(cols_dict, indent=4))
     return jsonify(columns=cols_numerical, categorical_columns=cols_categorical, other_columns=cols_others)
@@ -150,19 +182,24 @@ def linear_regression():
     with open(APP_STATIC+"/uploads/nodes_detail.json") as f:
         nodes_detail = json.load(f)
     data = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
-    selected_rows = []
-    for node in selected_nodes:
-        selected_rows += nodes_detail[node]
-    selected_data = data.iloc[selected_rows,:]
-    y = selected_data.loc[:,y_name]
-    X = selected_data.loc[:,X_names]
+    if len(selected_nodes) > 0:
+        selected_rows = []
+        for node in selected_nodes:
+            selected_rows += nodes_detail[node]
+        selected_rows = list(set(selected_rows))
+        data = data.iloc[selected_rows, :]
+        data.index = range(len(data))
+    y = data.loc[:,y_name]
+    X = data.loc[:,X_names]
     X2 = sm.add_constant(X)
     reg = sm.OLS(y, X2)
+    print(y,X2)
     result = reg.fit()
     conf_int = np.array(result.conf_int())
     conf_int_new = []
     for i in range(conf_int.shape[0]):
         conf_int_new.append(list(conf_int[i,:]))
+    print(result.summary())
     return jsonify(params=list(result.params), pvalues=list(result.pvalues), conf_int=conf_int_new, stderr=list(result.bse))
 
 @app.route('/pca', methods=['POST','GET'])
@@ -397,20 +434,38 @@ def module_computing():
     data, cols = get_selected_data(selected_nodes)
     module_info = json_data['module_info']
     data_new = call_module_function(data, cols, module_info)
-    data_new = data_new.to_json(orient='records')
-    return jsonify(module_result=data_new)
+    # data_new['kmeans_cluster'] = KMeans(n_clusters=4, random_state=0).fit(data_new).labels_
+    # data_new = data_new.to_json(orient='records')
+    # return jsonify(module_result=data_new)
+    return data_new
 
 def call_module_function(data, cols, module_info):
     mod_name, func_name = module_info['function-name'].rsplit('.',1)
     mod = importlib.import_module(mod_name)
     method_to_call = getattr(mod, func_name)
-    result = method_to_call(*module_info['function-parameters'])
-    data_new = result.fit_transform(data.loc[:,cols])
-    data_new = pd.DataFrame(data_new)
-    data_new_cols = []
-    for i in range(data_new.shape[1]):
-        data_new_cols.append("col"+str(i+1))
-    data_new.columns = data_new_cols
+    if module_info['module-type'] == "unsupervised_learning":
+        result = method_to_call(**module_info['function-parameters'])
+        data_new = result.fit_transform(data.loc[:,cols])
+        data_new = pd.DataFrame(data_new)
+        data_new_cols = []
+        for i in range(data_new.shape[1]):
+            data_new_cols.append("col"+str(i+1))
+        data_new.columns = data_new_cols
+        data_new['kmeans_cluster'] = KMeans(n_clusters=4, random_state=0).fit(data_new).labels_
+        data_new = data_new.to_json(orient='records')
+        data_new = jsonify(module_result=data_new)
+    elif module_info['module-type'] == "supervised_learning":
+        y = data.loc[:,module_info['input-variables']['dependent']]
+        X = data.loc[:,module_info['input-variables']['independent']]
+        X2 = sm.add_constant(X)
+        reg = method_to_call(np.asarray(y), np.asarray(X2))
+        result = reg.fit()
+        conf_int = np.array(result.conf_int())
+        conf_int_new = []
+        for i in range(conf_int.shape[0]):
+            conf_int_new.append(list(conf_int[i,:]))
+        print(result.summary())
+        data_new = jsonify(params=list(result.params), pvalues=list(result.pvalues), conf_int=conf_int_new, stderr=list(result.bse))
     return data_new
 
-
+# @limit_content_length(3 * 1024 * 1024)
