@@ -25,7 +25,7 @@ d3.select("#files")
         })
         d3.select(".columns-group")
             .style("max-height","1000px")
-            .style("visibility", "visible")
+            .style("visibility", "visible");
         // let files = $('#files')[0].files[0];
         // let fileReader = new FileReader();
         // fileReader.onload = function(fileLoadedEvent) {

@@ -267,7 +267,7 @@ class Graph{
         let v = this.nodes.map(d=>d.size);
         this.size_scales['Number of points'] = d3.scaleLinear()
             .domain([Math.min(...v), Math.max(...v)])
-            .range([6,18])
+            .range([10,18])
 
         let size_dropdown = document.getElementById("size_function_values");
         let size = size_dropdown.options[size_dropdown.selectedIndex].text;
@@ -388,11 +388,6 @@ class Graph{
     }
 
     select_node(){
-        if(!this.if_select_node){
-            d3.selectAll(".viewer-graph__vertex").classed("selected",false);
-            d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
-            d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        }
         this.selected_nodes = [];
         this.if_select_node = true;
         d3.select("#select-node").classed("selected", true);
@@ -401,22 +396,11 @@ class Graph{
         d3.select("#select-cluster").classed("selected", false);
         this.if_select_path = false;
         d3.select("#select-path").classed("selected", false);
-        d3.selectAll(".viewer-graph__vertex").classed("selected",false);
-        d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
-        d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        if(this.col_keys.indexOf(this.color_col)!=-1 || this.color_col==="Number of points"){
-            this.fill_vertex(this.color_col);
-        } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
-            let color_dict = this.fill_vertex_categorical(this.color_col);
-        }
+        this.unhighlight_all()
+        
     }
 
     select_cluster(){
-        if(!this.if_select_cluster){
-            d3.selectAll(".viewer-graph__vertex").classed("selected",false);
-            d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
-            d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        }
         this.selected_nodes = [];
         this.if_select_cluster = true;
         d3.select("#select-cluster").classed("selected", true);
@@ -425,22 +409,10 @@ class Graph{
         d3.select("#select-node").classed("selected", false);
         this.if_select_path = false;
         d3.select("#select-path").classed("selected", false);
-        d3.selectAll(".viewer-graph__vertex").classed("selected",false);
-        d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
-        d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        if(this.col_keys.indexOf(this.color_col)!=-1 || this.color_col==="Number of points"){
-            this.fill_vertex(this.color_col);
-        } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
-            let color_dict = this.fill_vertex_categorical(this.color_col);
-        }
+        this.unhighlight_all();
     }
 
     select_path(){
-        if(!this.if_select_path){
-            d3.selectAll(".viewer-graph__vertex").classed("selected",false);
-            d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
-            d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        }
         this.selected_nodes = [];
         this.selectable_nodes = [];
         this.nodes.forEach(node=>{
@@ -453,11 +425,7 @@ class Graph{
         d3.select("#select-node").classed("selected", false);
         this.if_select_cluster = false;
         d3.select("#select-cluster").classed("selected", false);
-        if(this.col_keys.indexOf(this.color_col)!=-1 || this.color_col==="Number of points"){
-            this.fill_vertex(this.color_col);
-        } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
-            let color_dict = this.fill_vertex_categorical(this.color_col);
-        }
+        this.unhighlight_all();
     }
 
     select_view(){
@@ -471,15 +439,7 @@ class Graph{
         d3.select("#select-path").classed("selected", false);
         d3.selectAll(".viewer-graph__vertex").classed("selected", false);
         this.remove_hist();
-        d3.selectAll(".viewer-graph__vertex").classed("selected",false);
-        d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
-        d3.selectAll(".viewer-graph__edge").classed("selected", false);
-        if(this.col_keys.indexOf(this.color_col)!=-1 || this.color_col==="Number of points"){
-            this.fill_vertex(this.color_col);
-        } else if(this.categorical_cols.indexOf(this.color_col)!=-1){
-            let color_dict = this.fill_vertex_categorical(this.color_col);
-        }
-        this.text_cluster_details([], this.label_column, this.labels);
+        this.unhighlight_all();
 
     }
 
@@ -581,8 +541,9 @@ class Graph{
         while (currentId!=fromId && kk < 500){
             let nextId = path[currentId];
             if(this.selected_nodes.indexOf(currentId)===-1){
-                d3.select("#node"+currentId).classed("highlighted_path", true).style("fill", "white");
-                d3.select("#node-label"+currentId).style("fill", "#555");
+                // d3.select("#node"+currentId).classed("highlighted_path", true).style("fill", "white");
+                // d3.select("#node-label"+currentId).style("fill", "#555");
+                this.highlight_selectable(currentId, true);
                 d3.select("#link"+currentId+"_"+nextId).classed("highlighted_path", true);
                 d3.select("#link"+nextId+"_"+currentId).classed("highlighted_path", true);
 
@@ -592,10 +553,57 @@ class Graph{
         }
     }
 
+    highlight_selected(nid){
+        d3.select("#node"+nid).classed("selected", true);
+        d3.select("#node-label"+nid).classed("selected", true);
+        d3.select("#group"+nid).select(".viewer-graph__pie").classed("selected", true);
+
+    }
+
+    unhighlight_selected(nid){
+        d3.select("#node"+nid).classed("selected", false);
+        d3.select("#node-label"+nid).classed("selected", false);
+        d3.select("#group"+nid).select(".viewer-graph__pie").classed("selected", false);
+    }
+
+    highlight_selectable(nid, if_highlight_path=false){
+        if(if_highlight_path){
+            d3.select("#node"+nid).classed("highlighted_path", true);
+        } else{
+            d3.select("#node"+nid).classed("selectable", true);
+        }
+        d3.select("#node-label"+nid).classed("selectable", true);
+        d3.select("#group"+nid).select(".viewer-graph__pie").classed("selectable", true);
+    }
+
     unhighlight_selectable(){
         d3.selectAll(".viewer-graph__vertex").classed("highlighted_path", false);
         d3.selectAll(".viewer-graph__vertex").classed("selectable", false);
+        d3.selectAll(".viewer-graph__label").classed("selectable", false);
+        d3.selectAll(".viewer-graph__pie").classed("selectable", false);
         d3.selectAll(".viewer-graph__edge").classed("highlighted_path", false);
+    }
+
+    highlight_unselectable(nid){
+        d3.select("#node"+nid).classed("unselectable", true);
+        d3.select("#node-label"+nid).classed("unselectable", true);
+        d3.select("#group"+nid).select(".viewer-graph__pie").classed("unselectable", true);
+    }
+
+    unhighlight_unselectable(nid){
+        d3.select("#node"+nid).classed("unselectable", false);
+        d3.select("#node-label"+nid).classed("unselectable", false);
+        d3.select("#group"+nid).select(".viewer-graph__pie").classed("unselectable", false);
+    }
+
+    unhighlight_all(){
+        d3.selectAll(".viewer-graph__vertex").classed("selected",false);
+        d3.selectAll(".viewer-graph__label").classed("selected",false);
+        d3.selectAll(".viewer-graph__pie").classed("selected",false);
+        d3.selectAll(".viewer-graph__vertex").classed("unselectable",false);
+        d3.selectAll(".viewer-graph__label").classed("unselectable",false);
+        d3.selectAll(".viewer-graph__pie").classed("unselectable",false);
+        d3.selectAll(".viewer-graph__edge").classed("selected", false);
     }
 
     draw_mapper(){
@@ -610,33 +618,27 @@ class Graph{
         ng.exit().remove();
         ng = ng.enter().append("g").merge(ng)
             .attr("class", "viewer-graph__vertex-group")
+            .attr("id",(d)=>"group"+d.id)
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
-                .on("end", dragended));
-        ng.append("circle")
-            .classed("viewer-graph__vertex",true)
-            .attr("id",(d)=>"node"+d.id)
-            .attr("r", 12)
+                .on("end", dragended))
             .on("mouseover", (d)=>{
                 if(this.if_select_node) {
                     if(this.selected_nodes.indexOf(d.id) === -1){
-                        d3.select("#node"+d.id).classed("selectable", true).style("fill", "white");
-                        d3.select("#node-label"+d.id).style("fill", "#555");
+                        this.highlight_selectable(d.id);
                     }
                 } else if(this.if_select_cluster) {
                     if(this.selected_nodes.indexOf(d.id) === -1) {
                         let cluster = this.connected_components[d.clusterId];
                         cluster.forEach(nId=>{
-                            d3.select("#node"+(nId+1).toString()).classed("selectable", true).style("fill", "white");
-                            d3.select("#node-label"+(nId+1).toString()).style("fill", "#555");
+                            this.highlight_selectable((nId+1).toString());
                         })
                     }
                 }
                 else if(this.if_select_path){
                     if(this.selected_nodes.length === 0){
-                        d3.select("#node"+d.id).classed("selectable", true);
-                        d3.select("#node-label"+d.id).style("fill", "#555");
+                        this.highlight_selectable(d.id);
                     }
                     else { // this.selected_nodes.length > 0
                         let path = this.dijkstra(this.path_start_id);
@@ -647,7 +649,6 @@ class Graph{
             .on("mouseout", ()=>{
                 if(this.if_select_node || this.if_select_cluster || this.if_select_path){
                     this.unhighlight_selectable();
-                    this.fill_vertex(this.color_col);
                 }             
             })
             .on("click",(d)=>{
@@ -656,37 +657,36 @@ class Graph{
                     this.unhighlight_selectable();
                     if(this.selected_nodes.indexOf(d.id)===-1){ // Selecting nodes
                         this.selected_nodes.push(d.id);
-                        d3.select("#node"+d.id).classed("selected",true).style("fill", "white");
-                        d3.select("#node-label"+d.id).style("fill","#555");
+                        this.highlight_selected(d.id)
                     } else{ // Unselecting
                         this.selected_nodes.splice(this.selected_nodes.indexOf(d.id),1);
-                        d3.select("#node"+d.id).classed("selected",false);
-                        this.fill_vertex(this.color_col);
+                        this.unhighlight_selected(d.id)
                     }
                     this.draw_hist();
                 } else if(this.if_select_cluster){
                     this.unhighlight_selectable();
                     let cluster = this.connected_components[d.clusterId];
-                    this.selected_nodes = [];
-                    cluster.forEach(nodeId=>{
-                        this.selected_nodes.push((nodeId+1).toString());
-                    })
-                    this.nodes.forEach(node=>{
-                        if(node.clusterId === d.clusterId){
-                            d3.select("#node"+node.id).classed("selected", true).style("fill", "white");
-                            d3.select("#node-label"+node.id).style("fill","#555");
-                        } else{
-                            d3.select("#node"+node.id).classed("selected", false);
-                            this.fill_vertex(this.color_col);
-                        }
-                    })
+                    if(this.selected_nodes.indexOf(d.id)===-1){
+                        cluster.forEach(nodeId=>{
+                            this.selected_nodes.push((nodeId+1).toString());
+                        })
+                        this.nodes.forEach(node=>{
+                            if(node.clusterId === d.clusterId){                                
+                                this.highlight_selected(node.id)
+                            } 
+                        })
+                    } else{
+                        cluster.forEach(nId=>{
+                            this.selected_nodes.splice(this.selected_nodes.indexOf((nId+1).toString()),1);
+                            this.unhighlight_selected((nId+1).toString());
+                        })
+                    }
                     this.draw_hist();
                 } else if(this.if_select_path){
                     this.unhighlight_selectable();
                     if(this.selected_nodes.length===0){
                         this.selected_nodes.push(d.id);
-                        d3.select("#node"+d.id).classed("selected",true).style("fill", "white");
-                        d3.select("#node-label"+d.id).style("fill","#555");
+                        this.highlight_selected(d.id)
                         this.selectable_nodes = this.connected_components[d.clusterId].map(nIdx=>(nIdx+1).toString());
                         this.selectable_nodes.splice(this.selectable_nodes.indexOf(d.id),1);
                         this.path_start_id = d.id;
@@ -701,8 +701,7 @@ class Graph{
                             let nextId = path[currentId];
                             d3.select("#link"+currentId+"_"+nextId).classed("selected", true);
                             d3.select("#link"+nextId+"_"+currentId).classed("selected", true);
-                            d3.select("#node"+currentId).classed("selected",true).style("fill", "white");
-                            d3.select("#node-label"+currentId).style("fill","#555");
+                            this.highlight_selected(currentId)
                             currentId = nextId;
                             kk += 1;
                         }
@@ -710,9 +709,9 @@ class Graph{
                     }
                     this.nodes.forEach(node=>{
                         if(this.selectable_nodes.indexOf(node.id)===-1 && this.selected_nodes.indexOf(node.id)===-1){
-                            d3.select("#node"+node.id).classed("unselectable", true);
+                            this.highlight_unselectable(node.id);
                         } else{
-                            d3.select("#node"+node.id).classed("unselectable", false);
+                            this.unhighlight_unselectable(node.id);
                         }
                     })
                     this.draw_hist();
@@ -720,6 +719,14 @@ class Graph{
                 console.log(this.selected_nodes)
                 this.text_cluster_details(this.selected_nodes, this.label_column, this.labels);
             });
+
+
+
+        ng.append("circle")
+            .classed("viewer-graph__vertex",true)
+            .attr("fill", "#fff")
+            .attr("id",(d)=>"node"+d.id)
+            .attr("r", 12);
 
         let lg = this.link_group.selectAll("line").data(this.links);
         lg.exit().remove();
@@ -733,6 +740,7 @@ class Graph{
         lbg = lbg.enter().append("text").merge(lbg);
         lbg
             .classed("viewer-graph__label", true)
+            .attr("fill", "#555")
             .attr("id",(d)=>"node-label"+d.id)
             .text((d)=>d.id);
 
@@ -756,14 +764,6 @@ class Graph{
                 .attr("transform", function (d) {
                     return "translate(" + d.x + "," + d.y + ")";
                 });
-                // .attr("cx", function(d) {
-                //     return d.x;
-                //     // return (d.x = Math.max(radius, Math.min(that.width - radius, d.x)));
-                // })
-                // .attr("cy", function(d) {
-                //     return d.y;
-                //     // return (d.y = Math.max(radius, Math.min(that.height - radius, d.y)));
-                // })
     
             // **** TODO **** how to make the label centered?
             lbg
@@ -855,30 +855,34 @@ class Graph{
     }
 
     fill_vertex(col_key){
-        d3.selectAll(".pie-group").remove();
+        d3.selectAll(".viewer-graph__pie").remove();
         d3.selectAll(".viewer-graph__vertex")
-            .style("fill", d=>{
+            .attr("fill", d=>{
                 if(d3.select("#node"+d.id).classed("selected")===false){
                     if(col_key === "Number of points"){
                         if(d.size < this.colorScale.domain()[0]){
-                            return "rgb(255,255,255)"; // white
+                            return "#fff"; // white
                         } else if(d.size > this.colorScale.domain()[1]){
                             return "rgb(169,169,169)"; // grey
                         }
-                        return this.colorScale(d.size)
-                    } else{
-                        if(d.avgs[col_key] < this.colorScale.domain()[0]){
-                            return "rgb(255,255,255)"; // white
-                        } else if(d.avgs[col_key] > this.colorScale.domain()[1]){
-                            return "rgb(169,169,169)"; // grey
-                        }
+                        return this.colorScale(d.size);
+                    } else if(col_key === "- None -"){
+                        return "#fff";
+                    }
+                    else{
+                        // if(d.avgs[col_key] < this.colorScale.domain()[0]){
+                        //     return "rgb(255,255,255)"; // white
+                        // } else if(d.avgs[col_key] > this.colorScale.domain()[1]){
+                        //     return "rgb(169,169,169)"; // grey
+                        // }
                         return this.colorScale(d.avgs[col_key]);
+                        // return d3.interpolateYlGnBu(Math.min(d.avgs[col_key]*1.5,1));
                     }
                 }
                 });
         d3.selectAll(".viewer-graph__label")
-            .style("fill", d=>{
-                let circle_rgb = d3.select("#node"+d.id).style("fill");
+            .attr("fill", d=>{
+                let circle_rgb = d3.select("#node"+d.id).attr("fill");
                 let rgb = circle_rgb.replace(/rgb\(|\)|rgba\(|\)|\s/gi, '').split(',');
                 for (let i = 0; i < rgb.length; i++){ rgb[i] = (i === 3 ? 1 : 255) - rgb[i] };
                 return 'rgb(' + rgb.join(',') + ')';
@@ -892,9 +896,19 @@ class Graph{
     // }
 
     fill_vertex_categorical(col_key){
-        d3.selectAll(".pie-group").remove();
+        d3.selectAll(".viewer-graph__pie").remove();
+        d3.selectAll(".viewer-graph__vertex").attr("fill", "#fff");
+        d3.selectAll(".viewer-graph__label").attr("fill", "#555");
         let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
         let color_dict = {};
+        // // get # catogories
+        // this.nodes.forEach(node=>{
+        //     for(let c in node.categorical_cols_summary[col_key]){
+        //         if(Object.keys(color_dict).indexOf(c)===-1){
+        //             color_dict[c] = "";
+        //         }
+        //     }
+        // })
         let idx = 0;
 
         // let that = this;
@@ -903,7 +917,7 @@ class Graph{
                 .sort(null);
 
         let pg = d3.selectAll(".viewer-graph__vertex-group").append("g")
-            .attr("class", "pie-group");
+            .attr("class", "viewer-graph__pie");
         
         let arc = d3.arc().innerRadius(0);
 
@@ -927,9 +941,11 @@ class Graph{
                 p.value = node.categorical_cols_summary[col_key][c];
                 p.node_id = node.id;
                 if(Object.keys(color_dict).indexOf(c)!=-1){
+                // if(color_dict[c]!=""){
                     p.color = color_dict[c];
                 } else {
                     p.color = color_categorical(idx);
+                    // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
                     idx += 1;
                     color_dict[c] = p.color;
                 }

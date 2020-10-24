@@ -187,9 +187,13 @@ li{
     padding-top:20px;
 } */
 
+.viewer-graph__pie.selectable, .viewer-graph__pie.selected, .viewer-graph__pie.unselectable{
+  visibility: hidden;
+}
+
 .viewer-graph__vertex {
     cursor: pointer;
-    fill: white;
+    /* fill: white; */
     stroke: #696969;
     stroke-width: 2px;
   }
@@ -236,7 +240,11 @@ li{
     cursor: pointer;
     pointer-events: none;
     font: 10px sans-serif;
-    fill: #555;  
+    /* fill: #555;   */
+}
+
+.viewer-graph__label.selectable, .viewer-graph__label.selected, .viewer-graph__label.unselectable{
+  fill: #555;
 }
 
 /* select nodes/cluster/path */

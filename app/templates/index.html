@@ -27,7 +27,7 @@
             <div class="viewer-graph__toolbar">
                 <button id="unselect-view" class="viewer-graph__toolbar-item btn">View</button>
                 <button id="select-node" class="viewer-graph__toolbar-item btn">Select Nodes</button>
-                <button id="select-cluster" class="viewer-graph__toolbar-item btn">Select Cluster</button>
+                <button id="select-cluster" class="viewer-graph__toolbar-item btn">Select Clusters</button>
                 <button id="select-path" class="viewer-graph__toolbar-item btn">Select Path</button>
             </div>
             <div class="viewer-graph__graph">
@@ -84,7 +84,7 @@
                     <div class="param-range-container_clustering">
                       <div class="param-range-container-inner_clustering" style="padding:0px;">
                         <span class="param-range left"><input type="number" id="range-eps-left" min="0.01" max="1" value="0.1" step=0.01></span>
-                        <span class="param-range right"><input type="number" id="range-eps-right" min="0.01" max="1" value="0.5" step=0.01></span>
+                        <span class="param-range right"><input type="number" id="range-eps-right" min="0.01" max="50000" value="0.5" step=0.01></span>
                       </div>    
                     </div>
                     <input class="ui-form-range__input" id="eps_input" name="dbscan_eps" type="range" value="0.1" max="0.5" min="0.1" step="0.01">

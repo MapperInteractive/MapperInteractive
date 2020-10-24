@@ -234,7 +234,8 @@ def pca():
     if len(selected_nodes)>0:
         data_new['kmeans_cluster'] = KMeans(n_clusters=min(len(selected_nodes), 6), random_state=0).fit(data_new).labels_
     else:
-        data_new['kmeans_cluster'] = KMeans(n_clusters=4, random_state=0).fit(data_new).labels_
+        data_new['kmeans_cluster'] = KMeans(n_clusters=10, random_state=0).fit(data_new).labels_
+        # data_new['kmeans_cluster'] = KMeans(n_clusters=10, random_state=0).fit(data_new).labels_
     data_new = data_new.to_json(orient='records')
     return jsonify(pca=data_new)
 
@@ -299,16 +300,21 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
 
     if len(filter_function) == 1:
         f = filter_function[0]
-        lens = compute_lens(f, data, mapper, filter_parameters)
+        lens = compute_lens(f, data_new, mapper, filter_parameters)
         
     elif len(filter_function) == 2:
         lens = []
         for f in filter_function:
-            lens_f = compute_lens(f, data, mapper, filter_parameters)
+            lens_f = compute_lens(f, data_new, mapper, filter_parameters)
             lens.append(lens_f)
         lens = np.concatenate((lens[0], lens[1]), axis=1)
-
+    # clusterer = sklearn.cluster.DBSCAN(eps=eps, min_samples=min_samples, metric='euclidean', n_jobs=8)
+    print(data_new.shape)
+    print(np.max(np.max(data_new)))
+    print(np.mean(np.mean(data_new)))
     graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+    print(len(graph['nodes'].keys()))
+    # graph = mapper.map(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
 
     return graph
 
