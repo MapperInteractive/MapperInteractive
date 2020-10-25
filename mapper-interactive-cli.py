@@ -7,10 +7,11 @@ from app import cover as km_cover
 from sklearn.cluster import DBSCAN
 import json
 import itertools
-import numpy as np 
-from os.path import join 
+import numpy as np
+from os.path import join
 from tqdm import tqdm
 from sklearn.preprocessing import MinMaxScaler, normalize
+
 
 def mkdir(f):
     if not os.path.exists(f):
@@ -35,6 +36,7 @@ def extract_range(s):
     choices.append(params[1])
     return choices
 
+
 def get_filter_fn(X, filter, filter_params=None):
     mapper = km.KeplerMapper()
     if type(filter) is not list:
@@ -51,11 +53,11 @@ def get_filter_fn(X, filter, filter_params=None):
 def mapper_wrapper(X, overlap, intervals, filter_fn, clusterer, **mapper_args):
     mapper = km.KeplerMapper()
     graph = mapper.map_parallel(filter_fn, X, clusterer=clusterer, cover=km_cover.Cover(
-        n_cubes=intervals, perc_overlap=overlap), **mapper_args)
+        n_cubes=intervals, perc_overlap=overlap / 100), **mapper_args)
     return graph
 
 
-def graph_to_dict(graph, **kwargs):
+def graph_to_dict(g, **kwargs):
     d = {}
     d['nodes'] = {}
     d['edges'] = {}
@@ -67,30 +69,22 @@ def graph_to_dict(graph, **kwargs):
         d[k] = kwargs[k]
     return d
 
+
 def wrangle_csv(df):
-    cols = list(df.columns)
-    df_0 = df.iloc[0,:]
-    cols_numerical_idx = []
-    cols_categorical_idx = []
-    cols_others_idx = []
-    rows2delete = np.array([])
-    for i in range(len(cols)):
-        c = df_0.iloc[i]
-        try:
-            float(c)
-            cols_numerical_idx.append(i)
-        except ValueError:
-            cols_categorical_idx.append(i)
+    print('Skipping wrangling, unimplemented')
     return df
 
+
 def normalize_data(X, norm_type):
-    if norm_type == "none":
+    if norm_type == "none" or norm_type is None:
+        X_prime = X
         pass
-    elif norm_type == "0-1": # axis=0, min-max norm for each column
+    elif norm_type == "0-1":  # axis=0, min-max norm for each column
         scaler = MinMaxScaler()
         X_prime = scaler.fit_transform(X)
     else:
-        X_prime = normalize(X, norm=norm_type, axis=0, copy=False, return_norm=False)
+        X_prime = normalize(X, norm=norm_type, axis=0,
+                            copy=False, return_norm=False)
     return X_prime
 
 
@@ -106,18 +100,19 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--filter', type=str,
                         help='Which filter function to use. See docs for choices.')
     parser.add_argument('-output', type=str,
-                        help='Output Directory. Defaults to "./graph/"')
+                        help='Output Directory. Defaults to "./graph/"', default='./graph/')
     parser.add_argument('--no-preprocess', action='store_true')
     parser.add_argument('--threads', type=int, default=4,
                         help='Number of threads to allocate')
     parser.add_argument('--eps', type=float,
                         help='Epsilon for DBSCAN', required=True)
     parser.add_argument('--num_pts', type=int,
-                        help='num_pts for DBSCAN', required=True)
+                        help='num_pts for DBSCAN', default=5)
     parser.add_argument('--norm', help='Normalization of points', default=None)
     parser.add_argument('--gpu-id', default='-1', type=str,
                         help='id(s) for CUDA_VISIBLE_DEVICES')  # TODO there's definitely a better way to parse cuda devices
-    parser.add_argument('--metric', default=None, help='Metric for DBSCAN')
+    parser.add_argument('--metric', default='euclidean',
+                        help='Metric for DBSCAN')
     args = parser.parse_args()
 
     fname = args.input
@@ -131,16 +126,26 @@ if __name__ == '__main__':
     eps = args.eps
     num_pts = args.num_pts
     metric = args.metric
+    norm = args.norm
 
     # Setup
     mkdir(output_dir)
     df = pd.read_csv(fname)
+    if not no_preprocess:
+        df = wrangle_csv(df)
     df_np = df.to_numpy()
+    df_np = normalize_data(df_np, norm_type=norm)
     overlaps = extract_range(overlaps_str)
     intervals = extract_range(intervals_str)
     filter_fn = get_filter_fn(df, filter_str, filter_params=None)
     clusterer = DBSCAN(eps=eps, min_samples=num_pts)
+    with open(join(output_dir, 'metadata.json'), 'w+') as fp:
+        meta = {'data': fname, 'intervals': intervals_str,
+                'overlaps': overlaps_str, 'filter': filter_str, 'normalization': norm,
+                'dbscan_eps': eps, 'dbscan_numpts': num_pts}
+        json.dump(meta, fp)
     for overlap, interval in tqdm(itertools.product(overlaps, intervals)):
-        g = graph_to_dict(mapper_wrapper(df_np, overlap, interval, filter_fn, clusterer, n_jobs=threads, metric=metric))
+        g = graph_to_dict(mapper_wrapper(
+            df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric))
         with open(join(output_dir, str(interval) + '_' + str(overlap) + '.json'), 'w+') as fp:
             json.dump(g, fp)
