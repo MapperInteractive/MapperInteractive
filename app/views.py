@@ -13,7 +13,10 @@ from sklearn import cluster
 import networkx as nx
 import sklearn
 # from sklearn.linear_model import LinearRegression
-import statsmodels.api as sm
+try:
+    import statsmodels.api as sm
+except:
+    print('No statsmodel found')
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import KernelDensity

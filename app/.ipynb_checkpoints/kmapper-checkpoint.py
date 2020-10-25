@@ -380,8 +380,7 @@ class KeplerMapper(object):
             # These arguments are all deprecated
             overlap_perc=None,
             nr_cubes=None,
-            n_threads=16,
-            metric=None
+            n_threads=16
     ):
         """Apply Mapper algorithm on this projection and build a simplicial complex. Returns a dictionary with nodes and links.
 
@@ -549,7 +548,7 @@ class KeplerMapper(object):
                 c = sklearn.base.clone(clusterer)
                 c.metric = 'precomputed'
                 c.n_jobs = n_threads
-                dist_mat = pairwise_distances(fit_data, n_jobs=n_threads) if metric is None else pairwise_distances(fit_data, n_jobs=n_threads, metric=metric)
+                dist_mat = pairwise_distances(fit_data, n_jobs=n_threads)
 
                 # if self.verbose > 1:
                 #     print(f'Computed distance matrix of shape{dist_mat.shape} in {datetime.now() - start}')
