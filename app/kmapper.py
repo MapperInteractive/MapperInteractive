@@ -5,6 +5,7 @@ from datetime import datetime
 import inspect
 import itertools
 import os
+from platform import dist
 import sys
 import warnings
 
@@ -382,6 +383,7 @@ class KeplerMapper(object):
             precomputed=False,
             remove_duplicate_nodes=False,
             metric='euclidean',
+            use_gpu=False,
             # These arguments are all deprecated
             overlap_perc=None,
             nr_cubes=None,
@@ -539,6 +541,16 @@ class KeplerMapper(object):
 
         # define a helper function that takes a hypercube and clusterer and returns cluster predictions
         from sklearn.metrics.pairwise import pairwise_distances
+        if use_gpu and metric == 'euclidean':
+            import torch
+            out_of_memory = -1
+            cuda_avail = torch.cuda.is_available()
+
+            def torch_cdist(X):
+                tensor = torch.from_numpy(X).to(torch.device('cuda'))
+                d = torch.cdist(tensor, tensor, p=2)
+                d = d.cpu().numpy()
+                return d
 
         def cluster_helper(hypercube, cube_idx):
             if hypercube.shape[0] >= min_cluster_samples:
@@ -552,8 +564,17 @@ class KeplerMapper(object):
                 c = sklearn.base.clone(clusterer)
                 c.metric = 'precomputed'
                 c.n_jobs = n_threads
-                dist_mat = pairwise_distances(
-                    fit_data, n_jobs=n_threads, metric=metric)
+
+                if use_gpu and metric == 'euclidean' and cuda_avail and (out_of_memory == -1 or fit_data.shape[0] < out_of_memory):
+                    try:
+                        dist_mat = torch_cdist(fit_data)
+                    except RuntimeError:
+                        out_of_memory = fit_data.shape[0]
+                        dist_mat = pairwise_distances(
+                            fit_data, n_jobs=n_threads, metric=metric)
+                else:
+                    dist_mat = pairwise_distances(
+                        fit_data, n_jobs=n_threads, metric=metric)
 
                 # if self.verbose > 1:
                 #     print(f'Computed distance matrix of shape{dist_mat.shape} in {datetime.now() - start}')
