@@ -45,7 +45,7 @@ def index():
 #     # ### Delete missing values ###
 #     for i in range(len(cols)):
 #         col = newdf1[:,i]
-#         if np.sum(col == "") >= 0.2*len(newdf1): # if less than 80% elements in this column are numerical, delete the whole column
+#         if np.sum(col == "") >= 0.2*len(newdf1): # if more than 20% elements in this column are empty, delete the whole column
 #             cols2delete.append(i)
 #         else:
 #             rows2delete = np.concatenate((rows2delete, np.where(col=="")[0]))
