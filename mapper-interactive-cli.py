@@ -71,8 +71,63 @@ def graph_to_dict(g, **kwargs):
 
 
 def wrangle_csv(df):
-    print('Skipping wrangling, unimplemented')
-    return df
+    '''
+    Check for:
+    1. Missing value
+    2. Non-numerical elements in numerical cols
+    3. If cols are non-numerical, check if cols are categorical
+    '''
+    newdf1 = df.to_numpy()[1:]
+    rows2delete = np.array([])
+    cols2delete = []
+
+    # ### Delete missing values ###
+    for i in range(len(cols)):
+        col = newdf1[:, i]
+        # if more than 20% elements in this column are empty, delete the whole column
+        if np.sum(col == "") >= 0.2*len(newdf1):
+            cols2delete.append(i)
+        else:
+            rows2delete = np.concatenate((rows2delete, np.where(col == "")[0]))
+    rows2delete = np.unique(rows2delete).astype("int")
+    newdf2 = np.delete(np.delete(newdf1, cols2delete,
+                                 axis=1), rows2delete, axis=0)
+    cols = [cols[i] for i in range(len(cols)) if i not in cols2delete]
+
+    ### check if numerical cols ###
+    cols_numerical_idx = []
+    cols_categorical_idx = []
+    cols_others_idx = []
+    rows2delete = np.array([])
+    r1 = re.compile(r'^-?\d+(?:\.\d+)?$')
+    # scientific notation
+    r2 = re.compile(
+        r'[+\-]?[^A-Za-z]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)')
+    vmatch = np.vectorize(lambda x: bool(r1.match(x) or r2.match(x)))
+    for i in range(len(cols)):
+        col = newdf2[:, i]
+        col_match = vmatch(col)
+        # if more than 90% elements can be converted to float, keep the col, and delete rows that cannot be convert to float:
+        if np.sum(col_match) >= 0.8*len(newdf1):
+            cols_numerical_idx.append(i)
+            rows2delete = np.concatenate(
+                (rows2delete, np.where(col_match == False)[0]))
+        else:
+            ### check if categorical cols###
+            if len(np.unique(col)) <= 200:  # if less than 10 different values: categorical
+                cols_categorical_idx.append(i)
+            else:
+                cols_others_idx.append(i)
+    newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx+cols_others_idx]
+    rows2delete = rows2delete.astype(int)
+    newdf3 = np.delete(newdf3, rows2delete, axis=0)
+    newdf3_cols = [cols[idx] for idx in cols_numerical_idx +
+                   cols_categorical_idx+cols_others_idx]
+    newdf3 = pd.DataFrame(newdf3)
+    newdf3.columns = newdf3_cols
+    # write the data frame
+    newdf3.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False)
+    return newdf3
 
 
 def normalize_data(X, norm_type):
@@ -109,10 +164,11 @@ if __name__ == '__main__':
     parser.add_argument('--num_pts', type=int,
                         help='num_pts for DBSCAN', default=5)
     parser.add_argument('--norm', help='Normalization of points', default=None)
-    parser.add_argument('--gpu-id', default='-1', type=str,
-                        help='id(s) for CUDA_VISIBLE_DEVICES')  # TODO there's definitely a better way to parse cuda devices
+    parser.add_argument('--gpu', action='store_true',
+                        help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--metric', default='euclidean',
                         help='Metric for DBSCAN')
+    parser.add_argument('--preprocess_only', action='store_true')
     args = parser.parse_args()
 
     fname = args.input
@@ -122,17 +178,19 @@ if __name__ == '__main__':
     output_dir = args.output
     no_preprocess = args.no_preprocess
     threads = args.threads
-    gpu_ids = args.gpu_id
+    gpu = args.gpu
     eps = args.eps
     num_pts = args.num_pts
     metric = args.metric
     norm = args.norm
+    preprocess_only = args.preprocess_only
 
     # Setup
     mkdir(output_dir)
     df = pd.read_csv(fname)
-    if not no_preprocess:
+    if not no_preprocess or preprocess_only:
         df = wrangle_csv(df)
+        df.to_csv(join(output_dir, 'wrangled_data.csv'))
     df_np = df.to_numpy()
     df_np = normalize_data(df_np, norm_type=norm)
     overlaps = extract_range(overlaps_str)
@@ -146,6 +204,6 @@ if __name__ == '__main__':
         json.dump(meta, fp)
     for overlap, interval in tqdm(itertools.product(overlaps, intervals)):
         g = graph_to_dict(mapper_wrapper(
-            df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric))
-        with open(join(output_dir, str(interval) + '_' + str(overlap) + '.json'), 'w+') as fp:
+            df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric, use_gpu=gpu))
+        with open(join(output_dir, 'mapper_' + str(fname) + '_' + str(interval) + '_' + str(overlap) + '.json'), 'w+') as fp:
             json.dump(g, fp)
