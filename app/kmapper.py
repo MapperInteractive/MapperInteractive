@@ -5,6 +5,7 @@ from datetime import datetime
 import inspect
 import itertools
 import os
+from platform import dist
 import sys
 import warnings
 
@@ -28,8 +29,8 @@ from .visuals import (
 )
 
 __all__ = [
-    "KeplerMapper", 
-    "cluster" #expose this to make examples and usage tidier
+    "KeplerMapper",
+    "cluster"  # expose this to make examples and usage tidier
 ]
 
 
@@ -48,7 +49,7 @@ class KeplerMapper(object):
     KM has a number of nice features, some which get forgotten.
         - ``project``: Some projections it makes sense to use a distance matrix, such as knn_distance_#. Using ``distance_matrix = <metric>`` for a custom metric.
         - ``fit_transform``: Applies a sequence of projections. Currently, this API is a little confusing and might be changed in the future. 
-    
+
 
 
     """
@@ -61,7 +62,7 @@ class KeplerMapper(object):
 
         verbose: int, default is 0
             Logging level. Currently 3 levels (0,1,2) are supported. For no logging, set `verbose=0`. For some logging, set `verbose=1`. For complete logging, set `verbose=2`.
-            
+
         """
 
         # TODO: move as many of the arguments from fit_transform and map into here.
@@ -243,7 +244,8 @@ class KeplerMapper(object):
             }
 
             if projection in projection_funcs.keys():
-                X = projection_funcs[projection](X, axis=1).reshape((X.shape[0], 1))
+                X = projection_funcs[projection](
+                    X, axis=1).reshape((X.shape[0], 1))
 
             if "knn_distance_" in projection:
                 n_neighbors = int(projection.split("_")[2])
@@ -346,9 +348,11 @@ class KeplerMapper(object):
             distance_matrices = [distance_matrices[0]] * len(projections)
 
         if self.verbose > 0:
-            print("..Composing projection pipeline of length %s:" % (len(projections)))
+            print("..Composing projection pipeline of length %s:" %
+                  (len(projections)))
             print("\tProjections: %s" % ("\n\t\t".join(map(str, projections))))
-            print("\tDistance matrices: %s" % ("\n".join(map(str, distance_matrices))))
+            print("\tDistance matrices: %s" %
+                  ("\n".join(map(str, distance_matrices))))
             print("\tScalers: %s" % ("\n".join(map(str, scalers))))
 
         # Pipeline Stack the projection functions
@@ -368,6 +372,7 @@ class KeplerMapper(object):
     """
     @author: Archit Rathore
     """
+
     def map_parallel(
             self,
             lens,
@@ -377,10 +382,12 @@ class KeplerMapper(object):
             nerve=GraphNerve(),
             precomputed=False,
             remove_duplicate_nodes=False,
+            metric='euclidean',
+            use_gpu=False,
             # These arguments are all deprecated
             overlap_perc=None,
             nr_cubes=None,
-            n_threads=16
+            n_threads=16,
     ):
         """Apply Mapper algorithm on this projection and build a simplicial complex. Returns a dictionary with nodes and links.
 
@@ -468,8 +475,6 @@ class KeplerMapper(object):
         >>>     nerve=km.GraphNerve(min_intersection=3))
 
         """
-        print("map_parallel")
-
         start = datetime.now()
 
         nodes = defaultdict(list)
@@ -536,6 +541,17 @@ class KeplerMapper(object):
 
         # define a helper function that takes a hypercube and clusterer and returns cluster predictions
         from sklearn.metrics.pairwise import pairwise_distances
+        if use_gpu and metric == 'euclidean':
+            import torch
+            out_of_memory = -1
+            cuda_avail = torch.cuda.is_available()
+
+            def torch_cdist(X):
+                tensor = torch.from_numpy(X).to(torch.device('cuda'))
+                d = torch.cdist(tensor, tensor, p=2)
+                d = d.cpu().numpy()
+                return d
+
         def cluster_helper(hypercube, cube_idx):
             if hypercube.shape[0] >= min_cluster_samples:
                 ids = [int(nn) for nn in hypercube[:, 0]]
@@ -548,7 +564,17 @@ class KeplerMapper(object):
                 c = sklearn.base.clone(clusterer)
                 c.metric = 'precomputed'
                 c.n_jobs = n_threads
-                dist_mat = pairwise_distances(fit_data, n_jobs=n_threads)
+
+                if use_gpu and metric == 'euclidean' and cuda_avail and (out_of_memory == -1 or fit_data.shape[0] < out_of_memory):
+                    try:
+                        dist_mat = torch_cdist(fit_data)
+                    except RuntimeError:
+                        out_of_memory = fit_data.shape[0]
+                        dist_mat = pairwise_distances(
+                            fit_data, n_jobs=n_threads, metric=metric)
+                else:
+                    dist_mat = pairwise_distances(
+                        fit_data, n_jobs=n_threads, metric=metric)
 
                 # if self.verbose > 1:
                 #     print(f'Computed distance matrix of shape{dist_mat.shape} in {datetime.now() - start}')
@@ -596,7 +622,8 @@ class KeplerMapper(object):
                 #           - partition points according to each cluster
                 # Now for every (sample id in cube, predicted cluster label)
                 for idx, pred in np.c_[hypercube[:, 0], cluster_predictions]:
-                    if pred != -1 and not np.isnan(pred):  # if not predicted as noise
+                    # if not predicted as noise
+                    if pred != -1 and not np.isnan(pred):
 
                         # TODO: allow user supplied label
                         #   - where all those extra values necessary?
@@ -671,26 +698,26 @@ class KeplerMapper(object):
             is an argument for DBSCAN among others), which 
             will then cause the clusterer to expect a square distance matrix for each hypercube. `precomputed=True` will give a square matrix
             to the clusterer to fit on for each hypercube.
-            
+
         remove_duplicate_nodes: Boolean
             Removes duplicate nodes before edges are determined. A node is considered to be duplicate
             if it has exactly the same set of points as another node.
 
         nr_cubes: Int
-            
+
             .. deprecated:: 1.1.6
 
                 define Cover explicitly in future versions
 
             The number of intervals/hypercubes to create. Default = 10.
-            
+
         overlap_perc: Float
             .. deprecated:: 1.1.6
 
                 define Cover explicitly in future versions    
 
             The percentage of overlap "between" the intervals/hypercubes. Default = 0.1. 
-            
+
 
 
         Returns
@@ -784,7 +811,8 @@ class KeplerMapper(object):
 
         if self.verbose > 1:
             print(
-                "Minimal points in hypercube before clustering: {}".format(min_cluster_samples)
+                "Minimal points in hypercube before clustering: {}".format(
+                    min_cluster_samples)
             )
 
         # Subdivide the projected data X in intervals/hypercubes with overlap
@@ -817,13 +845,14 @@ class KeplerMapper(object):
                             ).shape[0], i
                         )
                     )
-        
+
                 for pred in np.unique(cluster_predictions):
-                    # if not predicted as noise                       
-                    if pred != -1 and not np.isnan(pred):  
+                    # if not predicted as noise
+                    if pred != -1 and not np.isnan(pred):
                         cluster_id = "cube{}_cluster{}".format(i, int(pred))
-                        
-                        nodes[cluster_id] = hypercube[:, 0][cluster_predictions == pred].astype(int).tolist()
+
+                        nodes[cluster_id] = hypercube[:, 0][cluster_predictions == pred].astype(
+                            int).tolist()
             elif self.verbose > 1:
                 print("Cube_%s is empty.\n" % (i))
 
@@ -881,7 +910,8 @@ class KeplerMapper(object):
         nodes = graph["nodes"]
         nr_links = sum(len(v) for k, v in links.items())
 
-        print("\nCreated %s edges and %s nodes in %s." % (nr_links, len(nodes), time))
+        print("\nCreated %s edges and %s nodes in %s." %
+              (nr_links, len(nodes), time))
 
     def visualize(
         self,
@@ -1038,11 +1068,13 @@ class KeplerMapper(object):
         mapper_summary = format_meta(graph, custom_meta)
 
         # Find the absolute module path and the static files
-        js_path = os.path.join(os.path.dirname(__file__), "static", "kmapper.js")
+        js_path = os.path.join(os.path.dirname(
+            __file__), "static", "kmapper.js")
         with open(js_path, "r") as f:
             js_text = f.read()
 
-        css_path = os.path.join(os.path.dirname(__file__), "static", "style.css")
+        css_path = os.path.join(os.path.dirname(
+            __file__), "static", "style.css")
         with open(css_path, "r") as f:
             css_text = f.read()
 
@@ -1135,7 +1167,8 @@ class KeplerMapper(object):
 
             if estimator_type == "classifier":
                 X_blend = np.zeros((X_data.shape[0], np.unique(y).shape[0]))
-                skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1729)
+                skf = StratifiedKFold(
+                    n_splits=5, shuffle=True, random_state=1729)
 
                 blend(X_blend, model.predict_proba, skf, X_data, y)
             elif estimator_type == "regressor":
