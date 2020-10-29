@@ -2,6 +2,82 @@ let that = this;
 
 this.side_bar = new DataLoader([], []);
 
+// Load Resulting Mapper Graphs // 
+$("#import_graph").click(function(){
+    $("#graph_directory").click();
+})
+
+let folder = document.getElementById("graph_directory");
+folder.onchange=function(){
+    let files = folder.files;
+    that.mapper_folder_name = files[0].webkitRelativePath.split("/")[0];
+    let mapper_files = [];
+    for(let i=0;i<files.length;i+=1){
+        let filename_i = files[i].name;
+        if(filename_i.startsWith("mapper") && filename_i.endsWith(".json")){
+            mapper_files.push(filename_i)
+        }
+    }
+    console.log(mapper_files);
+    let mapper_list_container = document.getElementById("mapper-list-container-inner");
+    mapper_list_container.style.maxHeight = "300px";
+    // draw dropdown meun
+    let fg = d3.select("#mapper_list_selection").selectAll("option").data(mapper_files);
+    fg.exit().remove();
+    fg = fg.enter().append("option").merge(fg)
+        .classed("select-items", true)
+        .html(d=>d);
+  }
+  d3.select("#draw-selected-mapper")
+    .on("click", ()=>{
+        let mapper_list_dropdown = document.getElementById("mapper_list_selection");
+        if(mapper_list_dropdown.options){
+            let mapper_filename = mapper_list_dropdown.options[mapper_list_dropdown.selectedIndex].text;
+            $.ajax({
+                type: "POST",
+                url: "/mapper_data_process",
+                data: that.mapper_folder_name+"/"+mapper_filename,
+                dataType:'text',
+                success: function (response) {
+                    response = JSON.parse(response);
+                    console.log(response)
+                    that.graph = new Graph(response.mapper, {}, response.connected_components);
+
+                    // that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
+                },
+                error: function (error) {
+                    console.log("error",error);
+                }
+            })
+        }
+    })
+
+d3.select("#load-raw-data")
+    .on("click", ()=>{
+        let file_name = "3d-horse.csv";
+        console.log(file_name)
+        $.ajax({
+            type: "POST",
+            url: "/data_process",
+            data: file_name,
+            dataType:'text',
+            success: function (response) {
+                response = JSON.parse(response);
+                that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
+            },
+            error: function (error) {
+                console.log("error",error);
+                alert("Incorrect data format!");
+            }
+        })
+        d3.select(".columns-group")
+            .style("max-height","1000px")
+            .style("visibility", "visible");
+    })
+
+
+
+// Load Raw Data // 
 $("#import").click(function(){
     $("#files").click();
 })
@@ -220,21 +296,24 @@ $.post("/module_extension",{
         console.log(modules)
         modules.forEach(m_info => {
             let module_i = new New_Module(m_info);
-            d3.select("#"+module_i.module_name+"_button")
-            .on("click", ()=>{
-                if(that.graph){
-                    let selected_nodes = [...that.graph.selected_nodes];
-                    console.log(selected_nodes);
-                    $.post("/module_computing",{
-                        data: JSON.stringify({"nodes":selected_nodes, "module_info": m_info})
-                    }, function(res){
-                        module_i.data = JSON.parse(res.module_result);
-                        module_i.components.forEach(c=>{
-                            module_i.add_component(c);
+            d3.select("#"+module_i.module_id+"_button")
+                .on("click", ()=>{
+                    console.log(module_i.module_name)
+                    if(that.graph){
+                        let selected_nodes = [...that.graph.selected_nodes];
+                        console.log(selected_nodes);
+                        $.post("/module_computing",{
+                            data: JSON.stringify({"nodes":selected_nodes, "module_info": m_info})
+                        }, function(res){
+                            console.log(res)
+                            module_i.data = res.s_dist.map(x=>+x);
+                            // module_i.data = JSON.parse(res.module_result);
+                            module_i.components.forEach(c=>{
+                                module_i.add_component(c);
+                            })
                         })
-                    })
-                }
-            })
+                    }
+                });
         })    
     }
     

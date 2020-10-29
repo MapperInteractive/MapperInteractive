@@ -1,5 +1,5 @@
 class Graph{
-    constructor(graph_data, col_keys, connected_components, categorical_cols, other_cols){
+    constructor(graph_data, col_keys, connected_components, categorical_cols, other_cols=undefined){
         this.nodes = graph_data.nodes;
         this.links = graph_data.links;
         this.col_keys = col_keys;
@@ -216,6 +216,7 @@ class Graph{
     }
 
     draw_color_legend_categorical(color_dict){
+        console.log("color_dict", color_dict)
         // reset svg 
         $('#color-legend-svg').remove();
         $('#block_body-inner_color').append('<svg width="0" height="0" id="color-legend-svg"></svg>');

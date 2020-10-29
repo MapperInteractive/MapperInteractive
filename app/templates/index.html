@@ -37,12 +37,34 @@
     </div>
     <div class="col-md-3" style="padding-left: 0px;">
       <div class="sidebar-container" id="sidebar-container">
+        <div id="workspace-load_result" class="block">
+          <div class="block_title">Load Mapper Graphs</div>
+          <div class="block_body" style="max-height: 1000px">
+            <div class="block_body-inner">
+              <div class="import-group" style="padding-bottom:10px;">
+                <form method="post" id="upload-mapper" enctype="multipart/form-data" action="" >
+                  <input type="file" style="display:none" id="graph_directory" webkitdirectory multiple/>
+                  <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="import_graph" value="Import Graphs">
+                </form>
+              </div>
+              <div class="mapper-list-container">
+                <div class="mapper-list-container-inner", id="mapper-list-container-inner">
+                  <select name="mapper_list" class="custom-select" id="mapper_list_selection"></select>
+                  <div style="padding-top:15px;">
+                    <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="draw-selected-mapper" value="Display Selected Mapper">
+                    <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="load-raw-data" value="Load Raw Data">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="workspace-sidebar" class="block">
-          <div class="block_title">Graph Loader</div>
+          <div class="block_title">Load Raw Data</div>
           <div class="block_body" style="max-height: 1500px">
             <div class="block_body-inner">
               <div class="import-group" style="padding-bottom:10px;">
-                <form method="post" id="upload" enctype="multipart/form-data" action="" >
+                <form method="post" id="upload-data" enctype="multipart/form-data" action="" >
                   <input type="file" style="display:none" id="files" name="files">
                   <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="import" value="Import Data">
                 </form>

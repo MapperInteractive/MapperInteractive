@@ -177,7 +177,8 @@ li{
 }
 
 .axis_line text{
-  font-size: 8px;
+  font-size: 9px;
+  font-weight: lighter;
 }
 
 /* #workspace-histogram {
@@ -291,7 +292,7 @@ button.selected {
   padding-right: 10px;
 }
 
-.param-range-container-inner, .param-range-container-inner_clustering, .param-range-container-inner_filtering1, .param-range-container-inner_filtering2, #filter-inner-2, .scale-range-container-inner, .eccent-param-container-inner, .density-param-container-inner{
+.param-range-container-inner, .param-range-container-inner_clustering, .param-range-container-inner_filtering1, .param-range-container-inner_filtering2, #filter-inner-2, .scale-range-container-inner, .eccent-param-container-inner, .density-param-container-inner, .mapper-list-container-inner{
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;

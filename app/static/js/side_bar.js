@@ -309,7 +309,7 @@ class DataLoader{
     }
 
     edit_clustering_param(){
-        let clustering_param_ranges_limit = {"eps":{"left":0, "right":50000}, "min_samples":{"left":1, "right":100}};
+        let clustering_param_ranges_limit = {"eps":{"left":0, "right":300000}, "min_samples":{"left":1, "right":100}};
         let clustering_param_ranges = {};
         let clustering_params = ['eps', 'min_samples'];
         for(let i=0; i<clustering_params.length; i++){

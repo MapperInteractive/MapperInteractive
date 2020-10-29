@@ -15,6 +15,17 @@ class PCA{
 
         let color = d3.scaleOrdinal(d3.schemeCategory10);
 
+        let color_dict = {"airplane": "#1f77b4",
+        "automobile": "#ff7f0e",
+        "bird": "#2ca02c",
+        "cat": "#d62728",
+        "deer": "#9467bd",
+        "dog": "#8c564b",
+        "frog": "#e377c2",
+        "horse": "#7f7f7f",
+        "ship": "#17becf",
+        "truck": "#bcbd22"}
+
         let margin = {"left":20, "top":20, "right":10, "bottom":15};
         let width = $(d3.select("#PCA-panel").select(".block_body-inner").node()).width();
         let height = width+5;
@@ -40,7 +51,9 @@ class PCA{
             .attr("cy", d=>yScale(d.pc2))
             .attr("r", 2)
             .attr("fill", d=>{
-                return color(parseInt(d.kmeans_cluster));
+                // return color(parseInt(d.kmeans_cluster));
+                return color_dict[d.labels_str];
+                
             })
 
         // x-axis

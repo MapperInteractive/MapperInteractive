@@ -1,12 +1,13 @@
 class New_Module{
     constructor(module_info){
         this.module_name = module_info.name;
+        this.module_id = module_info.id;
         this.components = module_info.components;
         this.draw_new_module();
     }
 
     clear_canvas(){
-        $("#"+this.module_name+"_svg").remove();
+        $("#"+this.module_id+"_svg").remove();
     }
 
     draw_new_module(){
@@ -16,14 +17,14 @@ class New_Module{
         // 3. Components to display results (can be: scatter plot, table, etc.)
 
         console.log(this.module_name)
-        let panel_container = d3.select("#sidebar-container").append("div").attr("id", this.module_name+"-panel").classed("block", true);
-        panel_container.append("div").attr("id", this.module_name+"-panel_title").classed("block_title", true).html(this.module_name);
+        let panel_container = d3.select("#sidebar-container").append("div").attr("id", this.module_id+"-panel").classed("block", true);
+        panel_container.append("div").attr("id", this.module_id+"-panel_title").classed("block_title", true).html(this.module_name);
         let panel_body = panel_container.append("div").classed("block_body", true).style("max-height","1000px");
-        this.panel_body_inner = panel_body.append("div").attr("id",this.module_name+"-block_body-inner").classed("block_body-inner", true);
-        $("#"+this.module_name+"-block_body-inner").append("<input type='button' class='btn btn-outline-dark btn-block ui-form-button' id='"+this.module_name+"_button' value='Run "+this.module_name.toUpperCase()+"'>")
+        this.panel_body_inner = panel_body.append("div").attr("id",this.module_id+"-block_body-inner").classed("block_body-inner", true);
+        $("#"+this.module_id+"-block_body-inner").append("<input type='button' class='btn btn-outline-dark btn-block ui-form-button' id='"+this.module_id+"_button' value='Approximate "+this.module_name+"'>")
 
 
-        let panel_title = document.getElementById(this.module_name+"-panel_title");
+        let panel_title = document.getElementById(this.module_id+"-panel_title");
         panel_title.addEventListener("click", function(){
             this.classList.toggle("collapsed")
             let block_body = this.nextElementSibling;
@@ -40,7 +41,65 @@ class New_Module{
             this.add_plot();
         } else if(c === "table"){
             this.add_table();
+        } else if(c === "line graph"){
+            this.add_line_graph();
         }
+    }
+
+    add_line_graph(){
+        // input data: list of values
+
+        this.clear_canvas();
+
+        console.log(this.data)
+
+        let margin = {"left":25, "top":20, "right":20, "bottom":20};
+        let width = $(this.panel_body_inner.node()).width();
+        let height = width+5;
+
+        let module_svg = this.panel_body_inner.append("svg")
+            .attr("id", this.module_id+"_svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        let xScale = d3.scaleLinear()
+            .domain([0, this.data.length])
+            .range([margin.left, width-margin.right]);
+
+        let yScale = d3.scaleLinear()
+            .domain([Math.min(...this.data), Math.max(...this.data)])
+            .range([height-margin.bottom, margin.top]);
+
+        let line = d3.line() // line generator
+            .x(function(d, i) { return xScale(i); })
+            .y(function(d) { return yScale(d); }) 
+            .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+        module_svg.append("g").attr("id", this.module_id+"_axis_group");
+        module_svg.append("g").attr("id", this.module_id+"_line_group");
+
+        d3.select("#"+this.module_id+"_line_group").append("path")
+            .datum(this.data) //  Binds data to the line 
+            // .attr("class", "line")
+            .attr("stroke", "blue")
+            .attr("stroke-width", 1)
+            .attr("fill", "none")
+            .attr("d", line);
+
+        // x-axis
+        d3.select("#"+this.module_id+"_axis_group").append("g") 
+            .call(d3.axisBottom(xScale).ticks(5))
+            .classed("axis_line", true)
+            .attr("transform", "translate(0,"+(height-margin.bottom)+")");
+        
+        // y-axis
+        d3.select("#"+this.module_id+"_axis_group").append("g")
+            .call(d3.axisLeft(yScale).ticks(5))
+            .classed("axis_line", true)
+            .attr("transform", "translate("+margin.left+",0)");
+        
+        
+
     }
 
     add_plot(){
@@ -64,13 +123,13 @@ class New_Module{
             .range([margin.top, height-margin.bottom]);
 
         let module_svg = this.panel_body_inner.append("svg")
-            .attr("id", this.module_name+"_svg")
+            .attr("id", this.module_id+"_svg")
             .attr("width", width)
             .attr("height", height);
-        module_svg.append("g").attr("id", this.module_name+"_axis_group");
-        module_svg.append("g").attr("id", this.module_name+"_circle_group");
+        module_svg.append("g").attr("id", this.module_id+"_axis_group");
+        module_svg.append("g").attr("id", this.module_id+"_circle_group");
 
-        let cg = d3.select("#"+this.module_name+"_circle_group").selectAll("circle").data(this.data);
+        let cg = d3.select("#"+this.module_id+"_circle_group").selectAll("circle").data(this.data);
         cg.exit().remove();
         cg = cg.enter().append("circle").merge(cg)
             .attr("cx", d=>xScale(d.col1))
@@ -82,13 +141,13 @@ class New_Module{
             })
 
         // x-axis
-        d3.select("#"+this.module_name+"_axis_group").append("g") 
+        d3.select("#"+this.module_id+"_axis_group").append("g") 
             .call(d3.axisBottom(xScale).ticks(5))
             .classed("axis_line", true)
             .attr("transform", "translate(0,"+(height-margin.bottom)+")");
         
         // y-axis
-        d3.select("#"+this.module_name+"_axis_group").append("g")
+        d3.select("#"+this.module_id+"_axis_group").append("g")
             .call(d3.axisLeft(yScale).ticks(5))
             .classed("axis_line", true)
             .attr("transform", "translate("+margin.left+",0)");
@@ -98,7 +157,7 @@ class New_Module{
     add_table(){
         console.log(res)
         this.clear_result();
-        d3.select("#"+this.module_name+"-block_body-inner").append("div").classed("reg-result_title",true).append("h6").html(this.module_name);
+        d3.select("#"+this.module_id+"-block_body-inner").append("div").classed("reg-result_title",true).append("h6").html(this.module_name);
         let result_container = d3.select("#regression-panel").select(".block_body-inner").append("div")
             .classed("row", true)
             .attr("id","regression-result")
