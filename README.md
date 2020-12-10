@@ -27,12 +27,19 @@ pip install scikit-learn
 pip install kmapper
 pip install networkx
 pip install flask
+pip install flask_assets
 ```
 
 To perform linear regression, please also make sure you have [statsmodels](https://www.statsmodels.org/stable/index.html) installed.
 ```bash
 pip install statsmodels
 ```
+
+## Loading a dataset
+When loading a dataset into the interface, please make sure to put the data file to be loaded in the folder ``app/static/uploads/``.
+
+## Command-line API
+Please refer to a user-guide [here](CLI_README.md) for the command-line API.
 
 ## Video
 
