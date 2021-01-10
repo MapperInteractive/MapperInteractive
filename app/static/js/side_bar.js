@@ -8,9 +8,7 @@ class DataLoader{
 
         this.config = {};
   
-        this.add_range_slider("clustering-paramters-inner", "eps", "dbscan_eps", 0.1, 0.5, 0.1);
-        this.add_range_slider("clustering-paramters-inner", "min_samples", "dbscan_min_samples", 5, 10, 2, 1);
-
+        this.draw_clustering_params("DBSCAN");
         this.draw_all_cols();
         this.draw_selected_cols();
         this.draw_filter_dropdown();
@@ -51,13 +49,36 @@ class DataLoader{
             })
 
         let clustering_dropdown = document.getElementById("clustering_alg_selection");
+        this.config.clustering_alg = "DBSCAN";
+        this.config.clustering_alg_params = {};
+        this.get_clustering_params("DBSCAN");
         clustering_dropdown.onchange = function(){
-            let clustering_alg = clustering_dropdown.options[clustering_dropdown.selectedIndex].text
+            let clustering_alg = clustering_dropdown.options[clustering_dropdown.selectedIndex].text;
             console.log(clustering_alg)
             that.config.clustering_alg = clustering_alg;
             that.config.clustering_alg_params = {};
             that.draw_clustering_params(clustering_alg);
+            that.get_clustering_params(clustering_alg);
+            console.log(that.config.clustering_alg_params)
         }
+
+        // // eps
+        // let eps_slider = document.getElementById("dbscan_eps-input");
+        // this.config.eps = eps_slider.value;
+        // eps_slider.oninput = function(){
+        //     that.config.eps = this.value;
+        //     d3.select("#dbscan_eps_label")
+        //         .html(this.value);
+        // }
+
+        // // min samples
+        // let min_samples_slider = document.getElementById("dbscan_min_samples-input");
+        // this.config.min_samples = min_samples_slider.value;
+        // min_samples_slider.oninput = function(){
+        //     that.config.min_samples = this.value;
+        //     d3.select("#dbscan_min_samples_label")
+        //         .html(this.value);
+        // }
 
         let filter_dropdown = document.getElementById("filter_function_selection");
         filter_dropdown.onchange = function(){
@@ -145,23 +166,49 @@ class DataLoader{
             d3.select("#overlap2_label")
                 .html(this.value);
         }
+    }
 
-        // eps
-        let eps_slider = document.getElementById("eps_input");
-        this.config.eps = eps_slider.value;
-        eps_slider.oninput = function(){
-            that.config.eps = this.value;
-            d3.select("#eps_label")
-                .html(this.value);
-        }
+    get_clustering_params(clustering_alg) {
+        let that = this;
+        if(clustering_alg === "DBSCAN"){
+            // eps
+            let eps_slider = document.getElementById("dbscan_eps-input");
+            this.config.clustering_alg_params.eps = eps_slider.value;
+            eps_slider.oninput = function(){
+                that.config.clustering_alg_params.eps = this.value;
+                d3.select("#dbscan_eps_label").html(this.value);
+            }
 
-        // min samples
-        let min_samples_slider = document.getElementById("min_samples_input");
-        this.config.min_samples = min_samples_slider.value;
-        min_samples_slider.oninput = function(){
-            that.config.min_samples = this.value;
-            d3.select("#min_samples_label")
-                .html(this.value);
+            // min samples
+            let min_samples_slider = document.getElementById("dbscan_min_samples-input");
+            this.config.clustering_alg_params.min_samples = min_samples_slider.value;
+            min_samples_slider.oninput = function(){
+                that.config.clustering_alg_params.min_samples = this.value;
+                d3.select("#dbscan_min_samples_label").html(this.value);
+            }
+        } else if(clustering_alg === "Agglomerative Clustering"){
+            // linkage
+            let linkage_dropdown = document.getElementById("agglomerative_linkage-selection");
+            this.config.clustering_alg_params.linkage = linkage_dropdown.options[linkage_dropdown.selectedIndex].text;
+            linkage_dropdown.onchange = function(){
+                that.config.clustering_alg_params.linkage = linkage_dropdown.options[linkage_dropdown.selectedIndex].text;
+            }
+            // distance threshold
+            let dist_slider = document.getElementById("agglomerative_dist-input");
+            this.config.clustering_alg_params.dist = dist_slider.value;
+            dist_slider.oninput = function(){
+                that.config.clustering_alg_params.dist = this.value;
+                d3.select("#agglomerative_dist_label").html(this.value);
+            }
+
+        } else if(clustering_alg === "Mean Shift"){
+            // bandwidth
+            let bandwidth_slider = document.getElementById("meanshift_bandwidth-input");
+            this.config.clustering_alg_params.bandwidth = bandwidth_slider.value;
+            bandwidth_slider.oninput = function(){
+                that.config.clustering_alg_params.bandwidth = this.value;
+                d3.select("#bandwidth_slider_label").html(this.value);
+            }
         }
     }
 
@@ -188,12 +235,12 @@ class DataLoader{
         form_limit_container_inner.append("span")
             .classed("param-range", true)
             .classed("right", true)
-            .attr("id", range_id+"-range-right-container")
+            .attr("id", range_id+"-range-right-container");
 
-        $("#"+range_id+"-range-left-container").append('<input type="number" id='+range_id+'"-range-left" min="0.01" value='+ min_val +' step=0.01>')
-        $("#"+range_id+"-range-right-container").append('<input type="number" id='+range_id+'"-range-left" min="0.01" value='+ max_val +' step=0.01>')
+        $("#"+range_id+"-range-left-container").append('<input type="number" id='+range_id+'-range-left min="0.01" value='+ min_val +' step='+step+'>');
+        $("#"+range_id+"-range-right-container").append('<input type="number" id='+range_id+'-range-right min="0.01" value='+ max_val +' step='+step+'>');
 
-        $('#'+range_id+"-form-container").append('<input class="ui-form-range__input" id="eps_input" name="dbscan_eps" type="range" value=' + initial_val +' max='+ max_val +' min='+ min_val +' step='+ step +'>');
+        $('#'+range_id+"-form-container").append('<input class="ui-form-range__input" id='+ range_id +'-input name='+ range_id +'-input type="range" value=' + initial_val +' max='+ max_val +' min='+ min_val +' step='+ step +'>');
     }
 
     add_dropdown(container_id, dropdown_name, dropdown_id, option_list) {
@@ -224,15 +271,12 @@ class DataLoader{
         d3.select("#clustering-paramters").append("div").attr("id", "clustering-paramters-inner");
         if(clustering_alg === "DBSCAN"){
             this.add_range_slider("clustering-paramters-inner", "eps", "dbscan_eps", 0.1, 0.5, 0.1);
-            this.add_range_slider("clustering-paramters-inner", "min_samples", "dbscan_min_samples", 5, 10, 2, 1);
+            this.add_range_slider("clustering-paramters-inner", "Min samples", "dbscan_min_samples", 5, 10, 2, 1);
         } else if(clustering_alg === "Agglomerative Clustering"){
-            this.add_dropdown("clustering-paramters-inner", "Linkage", "linkage", ["ward", "average", "complete", "single"]);
+            this.add_dropdown("clustering-paramters-inner", "Linkage", "agglomerative_linkage", ["ward", "average", "complete", "single"]);
             this.add_range_slider("clustering-paramters-inner", "Distance threshold", "agglomerative_dist", 0.1, 0.5, 0.1);
-        } else if(clustering_alg === "Mean-Shift"){
-            // d3.select("#dbscan-param").selectAll("label").classed("ui-form-range__value", false);
-            // d3.select("#agglomerative-param").selectAll("label").classed("ui-form-range__value", false);
-            // d3.select("#meanshift-param").selectAll("label").classed("ui-form-range__value", true);
-            this.add_range_slider("clustering-paramters-inner", "Mean-shift", "meanshift_bandwidth", 0.1, 0.5, 0.1);
+        } else if(clustering_alg === "Mean Shift"){
+            this.add_range_slider("clustering-paramters-inner", "Bandwidth", "meanshift_bandwidth", 0.1, 0.5, 0.1);
         }
     }
 
@@ -390,32 +434,32 @@ class DataLoader{
     }
 
     edit_clustering_param(){
-        let clustering_param_ranges_limit = {"eps":{"left":0, "right":Infinity}, "min_samples":{"left":1, "right":Infinity}};
+        let clustering_param_ranges_limit = {"dbscan_eps":{"left":0, "right":Infinity}, "dbscan_min_samples":{"left":1, "right":Infinity}};
         let clustering_param_ranges = {};
-        let clustering_params = ['eps', 'min_samples'];
+        let clustering_params = ['dbscan_eps', 'dbscan_min_samples'];
         for(let i=0; i<clustering_params.length; i++){
             let p = clustering_params[i];
             clustering_param_ranges[p] = {};
-            clustering_param_ranges[p].left = d3.select("#range-"+p+"-left").node().value;
-            clustering_param_ranges[p].right = d3.select("#range-"+p+"-right").node().value;
-            d3.select("#range-"+p+"-left")
+            clustering_param_ranges[p].left = d3.select("#"+p+"-range-left").node().value;
+            clustering_param_ranges[p].right = d3.select("#"+p+"-range-right").node().value;
+            d3.select("#"+p+"-range-left")
                 .on("change", ()=>{
-                    let v = parseFloat(d3.select("#range-"+p+"-left").node().value);
+                    let v = parseFloat(d3.select("#"+p+"-range-left").node().value);
                     if(v >= clustering_param_ranges_limit[p].left && v<=clustering_param_ranges[p].right){
                         clustering_param_ranges[p].left = v;
-                        d3.select("#"+p+"_label").html(d3.select("#"+p+"_input").node().value)
-                        d3.select("#"+p+"_input").node().min = v;
+                        d3.select("#"+p+"_label").html(d3.select("#"+p+"-input").node().value)
+                        d3.select("#"+p+"-input").node().min = v;
                     } else {
                         alert("out of range!");
                     }
                 })
-            d3.select("#range-"+p+"-right")
+            d3.select("#"+p+"-range-right")
                 .on("change", ()=>{
-                    let v = parseFloat(d3.select("#range-"+p+"-right").node().value);
+                    let v = parseFloat(d3.select("#"+p+"-range-right").node().value);
                     if(v <= clustering_param_ranges_limit[p].right && v>=clustering_param_ranges[p].left){
                         clustering_param_ranges[p].right = v;
-                        d3.select("#"+p+"_label").html(d3.select("#"+p+"_input").node().value)
-                        d3.select("#"+p+"_input").node().max = v;
+                        d3.select("#"+p+"_label").html(d3.select("#"+p+"-input").node().value)
+                        d3.select("#"+p+"-input").node().max = v;
                     } else {
                         alert("out of range!");
                     }

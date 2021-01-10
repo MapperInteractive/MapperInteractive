@@ -30,100 +30,100 @@ import importlib
 def index():
     return render_template('index.html')
 
-# @app.route('/data_process', methods=['POST','GET'])
-# def process_text_data():
-#     '''
-#     Check for:
-#     1. Missing value
-#     2. Non-numerical elements in numerical cols
-#     3. If cols are non-numerical, check if cols are categorical
-#     '''
-#     text_data = request.get_data().decode('utf-8').splitlines()
-#     cols = text_data[0].split(',')
-#     mat = [n.split(',') for n in text_data] # csv: if an element is empty, it will be "".
-#     newdf1 = np.array(mat)[1:]
-#     rows2delete = np.array([])
-#     cols2delete = []
-    
-#     # ### Delete missing values ###
-#     for i in range(len(cols)):
-#         col = newdf1[:,i]
-#         if np.sum(col == "") >= 0.2*len(newdf1): # if more than 20% elements in this column are empty, delete the whole column
-#             cols2delete.append(i)
-#         else:
-#             rows2delete = np.concatenate((rows2delete, np.where(col=="")[0]))
-#     rows2delete = np.unique(rows2delete).astype("int")
-#     newdf2 = np.delete(np.delete(newdf1, cols2delete, axis=1), rows2delete, axis=0)
-#     cols = [cols[i] for i in range(len(cols)) if i not in cols2delete]
-
-#     ### check if numerical cols ###
-#     cols_numerical_idx = []
-#     cols_categorical_idx = []
-#     cols_others_idx = []
-#     rows2delete = np.array([])
-#     r1 = re.compile(r'^-?\d+(?:\.\d+)?$')
-#     r2 = re.compile(r'[+\-]?[^A-Za-z]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)') # scientific notation
-#     vmatch = np.vectorize(lambda x:bool(r1.match(x) or r2.match(x)))
-#     for i in range(len(cols)):
-#         col = newdf2[:,i]
-#         col_match = vmatch(col)
-#         if np.sum(col_match) >= 0.8*len(newdf1): # if more than 90% elements can be converted to float, keep the col, and delete rows that cannot be convert to float:
-#             cols_numerical_idx.append(i)
-#             rows2delete = np.concatenate((rows2delete, np.where(col_match==False)[0]))
-#         else: 
-#             ### check if categorical cols### 
-#             if len(np.unique(col)) <= 200: # if less than 10 different values: categorical
-#                 cols_categorical_idx.append(i)
-#             else:
-#                 cols_others_idx.append(i)
-#     newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx+cols_others_idx]
-#     rows2delete = rows2delete.astype(int)
-#     newdf3 = np.delete(newdf3, rows2delete, axis=0)
-#     newdf3_cols = [cols[idx] for idx in cols_numerical_idx+cols_categorical_idx+cols_others_idx]
-#     newdf3 = pd.DataFrame(newdf3)
-#     newdf3.columns = newdf3_cols
-#     # write the data frame
-#     newdf3.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False) 
-#     # write the cols info
-#     cols_numerical = [cols[idx] for idx in cols_numerical_idx]
-#     cols_categorical = [cols[idx] for idx in cols_categorical_idx]
-#     cols_others = [cols[idx] for idx in cols_others_idx]
-#     cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical, 'cols_others':cols_others}
-#     with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
-#         f.write(json.dumps(cols_dict, indent=4))
-#     return jsonify(columns=cols_numerical, categorical_columns=cols_categorical, other_columns=cols_others)
-
 @app.route('/data_process', methods=['POST','GET'])
-def load_data():
-    filename = request.get_data().decode('utf-8').splitlines()[0]
-    print(filename)
-    df = pd.read_csv(APP_STATIC+"/uploads/"+filename)
-    cols = list(df.columns)
-    df_0 = df.iloc[0,:]
+def process_text_data():
+    '''
+    Check for:
+    1. Missing value
+    2. Non-numerical elements in numerical cols
+    3. If cols are non-numerical, check if cols are categorical
+    '''
+    text_data = request.get_data().decode('utf-8').splitlines()
+    cols = text_data[0].split(',')
+    mat = [n.split(',') for n in text_data] # csv: if an element is empty, it will be "".
+    newdf1 = np.array(mat)[1:]
+    rows2delete = np.array([])
+    cols2delete = []
+    
+    # ### Delete missing values ###
+    for i in range(len(cols)):
+        col = newdf1[:,i]
+        if np.sum(col == "") >= 0.2*len(newdf1): # if more than 20% elements in this column are empty, delete the whole column
+            cols2delete.append(i)
+        else:
+            rows2delete = np.concatenate((rows2delete, np.where(col=="")[0]))
+    rows2delete = np.unique(rows2delete).astype("int")
+    newdf2 = np.delete(np.delete(newdf1, cols2delete, axis=1), rows2delete, axis=0)
+    cols = [cols[i] for i in range(len(cols)) if i not in cols2delete]
+
+    ### check if numerical cols ###
     cols_numerical_idx = []
     cols_categorical_idx = []
     cols_others_idx = []
     rows2delete = np.array([])
+    r1 = re.compile(r'^-?\d+(?:\.\d+)?$')
+    r2 = re.compile(r'[+\-]?[^A-Za-z]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)') # scientific notation
+    vmatch = np.vectorize(lambda x:bool(r1.match(x) or r2.match(x)))
     for i in range(len(cols)):
-        c = df_0.iloc[i]
-        try:
-            float(c)
+        col = newdf2[:,i]
+        col_match = vmatch(col)
+        if np.sum(col_match) >= 0.8*len(newdf1): # if more than 90% elements can be converted to float, keep the col, and delete rows that cannot be convert to float:
             cols_numerical_idx.append(i)
-        except ValueError:
-            cols_categorical_idx.append(i)
-        # if isinstance(c,int) or isinstance(c,float):
-            # cols_numerical_idx.append(i)
-        # else:
-            # cols_categorical_idx.append(i)
-    df.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False) 
+            rows2delete = np.concatenate((rows2delete, np.where(col_match==False)[0]))
+        else: 
+            ### check if categorical cols### 
+            if len(np.unique(col)) <= 200: # if less than 10 different values: categorical
+                cols_categorical_idx.append(i)
+            else:
+                cols_others_idx.append(i)
+    newdf3 = newdf2[:, cols_numerical_idx+cols_categorical_idx+cols_others_idx]
+    rows2delete = rows2delete.astype(int)
+    newdf3 = np.delete(newdf3, rows2delete, axis=0)
+    newdf3_cols = [cols[idx] for idx in cols_numerical_idx+cols_categorical_idx+cols_others_idx]
+    newdf3 = pd.DataFrame(newdf3)
+    newdf3.columns = newdf3_cols
+    # write the data frame
+    newdf3.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False) 
+    # write the cols info
     cols_numerical = [cols[idx] for idx in cols_numerical_idx]
     cols_categorical = [cols[idx] for idx in cols_categorical_idx]
     cols_others = [cols[idx] for idx in cols_others_idx]
     cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical, 'cols_others':cols_others}
-    print(cols_dict)
     with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
         f.write(json.dumps(cols_dict, indent=4))
     return jsonify(columns=cols_numerical, categorical_columns=cols_categorical, other_columns=cols_others)
+
+# @app.route('/data_process', methods=['POST','GET'])
+# def load_data():
+#     filename = request.get_data().decode('utf-8').splitlines()[0]
+#     print(filename)
+#     df = pd.read_csv(APP_STATIC+"/uploads/"+filename)
+#     cols = list(df.columns)
+#     df_0 = df.iloc[0,:]
+#     cols_numerical_idx = []
+#     cols_categorical_idx = []
+#     cols_others_idx = []
+#     rows2delete = np.array([])
+#     for i in range(len(cols)):
+#         c = df_0.iloc[i]
+#         try:
+#             float(c)
+#             cols_numerical_idx.append(i)
+#         except ValueError:
+#             cols_categorical_idx.append(i)
+#         # if isinstance(c,int) or isinstance(c,float):
+#             # cols_numerical_idx.append(i)
+#         # else:
+#             # cols_categorical_idx.append(i)
+#     df.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False) 
+#     cols_numerical = [cols[idx] for idx in cols_numerical_idx]
+#     cols_categorical = [cols[idx] for idx in cols_categorical_idx]
+#     cols_others = [cols[idx] for idx in cols_others_idx]
+#     cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical, 'cols_others':cols_others}
+#     print(cols_dict)
+#     with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
+#         f.write(json.dumps(cols_dict, indent=4))
+#     return jsonify(columns=cols_numerical, categorical_columns=cols_categorical, other_columns=cols_others)
 
 @app.route('/mapper_data_process', methods=['POST','GET'])
 def load_mapper_data():
@@ -150,8 +150,10 @@ def get_graph():
     # data = data[selected_cols].astype("float")
     config = mapper_data["config"]
     norm_type = config["norm_type"]
-    eps = config["eps"]
-    min_samples = config["min_samples"]
+    clustering_alg = config["clustering_alg"]
+    clustering_alg_params = config["clustering_alg_params"]
+    # eps = config["eps"]
+    # min_samples = config["min_samples"]
 
     #### TODO: update filter_parameters ####
     filter_parameters = config
@@ -165,6 +167,7 @@ def get_graph():
         interval = [int(config["interval1"]), int(config["interval2"])]
         overlap = [float(config["overlap1"])/100, float(config["overlap2"])/100]
     print(interval, overlap)
+    # TODO: fix normalization (only point cloud column needs to be modified?)
     # normalization
     if norm_type == "none":
         pass
@@ -174,7 +177,7 @@ def get_graph():
     else:
         data = sklearn.preprocessing.normalize(data, norm=norm_type, axis=0, copy=False, return_norm=False)
     data = pd.DataFrame(data, columns = all_cols)
-    mapper_result = run_mapper(data, selected_cols, interval, overlap, eps, min_samples, filter_function, filter_parameters)
+    mapper_result = run_mapper(data, selected_cols, interval, overlap, clustering_alg, clustering_alg_params, filter_function, filter_parameters)
     if len(categorical_cols) > 0:
         for node in mapper_result['nodes']:
             print("node", node['id'])
@@ -248,9 +251,8 @@ def pca():
     if len(selected_nodes)>0:
         data_new['kmeans_cluster'] = KMeans(n_clusters=min(len(selected_nodes), 6), random_state=0).fit(data_new).labels_
     else:
-        data_new['kmeans_cluster'] = KMeans(n_clusters=10, random_state=0).fit(data_new).labels_
         # data_new['kmeans_cluster'] = KMeans(n_clusters=10, random_state=0).fit(data_new).labels_
-    data_new['labels_str'] = data['labels_str']
+        data_new['kmeans_cluster'] = KMeans(n_clusters=6, random_state=0).fit(data_new).labels_
     data_new = data_new.to_json(orient='records')
     return jsonify(pca=data_new)
 
@@ -266,7 +268,7 @@ def update_cluster_details():
     labels = list(labels)
     return jsonify(labels=labels)
 
-def run_mapper(data_array, col_names, interval, overlap, dbscan_eps, dbscan_min_samples, filter_function, filter_parameters=None):
+def run_mapper(data_array, col_names, interval, overlap, clustering_alg, clustering_alg_params, filter_function, filter_parameters=None):
         """This function is called when the form is submitted. It triggers construction of Mapper. 
 
         Each parameter of this function is defined in the configuration.
@@ -298,14 +300,14 @@ def run_mapper(data_array, col_names, interval, overlap, dbscan_eps, dbscan_min_
         km_result = _call_kmapper(data_array, col_names, 
             interval,
             overlap,
-            float(dbscan_eps),
-            float(dbscan_min_samples),
+            clustering_alg,
+            clustering_alg_params,
             filter_function,
             filter_parameters
         )
         return _parse_result(km_result, data_array)
 
-def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_function, filter_parameters=None):
+def _call_kmapper(data, col_names, interval, overlap, clustering_alg, clustering_alg_params, filter_function, filter_parameters=None):
     print(filter_parameters)
     mapper = KeplerMapper()
     if len(col_names) == 1:
@@ -333,7 +335,15 @@ def _call_kmapper(data, col_names, interval, overlap, eps, min_samples, filter_f
     print(data_new.shape)
     print(np.max(np.max(data_new)))
     print(np.mean(np.mean(data_new)))
-    graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+    if clustering_alg == "DBSCAN":
+        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=float(clustering_alg_params["eps"]), min_samples=float(clustering_alg_params["min_samples"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+    elif clustering_alg == "Agglomerative Clustering":
+        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering(n_clusters=None, linkage=clustering_alg_params["linkage"], distance_threshold=float(clustering_alg_params["dist"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        # graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering( linkage=clustering_alg_params["linkage"]), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+    elif clustering_alg == "Mean Shift":
+        # graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=float(clustering_alg_params["bandwidth"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=1), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        
     print(len(graph['nodes'].keys()))
     # graph = mapper.map(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
 
