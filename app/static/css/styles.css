@@ -18,6 +18,10 @@ body {
     padding:0;
 }
 
+.indep_vars_selected {
+  font-weight: bold;
+}
+
 #workspace-graph {
     /* height: 700px; */
     height: 91vh;
@@ -98,6 +102,10 @@ body {
   padding: 10px;
 }
 
+.parameter-group-inner {
+  padding: 10px;
+}
+
 .columns-selection {
   display:inline-block;
   padding-right:0px;
@@ -149,8 +157,17 @@ li{
   list-style-type:none;
 }
 
+.radio-container {
+  padding-top: 5px;
+}
+
 .radio-label {
   font-size: 14px;
+}
+
+.radio-label2 {
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .reg_title, h6 {
@@ -468,4 +485,9 @@ button.selected {
 
 .select-items div:hover, .same-as-selected {
   background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* mapper result sliders */
+.slider_handler.highlighted{
+  opacity: 0.5;
 }

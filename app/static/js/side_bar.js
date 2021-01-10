@@ -8,6 +8,9 @@ class DataLoader{
 
         this.config = {};
   
+        this.add_range_slider("clustering-paramters-inner", "eps", "dbscan_eps", 0.1, 0.5, 0.1);
+        this.add_range_slider("clustering-paramters-inner", "min_samples", "dbscan_min_samples", 5, 10, 2, 1);
+
         this.draw_all_cols();
         this.draw_selected_cols();
         this.draw_filter_dropdown();
@@ -47,6 +50,15 @@ class DataLoader{
                 }
             })
 
+        let clustering_dropdown = document.getElementById("clustering_alg_selection");
+        clustering_dropdown.onchange = function(){
+            let clustering_alg = clustering_dropdown.options[clustering_dropdown.selectedIndex].text
+            console.log(clustering_alg)
+            that.config.clustering_alg = clustering_alg;
+            that.config.clustering_alg_params = {};
+            that.draw_clustering_params(clustering_alg);
+        }
+
         let filter_dropdown = document.getElementById("filter_function_selection");
         filter_dropdown.onchange = function(){
             let mapper_dim = d3.select('input[name="mapper-dim"]:checked').node().value;
@@ -76,7 +88,7 @@ class DataLoader{
         let filter_dropdown2 = document.getElementById("filter_function_selection2");
         filter_dropdown2.onchange = function(){
             if(filter_dropdown2.options){
-                let filter = filter_dropdown2.options[filter_dropdown2.selectedIndex].text
+                let filter = filter_dropdown2.options[filter_dropdown2.selectedIndex].text;
                 that.config.filter[1] = filter;
                 let eccent_param_container = document.getElementById("eccent-param-container-inner2");
                 let density_param_container = document.getElementById("density-param-container-inner2");
@@ -151,8 +163,77 @@ class DataLoader{
             d3.select("#min_samples_label")
                 .html(this.value);
         }
-        
+    }
 
+    add_range_slider(container_id, range_name, range_id, initial_val, max_val, min_val, step=0.01){
+        let form_container = d3.select("#"+container_id).append("div")
+            .classed("form-group", true)
+            .classed("ui-form-range", true)
+            .attr("id", range_id+"-form-container");
+        form_container.append("label").classed("ui-form-range__label", true).html(range_name);
+        form_container.append("span")
+            .classed("ui-form-range__value", true)
+            .attr("id", range_id+"_label")
+            .html(initial_val);
+        let form_limit_container = form_container.append("div")
+            .classed("param-range-container_clustering", true)
+            ;
+        let form_limit_container_inner = form_limit_container.append("div")
+            .classed("param-range-container-inner_clustering", true)
+            .style("padding","0");
+        form_limit_container_inner.append("span")
+            .classed("param-range", true)
+            .classed("left", true)
+            .attr("id", range_id+"-range-left-container")
+        form_limit_container_inner.append("span")
+            .classed("param-range", true)
+            .classed("right", true)
+            .attr("id", range_id+"-range-right-container")
+
+        $("#"+range_id+"-range-left-container").append('<input type="number" id='+range_id+'"-range-left" min="0.01" value='+ min_val +' step=0.01>')
+        $("#"+range_id+"-range-right-container").append('<input type="number" id='+range_id+'"-range-left" min="0.01" value='+ max_val +' step=0.01>')
+
+        $('#'+range_id+"-form-container").append('<input class="ui-form-range__input" id="eps_input" name="dbscan_eps" type="range" value=' + initial_val +' max='+ max_val +' min='+ min_val +' step='+ step +'>');
+    }
+
+    add_dropdown(container_id, dropdown_name, dropdown_id, option_list) {
+        let dropdown_container = d3.select("#"+container_id).append("div")
+            .classed("row", true)
+            .style("padding-top", "0px")
+            .style("padding-bottom", "10px");
+        dropdown_container.append("div")
+            .classed("col-6", true)
+            .classed("ui-form-range__label", true)
+            .style("padding-top", "5px")
+            .html(dropdown_name);
+        let selection_container = dropdown_container.append("div")
+            .classed("col-6", true)
+            .attr("id", dropdown_id+"-selection-container");
+        let select = selection_container.append("select")
+            .classed("custom-select", true)
+            .attr("name", dropdown_id+"-selection")
+            .attr("id", dropdown_id+"-selection")
+        let og = select.selectAll("option").data(option_list)
+        og = og.enter().append("option").merge(og)
+            .html(d=>d);
+
+    }
+
+    draw_clustering_params(clustering_alg) {
+        d3.select("#clustering-paramters-inner").remove();
+        d3.select("#clustering-paramters").append("div").attr("id", "clustering-paramters-inner");
+        if(clustering_alg === "DBSCAN"){
+            this.add_range_slider("clustering-paramters-inner", "eps", "dbscan_eps", 0.1, 0.5, 0.1);
+            this.add_range_slider("clustering-paramters-inner", "min_samples", "dbscan_min_samples", 5, 10, 2, 1);
+        } else if(clustering_alg === "Agglomerative Clustering"){
+            this.add_dropdown("clustering-paramters-inner", "Linkage", "linkage", ["ward", "average", "complete", "single"]);
+            this.add_range_slider("clustering-paramters-inner", "Distance threshold", "agglomerative_dist", 0.1, 0.5, 0.1);
+        } else if(clustering_alg === "Mean-Shift"){
+            // d3.select("#dbscan-param").selectAll("label").classed("ui-form-range__value", false);
+            // d3.select("#agglomerative-param").selectAll("label").classed("ui-form-range__value", false);
+            // d3.select("#meanshift-param").selectAll("label").classed("ui-form-range__value", true);
+            this.add_range_slider("clustering-paramters-inner", "Mean-shift", "meanshift_bandwidth", 0.1, 0.5, 0.1);
+        }
     }
 
     draw_all_cols(){
@@ -309,7 +390,7 @@ class DataLoader{
     }
 
     edit_clustering_param(){
-        let clustering_param_ranges_limit = {"eps":{"left":0, "right":300000}, "min_samples":{"left":1, "right":100}};
+        let clustering_param_ranges_limit = {"eps":{"left":0, "right":Infinity}, "min_samples":{"left":1, "right":Infinity}};
         let clustering_param_ranges = {};
         let clustering_params = ['eps', 'min_samples'];
         for(let i=0; i<clustering_params.length; i++){

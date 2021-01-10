@@ -20,7 +20,9 @@ folder.onchange=function(){
     }
     console.log(mapper_files);
     let mapper_list_container = document.getElementById("mapper-list-container-inner");
-    mapper_list_container.style.maxHeight = "300px";
+    mapper_list_container.style.maxHeight = "450px";
+    // draw sliders
+    draw_mapper_param_sliders();
     // draw dropdown meun
     let fg = d3.select("#mapper_list_selection").selectAll("option").data(mapper_files);
     fg.exit().remove();
@@ -51,6 +53,162 @@ folder.onchange=function(){
             })
         }
     })
+
+function draw_mapper_param_sliders(){
+    console.log("draw sliders")
+    let intervals = [10, 20, 30, 40, 50];
+    let overlaps = [0.25, 0.30, 0.35];
+
+    let width = $(d3.select("#workspace-load_result").select(".block_body-inner").node()).width();
+    let height = 30;
+    let margin = {"left":5, "top":15, "right":10, "bottom":15};
+
+    let interval_scale = d3.scaleLinear()
+                            // .domain([0, Math.max(Math.max(...intervals),100)])
+                            .domain([0, Math.max(...intervals)+10])
+                            .range([margin.left, width-margin.right]);
+    let overlap_scale = d3.scaleLinear()
+                            .domain([0, 0.7])
+                            // .domain([0, Math.max(...overlaps)+0.1])
+                            .range([margin.left, width-margin.right]);
+
+
+    let interval_svg = d3.select("#mapper_interval_sliders")
+        .attr("width", width)
+        .attr("height", height);
+    // interval 
+    interval_svg.append("rect")
+        .attr("rx", 3)
+        .attr("ry", 3)
+        .attr("x", margin.left)
+        .attr("y", margin.top)
+        .attr("width", width-margin.left-margin.right)
+        .attr("height", 5)
+        .attr("fill", "#e1e1e1")
+        .attr("stroke", "#e1e1e1")
+    let interval_group = interval_svg.append("g").attr("id", "interval_selection_group");
+    interval_svg.append("rect")
+        .attr("id", "interval_slider")
+        .classed("slider_handler", true)
+        .attr("x", margin.left)
+        .attr("y", margin.top-3)
+        .attr("width", 8)
+        .attr("height", 11)
+        .attr("fill", "#4CAF50")
+        .attr("stroke", "#4CAF50")
+        .on("mouseover", ()=>{
+            d3.select("#interval_slider").classed("highlighted", true);
+        })
+        .on("mouseout", ()=>{
+            d3.select("#interval_slider").classed("highlighted", false);
+        })
+        .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+    let that=this;
+    function dragstarted(d) {
+        that.dragStarted = true;
+    }
+    function dragged(d) {
+        d3.select("#interval_slider").attr("x", d3.event.x);
+    }
+    function dragended (d) {
+        let min_dist = 1000;
+        let dx = d3.event.x;
+        let dy = d3.event.y;
+        let final_x = d3.event.x;
+        let final_i = intervals[0];
+        intervals.forEach(i=>{
+            let dist = Math.abs(dx-interval_scale(i));
+            if(dist<min_dist){
+                min_dist = dist;
+                final_x = interval_scale(i);
+                final_i = i;
+            }
+        })
+        d3.select("#interval_slider").attr("x", final_x+2);
+        d3.select("#mapper_interval_label").html(final_i);
+        that.dragStarted = false;
+    }
+
+    let ig = interval_group.selectAll("rect").data(intervals);
+    ig.exit().remove();
+    ig = ig.enter().append("rect").merge(ig)
+        .attr("x", d=>interval_scale(d))
+        .attr("y", margin.top-5)
+        .attr("width",12)
+        .attr("height",15)
+        .attr("fill", "white")
+        .attr("stroke", "grey")
+        .attr("stroke-width", 2);
+    
+
+    let overlap_svg = d3.select("#mapper_overlap_sliders")
+        .attr("width", width)
+        .attr("height", height);
+    overlap_svg.append("rect")
+        .attr("rx", 3)
+        .attr("ry", 3)
+        .attr("x", margin.left)
+        .attr("y", margin.top)
+        .attr("width", width-margin.left-margin.right)
+        .attr("height", 5)
+        .attr("fill", "#e1e1e1")
+        .attr("stroke", "#e1e1e1")
+    let overlap_group = overlap_svg.append("g").attr("id", "overlap_selection_group");
+    overlap_svg.append("rect")
+        .attr("id", "overlap_slider")
+        .classed("slider_handler", true)
+        .attr("x", margin.left)
+        .attr("y", margin.top-3)
+        .attr("width", 8)
+        .attr("height", 11)
+        .attr("fill", "#4CAF50")
+        .attr("stroke", "#4CAF50")
+        .on("mouseover", ()=>{
+            d3.select("#overlap_slider").classed("highlighted", true);
+        })
+        .on("mouseout", ()=>{
+            d3.select("#overlap_slider").classed("highlighted", false);
+        })
+        .call(d3.drag()
+                .on("start", ()=>{
+                    this.dragStarted = true;
+                })
+                .on("drag", ()=>{
+                    d3.select("#overlap_slider").attr("x", d3.event.x);
+                })
+                .on("end", ()=>{
+                    let min_dist = Infinity;
+                    let dx = d3.event.x;
+                    let final_x = d3.event.x;
+                    let final_i = overlaps[0];
+                    overlaps.forEach(i=>{
+                        let dist = Math.abs(dx-overlap_scale(i));
+                        if(dist<min_dist){
+                            min_dist = dist;
+                            final_x = overlap_scale(i);
+                            final_i = i;
+                        }
+                    })
+                    d3.select("#overlap_slider").attr("x", final_x+2);
+                    d3.select("#mapper_overlap_label").html(parseInt(final_i*100));
+                    this.dragStarted = false;
+                }));
+    let og = overlap_group.selectAll("rect").data(overlaps);
+    og.exit().remove();
+    og = og.enter().append("rect").merge(og)
+        .attr("x", d=>overlap_scale(d))
+        .attr("y", margin.top-5)
+        .attr("width",12)
+        .attr("height",15)
+        .attr("fill", "white")
+        .attr("stroke", "grey")
+        .attr("stroke-width", 2);
+
+
+}
 
 d3.select("#load-raw-data")
     .on("click", ()=>{
@@ -83,48 +241,48 @@ $("#import").click(function(){
 })
 d3.select("#files")
     .on("change",()=>{
-        let file_name = $('#files')[0].files[0].name;
-        console.log(file_name)
-        $.ajax({
-            type: "POST",
-            url: "/data_process",
-            data: file_name,
-            dataType:'text',
-            success: function (response) {
-                response = JSON.parse(response);
-                that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
-            },
-            error: function (error) {
-                console.log("error",error);
-                alert("Incorrect data format!");
-            }
-        })
-        d3.select(".columns-group")
-            .style("max-height","1000px")
-            .style("visibility", "visible");
-        // let files = $('#files')[0].files[0];
-        // let fileReader = new FileReader();
-        // fileReader.onload = function(fileLoadedEvent) {
-        //     let textFromFileLoaded = fileLoadedEvent.target.result;
-        //     $.ajax({
-        //         type: "POST",
-        //         url: "/data_process",
-        //         data: textFromFileLoaded,
-        //         dataType:'text',
-        //         success: function (response) {
-        //             response = JSON.parse(response);
-        //             that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
-        //         },
-        //         error: function (error) {
-        //             console.log("error",error);
-        //             alert("Incorrect data format!");
-        //         }
-        //     })
-        //     d3.select(".columns-group")
-        //         .style("max-height","1000px")
-        //         .style("visibility", "visible")
-        // }
-        // fileReader.readAsText(files, "UTF-8");
+        // let file_name = $('#files')[0].files[0].name;
+        // console.log(file_name)
+        // $.ajax({
+        //     type: "POST",
+        //     url: "/data_process",
+        //     data: file_name,
+        //     dataType:'text',
+        //     success: function (response) {
+        //         response = JSON.parse(response);
+        //         that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
+        //     },
+        //     error: function (error) {
+        //         console.log("error",error);
+        //         alert("Incorrect data format!");
+        //     }
+        // })
+        // d3.select(".columns-group")
+        //     .style("max-height","1000px")
+        //     .style("visibility", "visible");
+        let files = $('#files')[0].files[0];
+        let fileReader = new FileReader();
+        fileReader.onload = function(fileLoadedEvent) {
+            let textFromFileLoaded = fileLoadedEvent.target.result;
+            $.ajax({
+                type: "POST",
+                url: "/data_process",
+                data: textFromFileLoaded,
+                dataType:'text',
+                success: function (response) {
+                    response = JSON.parse(response);
+                    that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
+                },
+                error: function (error) {
+                    console.log("error",error);
+                    alert("Incorrect data format!");
+                }
+            })
+            d3.select(".columns-group")
+                .style("max-height","1000px")
+                .style("visibility", "visible")
+        }
+        fileReader.readAsText(files, "UTF-8");
     })
 
 

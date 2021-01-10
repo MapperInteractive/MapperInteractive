@@ -49,7 +49,38 @@
               </div>
               <div class="mapper-list-container">
                 <div class="mapper-list-container-inner", id="mapper-list-container-inner">
-                  <select name="mapper_list" class="custom-select" id="mapper_list_selection"></select>
+                  <form id="mapper-loading-form">
+                    <div class="radio-container row">
+                        <div class="col-1">
+                            <input type="radio" class="form-radio inline" name="selection-type" value="selection-slider" id="selection-slider" checked="checked">
+                        </div>
+                        <div class="col-10">
+                            <label for="selection-slider" class="radio-label2">
+                              Select from sliders
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group ui-form-range">
+                      <label class="ui-form-range__label">Interval</label>
+                      <span class="ui-form-range__value" id="mapper_interval_label">0</span>
+                      <svg id="mapper_interval_sliders"></svg>
+                    </div>
+                    <div class="form-group ui-form-range">
+                      <label class="ui-form-range__label">Overlap</label>
+                      <span class="ui-form-range__value" id="mapper_overlap_label">0</span>
+                      <svg id="mapper_overlap_sliders"></svg>
+                    </div>
+                    <div class="radio-container row">
+                        <div class="col-1">
+                            <input type="radio" class="form-radio inline" name="selection-type" value="selection-dropdown" id="selection-dropdown">
+                        </div>
+                        <div class="col-10">
+                            <label for="cselection-dropdown" class="radio-label2">Select from dropdown menu</label>
+                        </div>
+                    </div>
+                    <select name="mapper_list" class="custom-select" id="mapper_list_selection"></select>
+                </form>
+                 
                   <div style="padding-top:15px;">
                     <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="draw-selected-mapper" value="Display Selected Mapper">
                     <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="load-raw-data" value="Load Raw Data">
@@ -84,10 +115,11 @@
               </div>
               <div class="clustering-group">
                 <div class="group-title">
-                  Clustering &nbsp;
+                  Clustering 
+                  &nbsp;
                   <i class="fas fa-pen" style="font-size:14px;" id="clustering-para-range"></i>
                 </div>
-                <div class="columns-group" style="max-height:0; visibility: hidden;padding:0;">
+                <div class="columns-group" style="max-height:0; visibility: hidden; padding:0;">
                   <div class="columns-group-inner">
                     <div class="columns-selection" id="all-columns-group">
                       <div class="column-title" style="height:20%;">All Columns</div>
@@ -99,14 +131,31 @@
                     </div>
                   </div>
                 </div>
-                <div class="parameter-group">
+                <div id="clustering-algorithm" class="parameter-group">
+                  <div class="row" style="padding-top:0px; padding-bottom:10px;">
+                    <div class="col-sm-6 ui-form-range__label" style="padding-top:5px;">Clustering Algorithm</div>
+                    <div class="col-sm-6" id="clustering-alg-container"> 
+                      <select class="custom-select"  name="clustering_alg_selection" id="clustering_alg_selection">
+                        <option>DBSCAN</option>
+                        <option>Agglomerative Clustering</option>
+                        <option>Mean-Shift</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="parameter-group" id="clustering-paramters">
+                  <div id="clustering-paramters-inner">
+
+                  </div>
+                </div>
+                <!-- <div class="parameter-group" id="dbscan-param">
                   <div class="form-group ui-form-range">
                     <label class="ui-form-range__label">eps (DBSCAN)</label>
                     <span class="ui-form-range__value" id="eps_label">0.1</span>
                     <div class="param-range-container_clustering">
                       <div class="param-range-container-inner_clustering" style="padding:0px;">
-                        <span class="param-range left"><input type="number" id="range-eps-left" min="0.01" max="1" value="0.1" step=0.01></span>
-                        <span class="param-range right"><input type="number" id="range-eps-right" min="0.01" max="50000" value="0.5" step=0.01></span>
+                        <span class="param-range left"><input type="number" id="range-eps-left" min="0.01" value="0.1" step=0.01></span>
+                        <span class="param-range right"><input type="number" id="range-eps-right" min="0.01" value="0.5" step=0.01></span>
                       </div>    
                     </div>
                     <input class="ui-form-range__input" id="eps_input" name="dbscan_eps" type="range" value="0.1" max="0.5" min="0.1" step="0.01">
@@ -116,13 +165,50 @@
                     <span class="ui-form-range__value" id="min_samples_label">5</span>
                     <div class="param-range-container_clustering">
                       <div class="param-range-container-inner_clustering" style="padding:0px;">
-                      <span class="param-range left"><input type="number" id="range-min_samples-left" min="1" max="100" value="5"></span>
-                      <span class="param-range right"><input type="number" id="range-min_samples-right" min="1" max="100" value="10"></span>
+                      <span class="param-range left"><input type="number" id="range-min_samples-left" min="1" value="5"></span>
+                      <span class="param-range right"><input type="number" id="range-min_samples-right" min="1" value="10"></span>
                       </div>    
                     </div>
                     <input class="ui-form-range__input" id="min_samples_input" name="dbscan_min_samples" type="range" value="5" max="10" min="2" step="1">
                   </div>
                 </div>
+                <div class="parameter-group" id="agglomerative-param">
+                  <div class="row" style="padding-top:0px; padding-bottom:10px;">
+                    <div class="col-sm-6 ui-form-range__label" style="padding-top:5px;">Linkage</div>
+                    <div class="col-sm-6" id="linkage-selection-container"> 
+                      <select class="custom-select"  name="linkage_selection" id="linkage_selection">
+                        <option>ward</option>
+                        <option>average</option>
+                        <option>complete</option>
+                        <option>single</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group ui-form-range">
+                    <label class="ui-form-range__label">Distance threshold</label>
+                    <span class="ui-form-range__value" id="agglomerative_dist_label">0.1</span>
+                    <div class="param-range-container_clustering">
+                      <div class="param-range-container-inner_clustering" style="padding:0px;">
+                        <span class="param-range left"><input type="number" id="range-dist-left" min="0.01" value="0.1" step=0.01></span>
+                        <span class="param-range right"><input type="number" id="range-dist-right" min="0.01" value="0.5" step=0.01></span>
+                      </div>    
+                    </div>
+                    <input class="ui-form-range__input" id="agglomerative_dist_input" name="agglomerative_dist_input" type="range" value="0.1" max="0.5" min="0.1" step="0.01">
+                  </div>
+                </div>
+                <div class="parameter-group" id="meanshift-param">
+                  <div class="form-group ui-form-range">
+                    <label class="ui-form-range__label">Bandwidth</label>
+                    <span class="ui-form-range__value" id="meanshift_bandwidth_label">0.1</span>
+                    <div class="param-range-container_clustering">
+                      <div class="param-range-container-inner_clustering" style="padding:0px;">
+                        <span class="param-range left"><input type="number" id="range-bandwidth-left" min="0.01" value="0.1" step=0.01></span>
+                        <span class="param-range right"><input type="number" id="range-bandwidth-right" min="0.01" value="0.5" step=0.01></span>
+                      </div>    
+                    </div>
+                    <input class="ui-form-range__input" id="meanshift_bandwidth_input" name="meanshift_bandwidth_input" type="range" value="0.1" max="0.5" min="0.1" step="0.01">
+                  </div>
+                </div> -->
               </div>       
               <div class="filter-group">
                 <div class="group-title">
@@ -202,7 +288,6 @@
                     <input class="ui-form-range__input" id="overlap1_input" name="overlap1" type="range" value="50" max="50" min="5" step="1">
                   </div>
                 </div>
-  
                 <div class="filter-inner" id="filter-inner-2">
                   Dimension 2 &nbsp;
                   <i class="fas fa-pen" style="font-size:14px;" id="filtering-para-range2"></i>
