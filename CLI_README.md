@@ -27,7 +27,7 @@ Example mapper graph computation with parameters:
 * Graphs stored in ./`CLI_examples/`
 
 ```bash
-python data.csv --intervals 10:50:10 --overlaps 25:35:5 --eps 0.5 --num_pts 5 --filter l2norm --output ./CLI_examples
+python data.csv --intervals 10:50:10 --overlaps 25:35:5 --clusterer dbscan --eps 0.5 --num_pts 5 --filter l2norm --output ./CLI_examples
 ```
 
 ---
@@ -51,12 +51,24 @@ Flag Arguments
 * `-output`: Output directory. Defaults to `./graph/`
 * `--no-preprocess`: Boolean flag to omit preprocessing. If used, not `wrangled_data.csv` will be produced.
 * `--threads`: Number of threads to use when computing pairwise distances for clustering. -1 means uses all available processors.
-* `--eps`: Epsilon parameter passed to DBSCAN.
-* `--num_pts`: num_pts parameter passed to DBSCAN. Defaults to 5.
+* `--clusterer`: Required parameter to indicate which clustering method to use. Choices included dbscan, agglomerative, and meanshift.
 * `--norm`: Normalization of points before computing the mapper graph. Possible choices include: None, 0-1, l1, l2, max. Defaults to None.
 * `--gpu`: Boolean flag to indicate whether GPU acceleration should be used. Requires PyTorch and a CUDA compatible device. If the CUDA device runs out of memory, distance computation defaults to the CPU. **Note: Using a GPU might cause small numerical inaccuracies. Preliminary testing shows 5e-5 tolerance.** GPU Acceleration only available when using a euclidean metric.
 * `--metric`: Metric to pass to DBSCAN. Any Scikit-learn metric. Defaults to euclidean.
 * `--preprocess_only`: Boolean flag to only wrangle the data. No mapper graphs are computed.
+
+
+Clustering Arguments as Flags
+
+
+The same parameter naming convention is used from scikit learn (see documentation for [meanshift](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html), [dbscan] (https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html), and [agglomerative](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html)).
+
+* `--eps`: epsilon for DBSCAN
+* `--min_samples`: Min samples for DBSCAN
+* `--linkage`: Linkage type for Agglomerative
+* `--distance_threshold`: Distance threshold for stopping Agglomerative clustering
+* `--bandwidth`: RBF kernel parameter for Mean Shift
+
 
 ----
 
