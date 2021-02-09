@@ -4,7 +4,7 @@ import os
 import app.views as MI  # MapperInteractive
 from app import kmapper as km
 from app import cover as km_cover
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, MeanShift, AgglomerativeClustering
 import json
 import itertools
 import numpy as np
@@ -159,10 +159,26 @@ if __name__ == '__main__':
     parser.add_argument('--no-preprocess', action='store_true')
     parser.add_argument('--threads', type=int, default=4,
                         help='Number of threads to allocate')
+
+    parser.add_argument('--clusterer', type=str, required=False,
+                        choices=['dbscan', 'agglomerative', 'meanshift', None], default=None)
+
+    # DBSCAN args
     parser.add_argument('--eps', type=float,
-                        help='Epsilon for DBSCAN', required=True)
-    parser.add_argument('--num_pts', type=int,
-                        help='num_pts for DBSCAN', default=5)
+                        help='DBSCAN Epsilon', required=False, default=-1)
+    parser.add_argument('--min_samples', type=int,
+                        help='DBSCAN Min points', required=False, default=-1)
+
+    # Agglomerative args
+    parser.add_argument('--linkage', help='Type of agglomerative clustering',
+                        choices=[-1, 'ward', 'complete', 'average', 'single'], default=-1, required=False)
+    parser.add_argument('--distance_threshold', help='Distance threshold for agglomerative clustering',
+                        type=float, default=-1, required=False)
+
+    # Mean Shift args
+    parser.add_argument(
+        '--bandwidth', type=str, help='bandwidth for mean shift. If "None" is supplied, scikit-learn estimator is used', default='NA', required=False)
+
     parser.add_argument('--norm', help='Normalization of points', default=None)
     parser.add_argument('--gpu', action='store_true',
                         help='id(s) for CUDA_VISIBLE_DEVICES')
@@ -179,8 +195,7 @@ if __name__ == '__main__':
     no_preprocess = args.no_preprocess
     threads = args.threads
     gpu = args.gpu
-    eps = args.eps
-    num_pts = args.num_pts
+    clustering_method = args.clusterer
     metric = args.metric
     norm = args.norm
     preprocess_only = args.preprocess_only
@@ -188,20 +203,55 @@ if __name__ == '__main__':
     # Setup
     mkdir(output_dir)
     df = pd.read_csv(fname)
-    if not no_preprocess or preprocess_only:
+    if preprocess_only:
         df = wrangle_csv(df)
         df.to_csv(join(output_dir, 'wrangled_data.csv'))
+        exit()
+    elif not no_preprocess:
+        df = wrangle_csv(df)
+
+    # Regardless, we want to save the data for bookkeeping
+    df.to_csv(join(output_dir, 'wrangled_data.csv'))
     df_np = df.to_numpy()
     df_np = normalize_data(df_np, norm_type=norm)
     overlaps = extract_range(overlaps_str)
     intervals = extract_range(intervals_str)
     filter_fn = get_filter_fn(df, filter_str, filter_params=None)
-    clusterer = DBSCAN(eps=eps, min_samples=num_pts)
+
+    meta = {'data': fname, 'intervals': intervals_str,
+            'overlaps': overlaps_str, 'filter': filter_str, 'normalization': norm}
+
+    assert clustering_method is not None, 'Cant run mapper without specifying a clustering method!'
+    meta['Clustering_method'] = clustering_method
+    if clustering_method == 'dbscan':
+        assert args.eps != -1, 'Must specify eps for DBSCAN'
+        assert args.min_samples != -1, 'Must specify min_samples for DBSCAN'
+        meta['DBSCAN_eps'] = args.eps
+        meta['DBSCAN_min_samples'] = args.min_samples
+        clusterer = DBSCAN(eps=args.eps, min_samples=args.min_samples)
+    elif clustering_method == 'agglomerative':
+        assert args.linkage is not None, 'Linkage must be provided for Agglomerative Clustering'
+        assert args.distance_threshold != - \
+            1, 'Distance threshold must be specified for Agglomerative Clustering'
+        meta['Agglomerative_linkage'] = args.linkage
+        meta['Agglomerative_distance_threshold'] = args.distance_threshold
+        clusterer = AgglomerativeClustering(
+            linkage=args.linkage, distance_threshold=args.distance_threshold)
+    elif clustering_method == 'meanshift':
+        assert args.bandwidth != 'NA', 'Must specify bandwidth for Mean Shift (Did you mean to use None?)'
+        if args.bandwidth == 'none' or args.bandwidth == 'None':
+            bandwidth = None
+        else:
+            try:
+                bandwidth = float(args.bandwidth)
+            except:
+                assert False, 'No float value passed to bandwidth for Mean Shift'
+        meta['MeanShift_bandwidth'] = 'None' if bandwidth is None else bandwidth
+        clusterer = MeanShift(bandwidth=args.bandwidth)
+
     with open(join(output_dir, 'metadata.json'), 'w+') as fp:
-        meta = {'data': fname, 'intervals': intervals_str,
-                'overlaps': overlaps_str, 'filter': filter_str, 'normalization': norm,
-                'dbscan_eps': eps, 'dbscan_numpts': num_pts}
         json.dump(meta, fp)
+
     for overlap, interval in tqdm(itertools.product(overlaps, intervals)):
         g = graph_to_dict(mapper_wrapper(
             df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric, use_gpu=gpu))
