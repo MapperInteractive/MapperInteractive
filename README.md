@@ -56,7 +56,10 @@ Pull requests are welcomed.
 ## Cite
 
 Mapper Interactive: A Scalable, Extendable, and Interactive Toolbox for the Visual Exploration of High-Dimensional Data.
-Youjia Zhou, Nithin Chalapathi, Archit Rathore, Yaodong Zhao, Bei Wang. 2020.
+Youjia Zhou, Nithin Chalapathi, Archit Rathore, Yaodong Zhao, Bei Wang.\
+*IEEE Pacific Visualization (PacificVis)*, accepted, 2021.
+
+https://arxiv.org/abs/2011.03209.
 
 
 
