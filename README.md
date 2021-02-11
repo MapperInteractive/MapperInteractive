@@ -24,7 +24,6 @@ If you do not have these packages installed, please use the following command to
 
 ```bash
 pip install scikit-learn
-pip install kmapper
 pip install networkx
 pip install flask
 pip install flask_assets
