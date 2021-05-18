@@ -51,8 +51,7 @@ class PCA{
             .attr("cy", d=>yScale(d.pc2))
             .attr("r", 2)
             .attr("fill", d=>{
-                // return color(parseInt(d.kmeans_cluster));
-                return color_dict[d.labels_str];
+                return color(parseInt(d.kmeans_cluster));
                 
             })
 

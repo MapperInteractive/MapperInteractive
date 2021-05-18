@@ -341,8 +341,8 @@ def _call_kmapper(data, col_names, interval, overlap, clustering_alg, clustering
         graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering(n_clusters=None, linkage=clustering_alg_params["linkage"], distance_threshold=float(clustering_alg_params["dist"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
         # graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering( linkage=clustering_alg_params["linkage"]), cover=Cover(n_cubes=interval, perc_overlap=overlap))
     elif clustering_alg == "Mean Shift":
-        # graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=float(clustering_alg_params["bandwidth"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
-        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=1), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=float(clustering_alg_params["bandwidth"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        # graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=1), cover=Cover(n_cubes=interval, perc_overlap=overlap))
         
     print(len(graph['nodes'].keys()))
     # graph = mapper.map(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
@@ -468,8 +468,9 @@ def get_selected_data(selected_nodes):
 @app.route('/module_extension', methods=['POST','GET'])
 def module_extension():
     module_info = ""
-    with open(APP_STATIC+"/uploads/new_modules.json") as f:
-        module_info = json.load(f)
+    if os.path.exists(APP_STATIC+"/uploads/new_modules.json"):
+        with open(APP_STATIC+"/uploads/new_modules.json") as f:
+            module_info = json.load(f)
     return module_info
 
 @app.route('/module_computing', methods=['POST','GET'])

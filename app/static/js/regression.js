@@ -134,6 +134,7 @@ class Regression{
 
     clear_result(){
         $('#regression-result').remove();
+        $('#regression-result-constant').remove();
         $('.reg-result_title').remove();
     }
 
@@ -144,7 +145,9 @@ class Regression{
         let result_container = d3.select("#regression-panel").select(".block_body-inner").append("div")
             .classed("row", true)
             .attr("id","regression-result")
-            .style("padding-top","5px");
+            .style("padding-top","5px")
+            .style("padding-bottom","0px")
+            .style("margin-bottom","0px");
         
         let indep_vars_container = result_container.append("div")
             .classed("col-sm-3", true)
@@ -168,24 +171,74 @@ class Regression{
         let pvalue_ul = pvalue_container.append("ul");
 
 
-        let ig = indep_vars_ul.selectAll("li").data(['constant'].concat(this.indep_vars_selected));
+        // let ig = indep_vars_ul.selectAll("li").data(['constant'].concat(this.indep_vars_selected));
+        // ig.exit().remove();
+        // ig = ig.enter().append("ul").merge(ig)
+        //     .html(d=>d);
+
+        // let cg = coef_ul.selectAll("li").data(res.params);
+        // cg.exit().remove();
+        // cg = cg.enter().append("ul").merge(cg)
+        //     .html(d=>Math.round(d*1000)/1000);
+
+        // let sg = std_ul.selectAll("li").data(res.stderr);
+        // sg.exit().remove();
+        // sg = sg.enter().append("ul").merge(sg)
+        //     .html(d=>Math.round(d*1000)/1000);
+
+        // let pg = pvalue_ul.selectAll("li").data(res.pvalues);
+        // pg.exit().remove();
+        // pg = pg.enter().append("li").merge(pg)
+        //     .html(d=>Math.round(d*1000)/1000);
+        
+        let ig = indep_vars_ul.selectAll("li").data(this.indep_vars_selected);
         ig.exit().remove();
         ig = ig.enter().append("ul").merge(ig)
+            .classed("indep_vars_selected", true)
             .html(d=>d);
 
-        let cg = coef_ul.selectAll("li").data(res.params);
+        let cg = coef_ul.selectAll("li").data(res.params.slice(1));
         cg.exit().remove();
         cg = cg.enter().append("ul").merge(cg)
             .html(d=>Math.round(d*1000)/1000);
 
-        let sg = std_ul.selectAll("li").data(res.stderr);
+        let sg = std_ul.selectAll("li").data(res.stderr.slice(1));
         sg.exit().remove();
         sg = sg.enter().append("ul").merge(sg)
             .html(d=>Math.round(d*1000)/1000);
 
-        let pg = pvalue_ul.selectAll("li").data(res.pvalues);
+        let pg = pvalue_ul.selectAll("li").data(res.pvalues.slice(1));
         pg.exit().remove();
         pg = pg.enter().append("li").merge(pg)
             .html(d=>Math.round(d*1000)/1000);
+
+        d3.select("#regression-panel").select(".block_body-inner").append("div")
+            .style("padding-left","45")
+            .style("padding-right","45")
+            .style("border-top","1px solid #D3DBE2")
+        let constant_container = d3.select("#regression-panel").select(".block_body-inner").append("div")
+            .classed("row", true)
+            .attr("id","regression-result-constant")
+            // .style("border-top", "1px solid #D3DBE2")
+            .style("padding-top","0px");
+        let indep_vars_container_c = constant_container.append("div")
+            .classed("col-sm-3", true)
+            .classed("scrollable-horizontal", true);
+        // indep_vars_container.append("text").html("vars").style("visibility", "hidden");
+        indep_vars_container_c.append("ul").append("li").html("constant");
+        
+        let coef_container_c = constant_container.append("div")
+            .classed("col-sm-2", true);
+        coef_container_c.append("ul").append("li").html(Math.round(res.params[0]*1000)/1000);
+
+        let std_container_c = constant_container.append("div")
+            .classed("col-sm-3", true);
+        std_container_c.append("ul").append("li").html(Math.round(res.stderr[0]*1000)/1000);
+
+        let pvalue_container_c = constant_container.append("div")
+            .classed("col-sm-4", true);
+        pvalue_container_c.append("ul").append("li").html(Math.round(res.pvalues[0]*1000)/1000);
+
+        
     }
 }

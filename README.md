@@ -10,7 +10,7 @@ The Mapper algorithm is a tool from topological data analysis first introduced b
 ## Installation
 
 ```bash
-git clone git@github.com:MapperInteractive/MapperInteractive.git
+git clone https://github.com/MapperInteractive/MapperInteractive
 cd MapperInteractive
 python3 run.py
 ```
