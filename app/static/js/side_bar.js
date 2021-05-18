@@ -326,9 +326,11 @@ class DataLoader{
     draw_filter_dropdown(){
         if(this.selected_cols.length >= 1){
             // this.filters = this.selectable_cols.concat(["sum", "mean", "median", "max", "min", "std"]);
-            this.filters = this.all_cols.concat(["l2norm", "Density", "Eccentricity", "PC1", "PC2", "sum", "mean", "median", "max", "min", "std"]);
+            // this.filters = this.all_cols.concat(["l2norm", "Density", "Eccentricity", "PC1", "PC2", "sum", "mean", "median", "max", "min", "std"]);
+            this.filters = ["l2norm", "Density", "Eccentricity", "PC1", "PC2", "sum", "mean", "median", "max", "min", "std"].concat(this.all_cols);
             if(this.all_cols.length === 1){
-                this.filters = this.all_cols.concat(["l2norm", "Density", "Eccentricity", "PC1", "sum", "mean", "median", "max", "min", "std"]);
+                // this.filters = this.all_cols.concat(["l2norm", "Density", "Eccentricity", "PC1", "sum", "mean", "median", "max", "min", "std"]);
+                this.filters = ["l2norm", "Density", "Eccentricity", "PC1", "sum", "mean", "median", "max", "min", "std"].concat(this.all_cols);
             }
         } else {
             this.filters = this.selectable_cols.slice(0);
