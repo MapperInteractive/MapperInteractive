@@ -1,4 +1,4 @@
-# Mapper Interactive
+# Mapper Interactive (Integrated with adaptive cover)
 
 
 
