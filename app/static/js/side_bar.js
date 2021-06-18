@@ -500,17 +500,42 @@ class DataLoader{
     }
 
     draw_adaptive_cover(classic_cover, adaptive_cover){
-        console.log("draw adaptive cover")
-        d3.select("#cover-svg").remove();
+        d3.select("#cover-svg-container").select("div").remove();
 
-        d3.select("#cover-svg-container").append("div").style("padding-top", "10px")
+        let svg_container = d3.select("#cover-svg-container").append("div");
+
+        svg_container.append("div").style("padding-top", "10px")
             .append("h6").html("Cover Differences");
+        
+        let legend_width = 25;
+        let legend_height = 10;
+
+        let legend_container = svg_container.append("div").style("border", "1px solid rgba(0, 0, 0, 0.3)").style("padding", "5px").style("border-radius", "3px")
+        let legend_classic_container = legend_container.append("div").classed("row", true);
+        legend_classic_container.append("div").classed("col-1", true).append("svg")
+            .attr("width", legend_width)
+            .attr("height",legend_height)
+            .append("line")
+            .attr("x1", 0).attr("y1", legend_height/2)
+            .attr("x2", legend_width).attr("y2", legend_height/2)
+            .attr("stroke", "black").attr("stroke-width", 2)
+        legend_classic_container.append("div").classed("col-10", true).html("initial covers");
+
+        let legend_adaptive_container = legend_container.append("div").classed("row", true);
+        legend_adaptive_container.append("div").classed("col-1", true).append("svg")
+            .attr("width", legend_width)
+            .attr("height",legend_height)
+            .append("line")
+            .attr("x1", 0).attr("y1", legend_height/2)
+            .attr("x2", legend_width).attr("y2", legend_height/2)
+            .attr("stroke", "#4CAF50").attr("stroke-width", 2)
+        legend_adaptive_container.append("div").classed("col-10", true).html("adaptive covers");
 
         let margin = {"left":20, "top":20, "right":10, "bottom":20};
         let width = $("#cover-svg-container").width();
         let height = width;
 
-        let module_svg = d3.select("#cover-svg-container").append("svg")
+        let module_svg = svg_container.append("svg")
             .attr("id", "cover-svg")
             .attr("width", width)
             .attr("height", height);
@@ -518,8 +543,6 @@ class DataLoader{
         let axis_group = module_svg.append("g").attr("id", "cover_svg_axis_group");
         let classic_cover_group = module_svg.append("g").attr("id", "cover_svg_classic_group");
         let adaptive_cover_group = module_svg.append("g").attr("id", "cover_svg_adaptive_group");
-        console.log(classic_cover)
-        console.log(adaptive_cover)
 
         let total_cover_length = classic_cover.length + adaptive_cover.length;
 
@@ -534,7 +557,6 @@ class DataLoader{
             .domain([1, total_cover_length])
             .range([margin.top, height-1.5*margin.bottom])
 
-        console.log(total_cover_length)
         let current_cover_idx = 1;
         classic_cover.forEach(c=>{
             c.push(current_cover_idx);
@@ -544,7 +566,6 @@ class DataLoader{
             c.push(current_cover_idx);
             current_cover_idx += 1;
         })
-        console.log(yScale(2))
         let clg = classic_cover_group.selectAll("line").data(classic_cover)
             .enter().append("line")
             .attr("x1", d=>xScale(d[0]))
@@ -560,7 +581,7 @@ class DataLoader{
             .attr("y1", d=>yScale(d[2]))
             .attr("x2", d=>xScale(d[1]))
             .attr("y2", d=>yScale(d[2]))
-            .attr("stroke", "green")
+            .attr("stroke", "#4CAF50")
             .attr("stroke-width", 2);
         
         // x-axis

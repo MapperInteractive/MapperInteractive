@@ -185,7 +185,6 @@ def get_graph():
     mapper_result = run_mapper(data, selected_cols, interval, overlap, clustering_alg, clustering_alg_params, filter_function, filter_parameters)
     if len(categorical_cols) > 0:
         for node in mapper_result['nodes']:
-            print("node", node['id'])
             vertices = node['vertices']
             data_categorical_i = data_categorical.iloc[vertices]
             node['categorical_cols_summary'] = {}
@@ -269,6 +268,14 @@ def get_enhanced_graph():
     g_multipass = generate_mapper_graph(data_new, lens, multipass_cover, clusterer, refit_cover=False)
     mapper_result = _parse_enhanced_graph(g_multipass, data)
     connected_components = compute_cc(mapper_result)
+
+    if len(categorical_cols) > 0:
+        for node in mapper_result['nodes']:
+            vertices = node['vertices']
+            data_categorical_i = data_categorical.iloc[vertices]
+            node['categorical_cols_summary'] = {}
+            for col in categorical_cols:
+                node['categorical_cols_summary'][col] = data_categorical_i[col].value_counts().to_dict()
     
     print(multipass_cover.intervals)
     return jsonify(mapper=mapper_result, connected_components=connected_components, classic_cover=cov.intervals.tolist(), adaptive_cover=multipass_cover.intervals.tolist())

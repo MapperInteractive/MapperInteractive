@@ -305,17 +305,21 @@ d3.select("#mapper_loader")
 d3.select("#enhanced_mapper_loader")
     .on("click", ()=>{
         if(that.side_bar.all_cols.length>0){
-            that.get_mapper_parameters();
-            that.get_enhanced_mapper_parameters();
-            console.log(that.mapper_data)
-            $.post("/enhanced_mapper_loader",{
-                data: JSON.stringify(that.mapper_data)
-            }, function(res){
-                console.log(res);
-                that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols, that.side_bar.other_cols);
-                that.regression = new Regression(that.side_bar.all_cols);
-                that.side_bar.draw_adaptive_cover(res.classic_cover, res.adaptive_cover);
-            })
+            if(that.side_bar.config.fitler.length>1){
+                alert("Only 1D enhanced mapper is implemented.")
+            } else{
+                that.get_mapper_parameters();
+                that.get_enhanced_mapper_parameters();
+                console.log(that.mapper_data)
+                $.post("/enhanced_mapper_loader",{
+                    data: JSON.stringify(that.mapper_data)
+                }, function(res){
+                    console.log(res);
+                    that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols, that.side_bar.other_cols);
+                    that.regression = new Regression(that.side_bar.all_cols);
+                    that.side_bar.draw_adaptive_cover(res.classic_cover, res.adaptive_cover);
+                })
+            }
         } else{
             alert("Please import a dataset frist!");
         } 
