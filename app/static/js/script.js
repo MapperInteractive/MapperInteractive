@@ -305,7 +305,7 @@ d3.select("#mapper_loader")
 d3.select("#enhanced_mapper_loader")
     .on("click", ()=>{
         if(that.side_bar.all_cols.length>0){
-            if(that.side_bar.config.fitler.length>1){
+            if(that.side_bar.config.filter.length>1){
                 alert("Only 1D enhanced mapper is implemented.")
             } else{
                 that.get_mapper_parameters();
