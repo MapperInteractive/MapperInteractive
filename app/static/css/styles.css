@@ -93,7 +93,7 @@ body {
   /* color: white; */
 }
 
-.import-group, .normalization-group, .filter-group, .clustering-group, .parameter-group {
+.import-group, .normalization-group, .filter-group, .clustering-group, .parameter-group, .enhanced-mapper-group {
   padding-top: 5px;
 }
 
@@ -333,6 +333,10 @@ button.selected {
   border:1px solid rgba(0, 0, 0, 0.2);
 }
 
+input:disabled{
+  opacity: 0.3;
+}
+
 /* Slider */
 .ui-form-range__label{
     display: inline-block;
@@ -426,6 +430,10 @@ button.selected {
 
 /* Select Menu */
 /* The container must be positioned relative: */
+.select-container{
+  padding: 10px 0px;
+}
+
 .custom-select {
   position: relative;
   width: 80%;

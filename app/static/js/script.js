@@ -289,36 +289,35 @@ d3.select("#files")
 d3.select("#mapper_loader")
     .on("click",()=>{
         if(that.side_bar.all_cols.length>0){
-            console.log(that.side_bar.config.filter)
-            if(that.side_bar.config.filter[0] === "Density"){
-                that.side_bar.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
-                let density_kernel_dropdown = document.getElementById("density_kernel_selection");
-                that.side_bar.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
-
-            } else if(that.side_bar.config.filter[1] === "Density"){
-                that.side_bar.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values2").node().value);
-                let density_kernel_dropdown = document.getElementById("density_kernel_selection2");
-                that.side_bar.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
-            }
-            if(that.side_bar.config.filter[0] === "Eccentricity"){
-                that.side_bar.config.eccent_p = parseFloat(d3.select("#eccent_p_values").node().value);
-                let eccent_dist_dropdown = document.getElementById("eccent_dist_selection")
-                that.side_bar.config.eccent_dist = eccent_dist_dropdown.options[eccent_dist_dropdown.selectedIndex].text;
-            } else if(that.side_bar.config.filter[1] === "Eccentricity"){
-                that.side_bar.config.eccent_p = parseFloat(d3.select("#eccent_p_values2").node().value);
-                let eccent_dist_dropdown = document.getElementById("eccent_dist_selection2")
-                that.side_bar.config.eccent_dist = eccent_dist_dropdown.options[eccent_dist_dropdown.selectedIndex].text;
-            }
-            let mapper_data = {"cols":that.side_bar.selected_cols, "all_cols":that.side_bar.all_cols, "categorical_cols":that.side_bar.categorical_cols, "config":that.side_bar.config};
+            that.get_mapper_parameters();
             $.post("/mapper_loader",{
-                data: JSON.stringify(mapper_data)
+                data: JSON.stringify(that.mapper_data)
             }, function(res){
                 console.log(res);
                 that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols, that.side_bar.other_cols);
                 that.regression = new Regression(that.side_bar.all_cols);
             })
         } else{
-            alert("Please import a dataset frist!")
+            alert("Please import a dataset frist!");
+        } 
+    })
+
+d3.select("#enhanced_mapper_loader")
+    .on("click", ()=>{
+        if(that.side_bar.all_cols.length>0){
+            that.get_mapper_parameters();
+            that.get_enhanced_mapper_parameters();
+            console.log(that.mapper_data)
+            $.post("/enhanced_mapper_loader",{
+                data: JSON.stringify(that.mapper_data)
+            }, function(res){
+                console.log(res);
+                that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols, that.side_bar.other_cols);
+                that.regression = new Regression(that.side_bar.all_cols);
+                that.side_bar.draw_adaptive_cover(res.classic_cover, res.adaptive_cover);
+            })
+        } else{
+            alert("Please import a dataset frist!");
         } 
     })
 
@@ -477,3 +476,48 @@ $.post("/module_extension",{
     
 })
 
+function get_mapper_parameters(){
+    if(that.side_bar.config.filter[0] === "Density"){
+        that.side_bar.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
+        let density_kernel_dropdown = document.getElementById("density_kernel_selection");
+        that.side_bar.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
+
+    } else if(that.side_bar.config.filter[1] === "Density"){
+        that.side_bar.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values2").node().value);
+        let density_kernel_dropdown = document.getElementById("density_kernel_selection2");
+        that.side_bar.config.density_kernel = density_kernel_dropdown.options[density_kernel_dropdown.selectedIndex].text;
+    }
+    if(that.side_bar.config.filter[0] === "Eccentricity"){
+        that.side_bar.config.eccent_p = parseFloat(d3.select("#eccent_p_values").node().value);
+        let eccent_dist_dropdown = document.getElementById("eccent_dist_selection")
+        that.side_bar.config.eccent_dist = eccent_dist_dropdown.options[eccent_dist_dropdown.selectedIndex].text;
+    } else if(that.side_bar.config.filter[1] === "Eccentricity"){
+        that.side_bar.config.eccent_p = parseFloat(d3.select("#eccent_p_values2").node().value);
+        let eccent_dist_dropdown = document.getElementById("eccent_dist_selection2")
+        that.side_bar.config.eccent_dist = eccent_dist_dropdown.options[eccent_dist_dropdown.selectedIndex].text;
+    }
+    that.mapper_data = {"cols":that.side_bar.selected_cols, "all_cols":that.side_bar.all_cols, "categorical_cols":that.side_bar.categorical_cols, "config":that.side_bar.config};
+}
+
+function get_enhanced_mapper_parameters(){
+    that.mapper_data.enhanced_config = {};
+    let ic_dropdown = document.getElementById("information_criterion_selection");
+    let ic_type = ic_dropdown.options[ic_dropdown.selectedIndex].text;
+    if(ic_type === "BIC"){
+        that.mapper_data.enhanced_config.bic = true;
+    } else {
+        that.mapper_data.enhanced_config.bic = false;
+    }
+    let max_iter = 5;
+    let delta = 1;
+
+    if($('#converg-iter').prop("checked")===true){
+        max_iter = parseInt(d3.select("#converg-iter-value").attr("value"));
+    }
+    if($('#converg-delta').prop("checked")===true){
+        delta = parseFloat(d3.select("#converg-delta-value").attr("value"));
+    }
+
+    that.mapper_data.enhanced_config.max_iter = max_iter;
+    that.mapper_data.enhanced_config.delta = delta;
+}

@@ -166,6 +166,36 @@ class DataLoader{
             d3.select("#overlap2_label")
                 .html(this.value);
         }
+
+        // 4. Enhanced Mapper Graph
+        // Convergence parameters
+        let if_iter_checked = true;
+        d3.select("#converg-iter-form")
+            .on("click", ()=>{
+                if(if_iter_checked === true){
+                    if_iter_checked = false;
+                    $('#converg-iter').prop("checked", false);
+                    $('#converg-iter-value').prop("disabled", true);
+                } else {
+                    if_iter_checked = true;
+                    $('#converg-iter').prop("checked", true);
+                    $('#converg-iter-value').prop("disabled", false);
+                }
+            })
+
+        let if_delta_checked = false;
+        d3.select("#converg-delta-form")
+            .on("click", ()=>{
+                if(if_delta_checked === true){
+                    if_delta_checked = false;
+                    $('#converg-delta').prop("checked", false);
+                    $('#converg-delta-value').prop("disabled", true);
+                } else {
+                    if_delta_checked = true;
+                    $('#converg-delta').prop("checked", true);
+                    $('#converg-delta-value').prop("disabled", false);
+                }
+            })
     }
 
     get_clustering_params(clustering_alg) {
@@ -467,6 +497,80 @@ class DataLoader{
                     }
                 })
         }
+    }
+
+    draw_adaptive_cover(classic_cover, adaptive_cover){
+        console.log("draw adaptive cover")
+        d3.select("#cover-svg").remove();
+
+        d3.select("#cover-svg-container").append("div").style("padding-top", "10px")
+            .append("h6").html("Cover Differences");
+
+        let margin = {"left":20, "top":20, "right":10, "bottom":20};
+        let width = $("#cover-svg-container").width();
+        let height = width;
+
+        let module_svg = d3.select("#cover-svg-container").append("svg")
+            .attr("id", "cover-svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        let axis_group = module_svg.append("g").attr("id", "cover_svg_axis_group");
+        let classic_cover_group = module_svg.append("g").attr("id", "cover_svg_classic_group");
+        let adaptive_cover_group = module_svg.append("g").attr("id", "cover_svg_adaptive_group");
+        console.log(classic_cover)
+        console.log(adaptive_cover)
+
+        let total_cover_length = classic_cover.length + adaptive_cover.length;
+
+        let xMin = Math.min(classic_cover[0][0], adaptive_cover[0][0])
+        let xMax = Math.min(classic_cover[classic_cover.length-1][1], adaptive_cover[adaptive_cover.length-1][1])
+        let xScale = d3.scaleLinear()
+            .domain([xMin, xMax])
+            .range([margin.left, width-margin.right]);
+        console.log(xMin, xMax)
+        
+        let yScale = d3.scaleLinear()
+            .domain([1, total_cover_length])
+            .range([margin.top, height-1.5*margin.bottom])
+
+        console.log(total_cover_length)
+        let current_cover_idx = 1;
+        classic_cover.forEach(c=>{
+            c.push(current_cover_idx);
+            current_cover_idx += 1;
+        })
+        adaptive_cover.forEach(c=>{
+            c.push(current_cover_idx);
+            current_cover_idx += 1;
+        })
+        console.log(yScale(2))
+        let clg = classic_cover_group.selectAll("line").data(classic_cover)
+            .enter().append("line")
+            .attr("x1", d=>xScale(d[0]))
+            .attr("y1", d=>yScale(d[2]))
+            .attr("x2", d=>xScale(d[1]))
+            .attr("y2", d=>yScale(d[2]))
+            .attr("stroke", "black")
+            .attr("stroke-width", 2);
+
+        let alg = adaptive_cover_group.selectAll("line").data(adaptive_cover)
+            .enter().append("line")
+            .attr("x1", d=>xScale(d[0]))
+            .attr("y1", d=>yScale(d[2]))
+            .attr("x2", d=>xScale(d[1]))
+            .attr("y2", d=>yScale(d[2]))
+            .attr("stroke", "green")
+            .attr("stroke-width", 2);
+        
+        // x-axis
+        axis_group.append("g") 
+            .call(d3.axisBottom(xScale).ticks(5))
+            .classed("axis_line", true)
+            .attr("transform", "translate(0,"+(height-margin.bottom)+")");
+    
+
+
     }
 
 }

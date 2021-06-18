@@ -358,6 +358,46 @@
                 </div>       
               </div>
               <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="mapper_loader" value="Compute Mapper">
+              <div class="enhanced-mapper-group">
+                <div class="select-container">
+                  <div class="group-title">Information Criterion</div>
+                  <select name="information_criterion" class="custom-select" id="information_criterion_selection">
+                    <option value="bic">BIC</option>
+                    <option value="aic">AIC</option>
+                  </select>
+                </div>
+                <div>
+                  <div class="group-title">Convergence</div> 
+                  <div class="row" style="padding:5px 0px;">
+                    <div class="col-1">
+                      <form id="converg-iter-form">
+                        <input type="radio" name="converg-iter" class="form-radio" value="converg-iter" id="converg-iter" checked>
+                      </form>
+                    </div>
+                    <div class="col-5">
+                      <label for="converg-iter" class="radio-label">Iterations</label>
+                    </div>
+                    <div class="col-5">
+                      <input type="number" id="converg-iter-value" min="1" value="5" style="width:80%; border:1px solid rgba(0, 0, 0, 0.3); border-radius: 3px;">
+                    </div>
+                  </div>
+                  <div class="row" style="padding:5px 0px;">
+                    <div class="col-1">
+                      <form id="converg-delta-form">
+                        <input type="radio" name="converg-delta" class="form-radio" value="converg-delta" id="converg-delta">
+                      </form>
+                    </div>
+                    <div class="col-5">
+                      <label for="converg-delta" class="radio-label">Tolerance</label>
+                    </div>
+                    <div class="col-5">
+                        <input type="number" id="converg-delta-value" min="0" value="1" step="0.1" style="width:80%; border:1px solid rgba(0, 0, 0, 0.3); border-radius: 3px;" disabled>
+                    </div>
+                  </div>
+                </div>
+                <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="enhanced_mapper_loader" value="Compute Enhanced Mapper">
+                <div id="cover-svg-container"></div>
+              </div>
             </div>   
           </div>
         </div>

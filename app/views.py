@@ -23,6 +23,11 @@ from sklearn.neighbors import KernelDensity
 from scipy.spatial import distance
 from sklearn.cluster import KMeans
 import importlib
+# from .enhanced_mapper.cover import Cover, UniformCover
+from .enhanced_mapper.cover import Cover as enhanced_Cover
+from .enhanced_mapper.mapper import generate_mapper_graph
+from .enhanced_mapper.AdaptiveCover import BIC_Cover_Centroid, construct_cover_from_xmeans, mapper_xmeans_centroid
+
 
 
 @app.route('/')
@@ -189,6 +194,133 @@ def get_graph():
     connected_components = compute_cc(mapper_result)
     return jsonify(mapper=mapper_result, connected_components=connected_components)
 
+@app.route('/enhanced_mapper_loader', methods=['POST','GET'])
+def get_enhanced_graph():
+    mapper_data = request.form.get('data')
+    mapper_data = json.loads(mapper_data)
+    selected_cols = mapper_data['cols']
+    all_cols = mapper_data['all_cols'] # all numerical cols
+    categorical_cols = mapper_data['categorical_cols']
+    data = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
+    data_categorical = data[categorical_cols]
+    data = data[all_cols]
+
+    config = mapper_data["config"]
+    norm_type = config["norm_type"]
+    clustering_alg = config["clustering_alg"]
+    clustering_alg_params = config["clustering_alg_params"]
+    filter_parameters = config
+    enhanced_parameters = mapper_data["enhanced_config"]
+
+    filter_function = config["filter"]
+    if len(filter_function) == 1:
+        interval = int(config["interval1"])
+        overlap = float(config["overlap1"]) / 100
+    elif len(filter_function) == 2:
+        interval = [int(config["interval1"]), int(config["interval2"])]
+        overlap = [float(config["overlap1"])/100, float(config["overlap2"])/100]
+
+    if norm_type == "none":
+        pass
+    elif norm_type == "0-1": # axis=0, min-max norm for each column
+        scaler = MinMaxScaler()
+        data = scaler.fit_transform(data)
+    else:
+        data = sklearn.preprocessing.normalize(data, norm=norm_type, axis=0, copy=False, return_norm=False)
+    data = pd.DataFrame(data, columns = all_cols)
+
+    mapper = KeplerMapper()
+    if len(selected_cols) == 1:
+        data_new = np.array(data[selected_cols[0]]).reshape(-1,1)
+    else:
+        data_new = np.array(data[selected_cols])
+
+    if len(filter_function) == 1:
+        f = filter_function[0]
+        if f in data.columns:
+            lens = data[f]
+        else:
+            lens = compute_lens(f, data_new, mapper, filter_parameters)
+        
+    elif len(filter_function) == 2:
+        lens = []
+        for f in filter_function:
+            if f in data.columns:
+                lens_f = np.array(data[f]).reshape(-1,1)
+            else:
+                lens_f = compute_lens(f, data_new, mapper, filter_parameters)
+            lens.append(lens_f)
+        lens = np.concatenate((lens[0], lens[1]), axis=1)
+
+    if clustering_alg == "DBSCAN":
+        clusterer = cluster.DBSCAN(eps=float(clustering_alg_params["eps"]), min_samples=float(clustering_alg_params["min_samples"]))
+    elif clustering_alg == "Agglomerative Clustering":
+        clusterer = cluster.AgglomerativeClustering(n_clusters=None, linkage=clustering_alg_params["linkage"], distance_threshold=float(clustering_alg_params["dist"]))
+    elif clustering_alg == "Mean Shift":
+        clusterer = cluster.MeanShift(bandwidth=float(clustering_alg_params["bandwidth"]))
+
+    iterations = enhanced_parameters['max_iter']
+    max_intervals = 100
+    BIC = enhanced_parameters['bic']
+
+    cov = enhanced_Cover(interval, overlap)
+    g_classic = generate_mapper_graph(data_new, lens, cov, clusterer, refit_cover = True)
+    multipass_cover = mapper_xmeans_centroid(data_new, lens, enhanced_Cover(interval, overlap), clusterer, iterations, max_intervals, BIC=BIC)
+    g_multipass = generate_mapper_graph(data_new, lens, multipass_cover, clusterer, refit_cover=False)
+    mapper_result = _parse_enhanced_graph(g_multipass, data)
+    connected_components = compute_cc(mapper_result)
+    
+    print(multipass_cover.intervals)
+    return jsonify(mapper=mapper_result, connected_components=connected_components, classic_cover=cov.intervals.tolist(), adaptive_cover=multipass_cover.intervals.tolist())
+
+def _parse_enhanced_graph(graph, data_array=[]):
+    if len(data_array)>0:
+        col_names = data_array.columns
+        data_array = np.array(data_array)
+    data = {"nodes":[], "links":[]}
+
+    nodes_detail = {}
+    name2id = {}
+    i = 1
+    for node in graph.nodes:
+        node_name = get_node_id(node)
+        name2id[node_name] = i
+        cluster = node.members.tolist()
+        nodes_detail[i] = cluster
+        if len(data_array)>0:
+            cluster_data = data_array[cluster]
+            cluster_avg = np.mean(cluster_data, axis=0)
+            cluster_avg_dict = {}
+            for j in range(len(col_names)):
+                cluster_avg_dict[col_names[j]] = cluster_avg[j]
+            data['nodes'].append({
+                "id": str(i),
+                "size": len(cluster),
+                "avgs": cluster_avg_dict,
+                "vertices": cluster
+                })    
+        else:
+            data['nodes'].append({
+                "id": str(i),
+                "size": len(cluster),
+                "vertices": cluster
+            })
+        i += 1
+
+    with open(APP_STATIC+"/uploads/nodes_detail.json","w") as f:
+        json.dump(nodes_detail, f)
+
+    for link in graph.edges:
+        node1, node2 = get_node_id(link[0]), get_node_id(link[1])
+        data["links"].append({"source": name2id[node1], "target":name2id[node2]})
+    return data
+
+def get_node_id(node):
+    interval_idx = node.interval_index
+    cluster_idx = node.cluster_index
+    node_id = "node"+str(interval_idx)+str(cluster_idx)
+    return node_id
+
 @app.route('/linear_regression', methods=['POST','GET'])
 def linear_regression():
     json_data = json.loads(request.form.get('data'))
@@ -332,19 +464,17 @@ def _call_kmapper(data, col_names, interval, overlap, clustering_alg, clustering
             lens.append(lens_f)
         lens = np.concatenate((lens[0], lens[1]), axis=1)
     # clusterer = sklearn.cluster.DBSCAN(eps=eps, min_samples=min_samples, metric='euclidean', n_jobs=8)
-    print(data_new.shape)
-    print(np.max(np.max(data_new)))
-    print(np.mean(np.mean(data_new)))
+
+    cover = Cover(n_cubes=interval, perc_overlap=overlap)
     if clustering_alg == "DBSCAN":
-        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=float(clustering_alg_params["eps"]), min_samples=float(clustering_alg_params["min_samples"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=float(clustering_alg_params["eps"]), min_samples=float(clustering_alg_params["min_samples"])), cover=cover)
     elif clustering_alg == "Agglomerative Clustering":
-        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering(n_clusters=None, linkage=clustering_alg_params["linkage"], distance_threshold=float(clustering_alg_params["dist"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering(n_clusters=None, linkage=clustering_alg_params["linkage"], distance_threshold=float(clustering_alg_params["dist"])), cover=cover)
         # graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering( linkage=clustering_alg_params["linkage"]), cover=Cover(n_cubes=interval, perc_overlap=overlap))
     elif clustering_alg == "Mean Shift":
-        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=float(clustering_alg_params["bandwidth"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=float(clustering_alg_params["bandwidth"])), cover=cover)
         # graph = mapper.map_parallel(lens, data_new, clusterer=cluster.MeanShift(bandwidth=1), cover=Cover(n_cubes=interval, perc_overlap=overlap))
         
-    print(len(graph['nodes'].keys()))
     # graph = mapper.map(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
 
     return graph
