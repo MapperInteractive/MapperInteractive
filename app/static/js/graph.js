@@ -902,6 +902,25 @@ class Graph{
         d3.selectAll(".viewer-graph__label").attr("fill", "#555");
         let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
         let color_dict = {};
+
+        let categories = [];
+
+        this.nodes.forEach(node=>{
+            for(let c in node.categorical_cols_summary[col_key]){
+                if(categories.indexOf(c)===-1){
+                    categories.push(c);
+                }
+            }
+        }) 
+        // ordering categories to make sure the colors are consistent
+        categories.sort((a,b)=>d3.ascending(a,b))
+        for(let i=0; i<categories.length; i++){
+            let c = categories[i];
+            color_dict[c] = color_categorical(i);
+        }
+
+
+        
         // // get # catogories
         // this.nodes.forEach(node=>{
         //     for(let c in node.categorical_cols_summary[col_key]){
@@ -941,15 +960,16 @@ class Graph{
                 p.category_id = c;
                 p.value = node.categorical_cols_summary[col_key][c];
                 p.node_id = node.id;
-                if(Object.keys(color_dict).indexOf(c)!=-1){
-                // if(color_dict[c]!=""){
-                    p.color = color_dict[c];
-                } else {
-                    p.color = color_categorical(idx);
-                    // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
-                    idx += 1;
-                    color_dict[c] = p.color;
-                }
+                p.color = color_dict[c];
+                // if(Object.keys(color_dict).indexOf(c)!=-1){
+                // // if(color_dict[c]!=""){
+                //     p.color = color_dict[c];
+                // } else {
+                //     p.color = color_categorical(idx);
+                //     // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                //     idx += 1;
+                //     color_dict[c] = p.color;
+                // }
                 pie_data.push(p);
             }
             return pie_data;

@@ -513,13 +513,14 @@ function get_enhanced_mapper_parameters(){
         that.mapper_data.enhanced_config.bic = false;
     }
     let max_iter = 5;
-    let delta = 1;
+    let delta = 0;
 
     if($('#converg-iter').prop("checked")===true){
-        max_iter = parseInt(d3.select("#converg-iter-value").attr("value"));
+        console.log("-----checked",d3.select("#converg-iter-value").property("value"))
+        max_iter = parseInt(d3.select("#converg-iter-value").property("value"));
     }
     if($('#converg-delta').prop("checked")===true){
-        delta = parseFloat(d3.select("#converg-delta-value").attr("value"));
+        delta = parseFloat(d3.select("#converg-delta-value").property("value"));
     }
 
     that.mapper_data.enhanced_config.max_iter = max_iter;

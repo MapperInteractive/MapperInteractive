@@ -45,6 +45,7 @@ def process_text_data():
     '''
     text_data = request.get_data().decode('utf-8').splitlines()
     cols = text_data[0].split(',')
+    cols = [col for col in cols if col!=""] # not include the col is there is no colname
     mat = [n.split(',') for n in text_data] # csv: if an element is empty, it will be "".
     newdf1 = np.array(mat)[1:]
     rows2delete = np.array([])
@@ -260,11 +261,15 @@ def get_enhanced_graph():
 
     iterations = enhanced_parameters['max_iter']
     max_intervals = 100
+    delta = enhanced_parameters['delta']
     BIC = enhanced_parameters['bic']
+
+    print("iterations", iterations)
+    print("delta", delta)
 
     cov = enhanced_Cover(interval, overlap)
     g_classic = generate_mapper_graph(data_new, lens, cov, clusterer, refit_cover = True)
-    multipass_cover = mapper_xmeans_centroid(data_new, lens, enhanced_Cover(interval, overlap), clusterer, iterations, max_intervals, BIC=BIC)
+    multipass_cover = mapper_xmeans_centroid(data_new, lens, enhanced_Cover(interval, overlap), clusterer, iterations, max_intervals, BIC=BIC, delta=delta)
     g_multipass = generate_mapper_graph(data_new, lens, multipass_cover, clusterer, refit_cover=False)
     mapper_result = _parse_enhanced_graph(g_multipass, data)
     connected_components = compute_cc(mapper_result)

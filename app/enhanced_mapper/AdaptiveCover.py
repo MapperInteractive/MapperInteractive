@@ -47,50 +47,6 @@ def bic_centroid(X, c, assignments, BIC=True):
     else:
         return 2 * llh - ((k * (d + 1)) ) * 2 # aic
 
-def bic_function(g, l, exclude=False):
-    # compute likelyhood
-    exclude=False
-    if type(g) is list:
-        nodes = g
-    else:
-        nodes = list(g.nodes)
-    lens = l
-    cluster_max = [lens[c.members].max() for c in nodes]
-    cluster_min = [lens[c.members].min() for c in nodes]
-    cluster_size = [len(c.members) for c in nodes]
-    f_min = min(cluster_min)
-    f_max = max(cluster_max)
-    lens = l[f_min <= l]
-    lens = lens[lens <= f_max]
-    included_members = []
-    for c in nodes:
-        included_members = included_members + list(c.members)
-    included_members = set(included_members)
-    excluded_count = lens.shape[0] - len(included_members)
-    if not exclude:
-        total = sum(cluster_size) + excluded_count
-    else:
-        total = sum(cluster_size)
-    llh = 0
-    count = 0
-    for i in range(lens.shape[0]):
-        pt = lens[i]
-        size = 0
-        for f_min, f_max, s in zip(cluster_min, cluster_max, cluster_size):
-            if f_min <= pt and pt <= f_max:
-                size = size + s
-        if size == 0 and not exclude:
-            llh = llh + log(1 / total)
-            count += 1
-        elif size != 0:
-            llh = llh + log(size / total)
-            count += 1
-    # print(llh, 'function llh')
-    # if llh == 0:
-    #     print(cluster_size, cluster_min, cluster_max, count)
-    return llh - (3 * len(nodes) / 2) * log(count) # bic
-   #return 2*llh - (3 * len(nodes)) * 2 # aic
-
 
 def BIC_Cover_Centroid(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer, BIC=True):
     # Returns optimal cover object, costs, num_clusters
@@ -105,21 +61,6 @@ def BIC_Cover_Centroid(X, lens, perc_overlap, min_intervals, max_intervals, inte
         centroids, membership, _ = graph.to_hard_clustering_set(X)
         costs.append(bic_centroid(X, centroids, membership, BIC))
     return costs, intervals
-
-def BIC_Cover_function(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer):
-    # Returns optimal cover object, costs, num_clusters
-    costs = []
-    intervals = [i for i in range(min_intervals, max_intervals, interval_step)]
-    num_clusters = []
-
-    for interval in intervals:
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
-        graph = generate_mapper_graph(X, lens, current_cover, clusterer)
-        centroids, membership, _ = graph.to_hard_clustering_set(X)
-        # costs.append(bic_centroid(X, centroids, membership))
-        costs.append(bic_function(graph, lens))
-    return costs, intervals
-
 
 
 def xmeans_log_likelyhood(rn, m, var, k, r):
@@ -260,112 +201,102 @@ def construct_cover_from_xmeans(X, lens, initial_interval, starting_overlap, min
     final_centroids = xmeans(X, centroids, iterations=iterations, max_k = max_k, BIC=BIC)
     return CentroidCover(X, lens, final_centroids, min_overlap, enhanced=False)
 
-def mapper_xmeans_centroid(X, lens, initial_cover, clusterer, iterations=10, max_intervals=10, BIC=True):
+def mapper_xmeans_centroid(X, lens, initial_cover, clusterer, iterations=10, max_intervals=10000, BIC=True, delta=0., randomized=False):
     # Returns the best cover found
     cover = initial_cover
     num_iter = 0
     check_interval = [True for i in range(cover.num_intervals)]
     for iteration in range(iterations):
-        # print(iteration)
         num_iter = iteration
         modified = False
         g = generate_mapper_graph(X, lens, cover, clusterer, enhanced=False, refit_cover=False)
         split_interval = [False for _ in range(cover.num_intervals)] # Determines which to split at the end
         difference = [0 for _ in range(cover.num_intervals)]
-        # print(cover.num_intervals)
-        # print(len(check_interval), 'check')
-        for i in range(cover.num_intervals):
-            # print(cover.num_intervals)
-            # print(len(check_interval))
-            if not check_interval[i]:
-                continue
-            # Compute the bic presplit
-            interval_centers, interval_membership, interval_members = g.to_hard_clustering_set(X, intervals=[i])
-            if len(interval_centers) == 0:
-                continue
-            old_bic = bic_centroid(X[interval_members], interval_centers, interval_membership, BIC=BIC)
 
-            # Generate the split
-            cover.divide_interval(i)
-            g_split = generate_mapper_graph(X, lens, cover, clusterer, enhanced=False, refit_cover=False)
-            interval_centers, interval_membership, interval_members = g_split.to_hard_clustering_set(X, intervals = [i, i+1])
-            if len(interval_centers) == 0:
+        # Version where you just check all of the intervals in order
+        if not randomized:
+            for i in range(cover.num_intervals):
+                if not check_interval[i]:
+                    continue
+                # Compute the bic presplit
+                interval_centers, interval_membership, interval_members = g.to_hard_clustering_set(X, intervals=[i])
+                if len(interval_centers) == 0:
+                    continue
+                old_bic = bic_centroid(X[interval_members], interval_centers, interval_membership, BIC=BIC)
+
+                # Generate the split
+                cover.divide_interval(i)
+                g_split = generate_mapper_graph(X, lens, cover, clusterer, enhanced=False, refit_cover=False)
+                interval_centers, interval_membership, interval_members = g_split.to_hard_clustering_set(X, intervals = [i, i+1])
+                if len(interval_centers) == 0:
+                    cover.merge_interval(i, i+1)
+                    continue
+
+                new_bic = bic_centroid(X[interval_members], interval_centers, interval_membership, BIC=BIC)
+                if new_bic >= old_bic:
+                    split_interval[i] = True
+                    difference[i] = new_bic - old_bic
+                    modified = True
+                else:
+                    check_interval[i] = False
                 cover.merge_interval(i, i+1)
-                continue
-            # print(interval_membership)
-            new_bic = bic_centroid(X[interval_members], interval_centers, interval_membership, BIC=BIC)
-            if new_bic >= old_bic:
-                split_interval[i] = True
-                difference[i] = new_bic - old_bic
-                modified = True
+            
+            if not modified:
+                print(f'\tLOG: Convergence after {num_iter} iterations.')
+                cover.remove_duplicate_cover_elements()
+                return cover
+        
+            best_split = difference.index(max(difference))
+            if split_interval[best_split] and max(difference) >= delta:
+                cover.divide_interval(best_split)
+                check_interval.insert(best_split+1, True)
+                check_interval[best_split] = True
             else:
-                check_interval[i] = False
-            cover.merge_interval(i, i+1)
-            # print(len(cover.intervals))
+                cover.remove_duplicate_cover_elements()
+                return cover
+        else:
+            all_elements_idx = [i for i in range(cover.num_intervals)]
+            element_lengths = [cover[i][1] - cover[i][0] for i in range(cover.num_intervals)]
+            found_valid = False
+            while not found_valid and len(all_elements_idx) != 0:
+                # Sample one of the remaining intervals weighted by length
+                weights = np.asarray(element_lengths)[all_elements_idx]
+                weights = weights / weights.sum()
+                current_element = int(np.random.choice(np.asarray(all_elements_idx), p=weights))
 
-        if not modified:
-            print(f'\tLOG: Convergence after {num_iter} iterations.')
-            return cover
+                # Compute the old BIC
+                interval_centers, interval_membership, interval_members = g.to_hard_clustering_set(X, intervals=[current_element])
+                if len(interval_centers) == 0:
+                    continue
+                old_bic = bic_centroid(X[interval_members], interval_centers, interval_membership, BIC=BIC)
 
-        best_split = difference.index(max(difference))
-        if split_interval[best_split]:
-            cover.divide_interval(best_split)
-            check_interval.insert(best_split+1, True)
-            check_interval[best_split] = True
-        if cover.num_intervals > max_intervals:
-            break
-    return cover
+                # Generate the right split and new mapper graph
+                cover.divide_interval(current_element)
+                g_split = generate_mapper_graph(X, lens, cover, clusterer, enhanced=False, refit_cover=False)
 
-def mapper_xmeans_function(X, lens, initial_cover, clusterer, iterations=10, max_intervals=10):
-    # Returns the best cover found
-    cover = initial_cover
-    for iteration in range(iterations):
-        g = generate_mapper_graph(X, lens, cover, clusterer, enhanced=False, refit_cover=False)
-        split_interval = [False for _ in range(cover.num_intervals)] # Determines which to split at the end
-        difference = [0 for _ in range(cover.num_intervals)]
-        for i in range(cover.num_intervals):
-            # Compute the bic presplit
-            # interval_centers, interval_membership, interval_members = g.to_hard_clustering_set(X, intervals=[i])
-            nodes = g.get_interval_nodes(i)
-            if len(nodes) == 0:
-                continue
-            # old_bic = bic_centroid(X[interval_members], interval_centers, interval_membership)
-            old_bic = bic_function(nodes, lens, exclude=True)
+                # Compute the new BIC score
+                interval_centers, interval_membership, interval_members = g_split.to_hard_clustering_set(X, intervals = [current_element, current_element + 1])
+                if len(interval_centers) == 0:
+                    cover.merge_interval(current_element, current_element+1)
+                    continue
+                new_bic = bic_centroid(X[interval_members], interval_centers, interval_membership, BIC=BIC)
 
-            # Generate the split
-            cover.divide_interval(i)
-            g_split = generate_mapper_graph(X, lens, cover, clusterer, enhanced=False, refit_cover=False)
-            # interval_centers, interval_membership, interval_members = g_split.to_hard_clustering_set(X, intervals = [i, i+1])
-            nodes = g_split.get_interval_nodes([i, i+1])
-            if len(nodes) == 0:
-                continue
-            # print(interval_membership)
-            # new_bic = bic_centroid(X[interval_members], interval_centers, interval_membership)
-            new_bic = bic_function(nodes, lens, exclude=True)
-            # print(new_bic, old_bic)
-            if new_bic >= old_bic:
-                split_interval[i] = True
-                difference[i] = new_bic - old_bic
-            cover.merge_interval(i, i+1)
-        # print(split_interval)
-        # number_split = 0
-        # for i in range(len(split_interval)):
-        #     if split_interval[i]:
-        #         cover.divide_interval(i + number_split)
-        #         number_split = number_split + 1
-        best_split = difference.index(max(difference))
-        if max(difference) == 0 and split_interval[best_split] is False:
-            return cover
-        if split_interval[best_split]:
-            # print('split')
-            # print(old_bic)
-            # print(max(difference))
-            cover.divide_interval(best_split)
+                # If the split is valid, keep it
+                if new_bic >= old_bic:
+                    found_valid = True
+                else:
+                    cover.merge_interval(current_element, current_element + 1)
+                    all_elements_idx.remove(current_element)
+
+
+            # If no changes are made, exit prematurely after removing duplicates
+            if not found_valid:
+                print(f'\tLOG: Convergence after {num_iter} iterations.')
+                cover.remove_duplicate_cover_elements()
+                return cover
+
         if cover.num_intervals > max_intervals:
             break
 
-
+    cover.remove_duplicate_cover_elements()
     return cover
-
-
-

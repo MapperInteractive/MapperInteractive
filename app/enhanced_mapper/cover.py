@@ -90,6 +90,45 @@ class AbstractCover(ABC):
         self.num_intervals -= 1
         self.intervals = np.asarray(intervals_list)
 
+    def remove_duplicate_cover_elements(self):
+        # Sort the cover elements by starting element
+        intervals_list = self.intervals.tolist()
+        def c(a, b):
+            if a[0] < b[0]:
+                return -1
+            elif a[0] == b[0]:
+                if a[1] > b[1]:
+                    return -1
+                elif a[1] < b[1]:
+                    return 1
+                else:
+                    return 0
+            else:
+                return 1
+
+        intervals_list.sort(key=cmp_to_key(c))
+        marked_for_deletion = []
+        for i in range(len(intervals_list)):
+            for j in range(i + 1, len(intervals_list)):
+                a = intervals_list[i]
+                b = intervals_list[j]
+                # exact case:
+                if a[0] == b[0] and a[1] == b[1]:
+                    marked_for_deletion.append(b)
+                # Contained case
+                elif a[0] <= b[0] and a[1] >= b[1]:
+                    marked_for_deletion.append(b)
+        print(f'Deleted {len(marked_for_deletion)} intervals')
+        for d in marked_for_deletion:
+            if d in intervals_list:  # Might have duplicates due to numerical quirks
+                intervals_list.remove(d)
+
+        self.intervals = np.asarray(intervals_list)
+        self.fitted = True
+        self.num_intervals = len(intervals_list)
+
+
+
 class Cover(AbstractCover):
 
     def __init__(self, num_intervals: int, percent_overlap: float, enhanced: bool = False):
