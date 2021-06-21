@@ -281,8 +281,8 @@ def get_enhanced_graph():
             node['categorical_cols_summary'] = {}
             for col in categorical_cols:
                 node['categorical_cols_summary'][col] = data_categorical_i[col].value_counts().to_dict()
-    
-    print(multipass_cover.intervals)
+    print("classic",cov.intervals)
+    print("xmeans",multipass_cover.intervals)
     return jsonify(mapper=mapper_result, connected_components=connected_components, classic_cover=cov.intervals.tolist(), adaptive_cover=multipass_cover.intervals.tolist())
 
 def _parse_enhanced_graph(graph, data_array=[]):
@@ -522,6 +522,7 @@ def compute_lens(f, data, mapper, filter_parameters=None):
 
 
 def _parse_result(graph, data_array=[]):
+    print("parsing result")
     if len(data_array)>0:
         col_names = data_array.columns
         data_array = np.array(data_array)
