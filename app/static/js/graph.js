@@ -221,7 +221,7 @@ class Graph{
         $('#color-legend-svg').remove();
         $('#block_body-inner_color').append('<svg width="0" height="0" id="color-legend-svg"></svg>');
         // draw legend
-        let color_array = d3.entries(color_dict);
+        let color_array = d3.entries(color_dict).sort(d3.ascending);
         let width = $(d3.select("#workspace-color_functions").node()).width();
         let margin = 10;
         let rect_height = 10;
@@ -901,7 +901,8 @@ class Graph{
         d3.selectAll(".viewer-graph__vertex").attr("fill", "#fff");
         d3.selectAll(".viewer-graph__label").attr("fill", "#555");
         let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
-        let color_dict = {};
+        // let color_dict = {};
+        let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f"};
         // // get # catogories
         // this.nodes.forEach(node=>{
         //     for(let c in node.categorical_cols_summary[col_key]){

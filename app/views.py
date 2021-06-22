@@ -479,23 +479,24 @@ def module_computing():
     selected_nodes = json_data['nodes']
     data, cols = get_selected_data(selected_nodes)
     module_info = json_data['module_info']
-    data_new = call_module_function(data, cols, module_info)
+    # data_new = call_module_function(data, cols, module_info)
     # data_new['kmeans_cluster'] = KMeans(n_clusters=4, random_state=0).fit(data_new).labels_
     # data_new = data_new.to_json(orient='records')
     # return jsonify(module_result=data_new)
-    return data_new
-    # # kNN graph
-    # from pynndescent import NNDescent
-    # df = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
-    # activations = df.iloc[:, 0:512]
-    # k=5
-    # index = NNDescent(activations, n_neighbors=15, metric='euclidean')
-    # out = index.query(activations, k=k)
-    # dist = out[1]
-    # s_dist=np.sort(dist, axis=0)
-    # s_dist = list(s_dist[:,k-1].astype("str"))
-    # print(s_dist)
-    # return jsonify(s_dist=s_dist)
+    # return data_new
+    # kNN graph
+    from pynndescent import NNDescent
+    df = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv")
+    activations_shape = df.shape[1]-1
+    activations = df.iloc[:, 0:activations_shape]
+    k=5
+    index = NNDescent(activations, n_neighbors=5, metric='euclidean')
+    out = index.query(activations, k=k)
+    dist = out[1]
+    s_dist=np.sort(dist, axis=0)
+    s_dist = list(s_dist[:,k-1].astype("str"))
+    print(s_dist)
+    return jsonify(s_dist=s_dist)
 
 def call_module_function(data, cols, module_info):
     mod_name, func_name = module_info['function-name'].rsplit('.',1)
