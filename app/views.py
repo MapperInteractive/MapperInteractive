@@ -132,9 +132,9 @@ def load_mapper_data():
         mapper_graph = json.load(f)
     mapper_graph["links"] = mapper_graph["edges"]
     del mapper_graph["edges"]
-    mapper_graph_new = _parse_result(mapper_graph)
+    mapper_graph_new = _parse_result(mapper_graph, lens_dict={}, data_array=[], if_cli=True)
     connected_components = compute_cc(mapper_graph_new)
-    return jsonify(mapper=mapper_graph_new, connected_components=connected_components)
+    return jsonify(mapper=mapper_graph_new, connected_components=connected_components, categorical_cols=mapper_graph['categorical_cols'])
 
 @app.route('/mapper_loader', methods=['POST','GET'])
 def get_graph():
@@ -180,7 +180,6 @@ def get_graph():
     mapper_result = run_mapper(data, selected_cols, interval, overlap, clustering_alg, clustering_alg_params, filter_function, filter_parameters)
     if len(categorical_cols) > 0:
         for node in mapper_result['nodes']:
-            print("node", node['id'])
             vertices = node['vertices']
             data_categorical_i = data_categorical.iloc[vertices]
             node['categorical_cols_summary'] = {}
@@ -297,7 +296,7 @@ def run_mapper(data_array, col_names, interval, overlap, clustering_alg, cluster
         """
         # data_array = np.array(data_array)
 
-        km_result = _call_kmapper(data_array, col_names, 
+        km_result, lens_dict = _call_kmapper(data_array, col_names, 
             interval,
             overlap,
             clustering_alg,
@@ -305,7 +304,7 @@ def run_mapper(data_array, col_names, interval, overlap, clustering_alg, cluster
             filter_function,
             filter_parameters
         )
-        return _parse_result(km_result, data_array)
+        return _parse_result(km_result, lens_dict, data_array)
 
 def _call_kmapper(data, col_names, interval, overlap, clustering_alg, clustering_alg_params, filter_function, filter_parameters=None):
     print(filter_parameters)
@@ -315,12 +314,14 @@ def _call_kmapper(data, col_names, interval, overlap, clustering_alg, clustering
     else:
         data_new = np.array(data[col_names])
 
+    lens_dict = {}
     if len(filter_function) == 1:
         f = filter_function[0]
         if f in data.columns:
             lens = data[f]
         else:
             lens = compute_lens(f, data_new, mapper, filter_parameters)
+        lens_dict[f] = lens
         
     elif len(filter_function) == 2:
         lens = []
@@ -330,6 +331,7 @@ def _call_kmapper(data, col_names, interval, overlap, clustering_alg, clustering
             else:
                 lens_f = compute_lens(f, data_new, mapper, filter_parameters)
             lens.append(lens_f)
+            lens_dict[f] = lens_f
         lens = np.concatenate((lens[0], lens[1]), axis=1)
     # clusterer = sklearn.cluster.DBSCAN(eps=eps, min_samples=min_samples, metric='euclidean', n_jobs=8)
     print(data_new.shape)
@@ -347,7 +349,7 @@ def _call_kmapper(data, col_names, interval, overlap, clustering_alg, clustering
     print(len(graph['nodes'].keys()))
     # graph = mapper.map(lens, data_new, clusterer=cluster.DBSCAN(eps=eps, min_samples=min_samples), cover=Cover(n_cubes=interval, perc_overlap=overlap))
 
-    return graph
+    return graph, lens_dict
 
 def compute_lens(f, data, mapper, filter_parameters=None):
     data_array = np.array(data)
@@ -379,7 +381,7 @@ def compute_lens(f, data, mapper, filter_parameters=None):
     return lens
 
 
-def _parse_result(graph, data_array=[]):
+def _parse_result(graph, lens_dict, data_array=[], if_cli=False):
     if len(data_array)>0:
         col_names = data_array.columns
         data_array = np.array(data_array)
@@ -394,10 +396,14 @@ def _parse_result(graph, data_array=[]):
         name2id[key] = i
         cluster = graph['nodes'][key]
         nodes_detail[i] = cluster
+        cluster_avg_dict = {}
+        for lens in lens_dict:
+            cluster_data = lens_dict[lens][cluster]
+            cluster_avg = np.mean(cluster_data)
+            cluster_avg_dict[lens] = cluster_avg
         if len(data_array)>0:
             cluster_data = data_array[cluster]
             cluster_avg = np.mean(cluster_data, axis=0)
-            cluster_avg_dict = {}
             for j in range(len(col_names)):
                 cluster_avg_dict[col_names[j]] = cluster_avg[j]
             data['nodes'].append({
@@ -407,11 +413,20 @@ def _parse_result(graph, data_array=[]):
                 "vertices": cluster
                 })
         else:
-            data['nodes'].append({
-                "id": str(i),
-                "size": len(graph['nodes'][key]),
-                "vertices": cluster
-                })
+            if if_cli:
+                data['nodes'].append({
+                    "id": str(i),
+                    "id_orignal": key,
+                    "size": len(graph['nodes'][key]),
+                    "vertices": cluster,
+                    "categorical_cols_summary": graph['nodes'][key]["categorical_cols_summary"]
+                    })
+            else:
+                data['nodes'].append({
+                    "id": str(i),
+                    "size": len(graph['nodes'][key]),
+                    "vertices": cluster
+                    })
         i += 1
     
     with open(APP_STATIC+"/uploads/nodes_detail.json","w") as f:

@@ -361,6 +361,43 @@
             </div>   
           </div>
         </div>
+        <div id="workspace-graph_layout" class="block">
+          <div class="block_title">Graph Layout</div>
+          <div class="block_body" style="max-height: 1000px">
+            <div class="block_body-inner">
+              <div class="row" style="padding-top:5px; padding-bottom:5px;">
+                <div class="col-sm-4 col-form-label">Layout</div>
+                <div class="col-sm-8" id="graph_layout-container"> 
+                  <select class="custom-select"  name="graph_layout_dropdown" id="graph_layout_dropdown">
+                    <option value="fd">Force directed layout</option>
+                    <option value="sorted">Sorted by filter function</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="workspace-img_locations" class="block"> 
+          <div class="block_title">Image Locations</div>
+          <div class="block_body" style="max-height: 1000px"> 
+            <div class="block_body-inner" id = "block_body-inner_img">
+              <div class="row" style="padding-top:5px; padding-bottom:5px;">
+                <div class="col-sm-4 col-form-label">Image Category</div>
+                <div class="col-sm-8" id="img-category-container"> <select class="custom-select"  name="img-category" id="img-category">
+                </select></div>
+            </div>
+              <div class="row" style="padding-top:5px; padding-bottom:5px;">
+                  <div class="col-sm-4 col-form-label">Image Id</div>
+                  <div class="col-sm-8" id="img-locations-container"> <select class="custom-select"  name="img-locations" id="img-locations">
+                    <!-- <option>horse 13</option> -->
+                  </select></div>
+              </div>
+              <div id="point_purity">
+                <!-- point purity -->
+              </div>
+            </div>
+          </div>  
+        </div>
         <div id="workspace-color_functions" class="block"> 
           <div class="block_title">Color Functions</div>
           <div class="block_body" style="max-height: 1000px"> 

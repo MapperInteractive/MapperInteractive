@@ -1,9 +1,11 @@
 class Graph{
-    constructor(graph_data, col_keys, connected_components, categorical_cols, other_cols=undefined){
+    constructor(graph_data, col_keys, connected_components, categorical_cols, other_cols=undefined, filter_functions=undefined){
+        console.log("cok", col_keys)
         this.nodes = graph_data.nodes;
         this.links = graph_data.links;
         this.col_keys = col_keys;
         this.connected_components = {};
+        this.filter_functions = filter_functions;
         for(let i=0; i<connected_components.length; i++){
             this.connected_components["cluster"+i] = connected_components[i];
         }
@@ -30,6 +32,8 @@ class Graph{
             .attr("id","graph-node-group");
         this.label_group = this.graphSvg_g.append("g")
             .attr("id","graph-label-group");
+        this.axis_group = this.graphSvg_g.append("g")
+            .attr("id","graph-axis-group");
 
         d3.select(".sidebar-container").style("height", this.height)
             
@@ -45,32 +49,164 @@ class Graph{
         "Purple, Red":["purple", "red"],
         "Yellow, Blue":["yellow", "blue"], 
         "Green, Blue":["green", "blue"]};
-        this.colorScale = d3.scaleLinear();
-
-        // this.COLORMAPS = [
-        //     { 'label': '- None -', 'scheme': null },
-        //     // { 'label': 'Rainbow', 'scheme': 'interpolateRainbow' },
-        //     { 'label': 'Yellow, Red', 'scheme': 'interpolateYlOrRd' },
-        //     // { 'label': 'Yellow, Blue', 'scheme': 'interpolateYlOrBr' },
-        //     // { 'label': 'Yellow, Green', 'scheme': 'interpolateYlGn' },
-        //     // { 'label': 'Yellow, Green, Blue', 'scheme': 'interpolateYlGnBu' },
-        //     { 'label': 'Purple, Red', 'scheme': 'interpolatePuRd' },
-        //     // { 'label': 'Purple, Blue', 'scheme': 'interpolatePuBu' },
-        //     // { 'label': 'Purple, Blue, Green', 'scheme': 'interpolatePuBuGn' },
-        //     { 'label': 'Green, Blue', 'scheme': 'interpolateGnBu' },
-        //     // { 'label': 'Red', 'scheme': 'interpolateOrRd' },
-        //     // { 'label': 'Red, Blue', 'scheme': 'interpolateRdPu' },
-        //     // { 'label': 'Blue', 'scheme': 'interpolateBlues' },
-        //     // { 'label': 'Blue, Purple', 'scheme': 'interpolateBuPu' }
-        //   ]      
+        this.colorScale = d3.scaleLinear(); 
         
         this.label_column = "row index";
 
         this.color_functions();
         this.size_functions();
+        this.toggle_graph_layout();
         this.select_view();
-        this.draw_mapper();
+        this.draw_mapper_fd();
         this.selection_nodes();
+        this.img_functions();
+    }
+
+    toggle_graph_layout(){
+        this.layout_alg = "fd";
+        let layout_dropdown = document.getElementById("graph_layout_dropdown");
+        let that = this;
+        layout_dropdown.onchange = function(){
+            that.layout_alg = layout_dropdown.options[layout_dropdown.selectedIndex].value;
+            if(that.layout_alg === "fd"){
+                $("#graph_layout_filter-container").remove()
+                that.draw_mapper_fd();
+            } else if(that.layout_alg === "sorted"){
+                let filter_row = d3.select("#workspace-graph_layout").select(".block_body-inner").append("div")
+                    .classed("row", true)
+                    .attr("id", "graph_layout_filter-container")
+                    .style("padding-top", "5px")
+                    .style("padding-bottom", "5px");
+                filter_row.append("div")
+                    .classed("col-sm-4", true)
+                    .classed("col-form-label", true)
+                    .html("Filter function")
+                filter_row.append("div")
+                    .classed("col-sm-8", true)
+                    .attr("id", "graph_layout_filter_dropdown-container")
+                $("#graph_layout_filter_dropdown-container").append('<select class="custom-select"  name="graph_layout_filter_dropdown" id="graph_layout_filter_dropdown"></select>')
+                that.filter_functions.forEach(filter=>{
+                    d3.select("#graph_layout_filter_dropdown").append("option")
+                        .html(filter);
+                })
+                that.sorted_filter = that.filter_functions[0];
+                let filter_dropdown = document.getElementById("graph_layout_filter_dropdown");
+                filter_dropdown.onchange = function(){
+                    that.sorted_filter = filter_dropdown.options[filter_dropdown.selectedIndex].text;
+                    console.log(that.sorted_filter)
+                    that.draw_mapper_sorted();
+                }
+                that.draw_mapper_sorted();
+            }
+        }
+    }
+
+    img_functions(){
+       let names = ['airplane',
+        'automobile',
+        'bird',
+        'cat',
+        'deer',
+        'dog',
+        'frog',
+        'horse',
+        'ship',
+        'truck']
+        let names2idx = {};
+        for(let i=0; i<names.length; i++){
+            names2idx[names[i]] = i;
+        }
+        let labels = ['-None-'];
+        for(let j=0; j<5000; j++){
+            labels.push(j);
+        }
+        d3.select("#img-category").selectAll("option").data(names)
+            .enter().append("option")
+            .html(d=>d);
+        d3.select("#img-locations").selectAll("option").data(labels)
+            .enter().append("option")
+            .html(d=>d);
+            
+        let that=this;
+        this.img_locations = [];
+        let img_category_dropdown = document.getElementById("img-category");
+        let img_category_val = img_category_dropdown.options[img_category_dropdown.selectedIndex].text;
+        let img_label_dropdown = document.getElementById("img-locations");
+        let img_label_val = parseInt(img_label_dropdown.options[img_label_dropdown.selectedIndex].text);
+
+        let f = d3.format(".3f");
+        img_category_dropdown.onchange = function(){
+            img_category_val = img_category_dropdown.options[img_category_dropdown.selectedIndex].text;
+            console.log(img_category_val, img_label_val)
+            that.img_locations = [];
+            let purity = 0;
+            let img_idx = names2idx[img_category_val]*5000 + img_label_val;
+            for(let i=0; i<that.nodes.length; i++){
+                let node = that.nodes[i];
+                let vertices = node.vertices.vertices;
+                if(vertices.indexOf(img_idx)!=-1){
+                    that.img_locations.push(i);
+                    purity += 1 / Object.keys(node.categorical_cols_summary.label).length;
+                }
+                
+            }
+            purity /= that.img_locations.length;
+            d3.selectAll(".viewer-graph__vertex")
+            .style("stroke", d=>{
+                if(that.img_locations.indexOf(d.index)!=-1){
+                    return "magenta"
+                } else {
+                    return "#696969"
+                }
+            })
+            .style("stroke-width", d=>{
+                if(that.img_locations.indexOf(d.index)!=-1){
+                    return 8
+                } else {
+                    return 2
+                }
+            })
+            d3.select("#point_purity").html("point purity: " + f(purity))
+
+        }
+
+
+        img_label_dropdown.onchange = function(){
+            img_label_val = parseInt(img_label_dropdown.options[img_label_dropdown.selectedIndex].text);
+            console.log(img_category_val, img_label_val)
+            that.img_locations = [];
+            let purity = 0;
+            let img_idx = names2idx[img_category_val]*5000 + img_label_val;
+            for(let i=0; i<that.nodes.length; i++){
+                let node = that.nodes[i];
+                let vertices = node.vertices.vertices;
+                if(vertices.indexOf(img_idx)!=-1){
+                    that.img_locations.push(i);
+                    purity += 1 / Object.keys(node.categorical_cols_summary.label).length;
+                }
+                
+            }
+            purity /= that.img_locations.length;
+            d3.selectAll(".viewer-graph__vertex")
+            .style("stroke", d=>{
+                if(that.img_locations.indexOf(d.index)!=-1){
+                    return "magenta"
+                } else {
+                    return "#696969"
+                }
+            })
+            .style("stroke-width", d=>{
+                if(that.img_locations.indexOf(d.index)!=-1){
+                    return 8
+                } else {
+                    return 2
+                }
+            })
+            d3.select("#point_purity").html("point purity: " + f(purity))
+        }
+
+
+        
     }
 
     color_functions(){
@@ -607,14 +743,22 @@ class Graph{
         d3.selectAll(".viewer-graph__edge").classed("selected", false);
     }
 
-    draw_mapper(){
+    draw_mapper_fd(){
+        this.axis_group.remove();
+        this.axis_group = this.graphSvg_g.append("g")
+            .attr("id","graph-axis-group");
+
+        this.nodes.forEach(node=>{
+            delete node['fx'];
+        })
+
         let simulation = d3.forceSimulation(this.nodes)
             .force("link", d3.forceLink(this.links).id(function(d) { return d.id; }))
             .force("charge", d3.forceManyBody().strength(-200))
             .force("center", d3.forceCenter(this.width/2, this.height/2))
             .force("x", d3.forceX().strength(0.2))
             .force("y", d3.forceY().strength(0.2));
-        
+                
         let ng = this.node_group.selectAll("g").data(this.nodes);
         ng.exit().remove();
         ng = ng.enter().append("g").merge(ng)
@@ -735,15 +879,22 @@ class Graph{
         lg
             .classed("viewer-graph__edge",true)
             .attr("id",d=>"link"+d.source.id+"_"+d.target.id);
+            // .attr("x1", d => d.source.x)
+            // .attr("y1", d => d.source.y)
+            // .attr("x2", d => d.target.x)
+            // .attr("y2", d => d.target.y);
 
-        let lbg = this.label_group.selectAll("text").data(this.nodes);
-        lbg.exit().remove();
-        lbg = lbg.enter().append("text").merge(lbg);
-        lbg
+        // let lbg = this.label_group.selectAll("text").data(this.nodes);
+        // lbg.exit().remove();
+        // lbg = lbg.enter().append("text").merge(lbg);
+        // lbg
+        ng.append("text")
             .classed("viewer-graph__label", true)
             .attr("fill", "#555")
             .attr("id",(d)=>"node-label"+d.id)
-            .text((d)=>d.id);
+            .text((d)=>d.id)
+            .attr("x",d=>-3)
+            .attr("y",d=>4);
 
         simulation
             .nodes(this.nodes)
@@ -765,11 +916,6 @@ class Graph{
                 .attr("transform", function (d) {
                     return "translate(" + d.x + "," + d.y + ")";
                 });
-    
-            // **** TODO **** how to make the label centered?
-            lbg
-                .attr("x",d=>d.x-3)
-                .attr("y",d=>d.y+4);
         }
     
         function dragstarted(d) {
@@ -787,6 +933,256 @@ class Graph{
             if (!d3.event.active) {simulation.alphaTarget(0);
             d.fx = null;
             d.fy = null;}
+        }
+
+        const zoom_handler = d3.zoom()
+            .on("zoom", zoom_actions);
+
+        // drag_handler(ng);
+        zoom_handler(this.graphSvg);
+
+        function zoom_actions() {
+            that.graphSvg_g.attr("transform", d3.event.transform);
+        }
+    }
+
+    draw_mapper_sorted(){
+        this.axis_group.remove();
+        this.axis_group = this.graphSvg_g.append("g")
+            .attr("id","graph-axis-group");
+        let simulation = d3.forceSimulation(this.nodes)
+            .force("link", d3.forceLink(this.links).id(function(d) { return d.id; }))
+            .force("charge", d3.forceManyBody().strength(-200))
+            .force("center", d3.forceCenter(this.width/2, this.height/2))
+            .force("x", d3.forceX().strength(0.2))
+            .force("y", d3.forceY().strength(0.4))
+            .stop();
+
+        this.nodes.forEach(node=>{
+            node.links = {"source":[], "target":[]};
+        })
+
+        this.links.forEach(l=>{
+            l.source.links.source.push(`link${l.source.id}_${l.target.id}`);
+            l.target.links.target.push(`link${l.source.id}_${l.target.id}`);
+        })
+
+        let selected_lens = this.sorted_filter;
+
+        let margin = 40;
+        let lens_values = this.nodes.map(d=>d.avgs[selected_lens]);
+        let lens_scale = d3.scaleLinear()
+            .domain([Math.min(...lens_values), Math.max(...lens_values)])
+            .range([margin, this.width-margin])
+
+
+        this.nodes.forEach(node=>{
+            node.fx = lens_scale(node.avgs[selected_lens]);
+        })
+
+        simulation.tick(300);
+
+        let y_max = Math.max(...this.nodes.map(d=>d.y));
+
+        // draw axis
+        let lens_axis = d3.axisBottom(lens_scale).ticks(5);
+        this.axis_group.append("g")
+            .classed("axis", true)
+            .attr("transform", `translate(0,${y_max+20})`)
+            .call(lens_axis);
+        
+        this.axis_group.append("text")
+            .attr("transform", `translate(${this.width/2},${Math.max(...this.nodes.map(d=>d.y))+60})`)
+            .text(selected_lens)
+        
+        let ng = this.node_group.selectAll("g").data(this.nodes);
+        ng.exit().remove();
+        ng = ng.enter().append("g").merge(ng)
+            .attr("transform", function (d) {
+                return "translate(" + d.x + "," + d.y + ")";
+            })
+            .attr("class", "viewer-graph__vertex-group")
+            .attr("id",(d)=>"group"+d.id)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended))
+            .on("mouseover", (d)=>{
+                if(this.if_select_node) {
+                    if(this.selected_nodes.indexOf(d.id) === -1){
+                        this.highlight_selectable(d.id);
+                    }
+                } else if(this.if_select_cluster) {
+                    if(this.selected_nodes.indexOf(d.id) === -1) {
+                        let cluster = this.connected_components[d.clusterId];
+                        cluster.forEach(nId=>{
+                            this.highlight_selectable((nId+1).toString());
+                        })
+                    }
+                }
+                else if(this.if_select_path){
+                    if(this.selected_nodes.length === 0){
+                        this.highlight_selectable(d.id);
+                    }
+                    else { // this.selected_nodes.length > 0
+                        let path = this.dijkstra(this.path_start_id);
+                        this.highlight_path(path, this.path_start_id, d.id);
+                    }
+                }
+            })
+            .on("mouseout", ()=>{
+                if(this.if_select_node || this.if_select_cluster || this.if_select_path){
+                    this.unhighlight_selectable();
+                }             
+            })
+            .on("click",(d)=>{
+                this.clicking = true;
+                if(this.if_select_node){
+                    this.unhighlight_selectable();
+                    if(this.selected_nodes.indexOf(d.id)===-1){ // Selecting nodes
+                        this.selected_nodes.push(d.id);
+                        this.highlight_selected(d.id)
+                    } else{ // Unselecting
+                        this.selected_nodes.splice(this.selected_nodes.indexOf(d.id),1);
+                        this.unhighlight_selected(d.id)
+                    }
+                    this.draw_hist();
+                } else if(this.if_select_cluster){
+                    this.unhighlight_selectable();
+                    let cluster = this.connected_components[d.clusterId];
+                    if(this.selected_nodes.indexOf(d.id)===-1){
+                        cluster.forEach(nodeId=>{
+                            this.selected_nodes.push((nodeId+1).toString());
+                        })
+                        this.nodes.forEach(node=>{
+                            if(node.clusterId === d.clusterId){                                
+                                this.highlight_selected(node.id)
+                            } 
+                        })
+                    } else{
+                        cluster.forEach(nId=>{
+                            this.selected_nodes.splice(this.selected_nodes.indexOf((nId+1).toString()),1);
+                            this.unhighlight_selected((nId+1).toString());
+                        })
+                    }
+                    this.draw_hist();
+                } else if(this.if_select_path){
+                    this.unhighlight_selectable();
+                    if(this.selected_nodes.length===0){
+                        this.selected_nodes.push(d.id);
+                        this.highlight_selected(d.id)
+                        this.selectable_nodes = this.connected_components[d.clusterId].map(nIdx=>(nIdx+1).toString());
+                        this.selectable_nodes.splice(this.selectable_nodes.indexOf(d.id),1);
+                        this.path_start_id = d.id;
+                    } else if(this.selectable_nodes.indexOf(d.id)!=-1){
+                        let startId = this.path_start_id;
+                        let path = this.dijkstra(startId);
+                        let currentId = d.id;
+                        let kk = 0;
+                        while (currentId!=startId && kk < 500){
+                            this.selected_nodes.push(currentId);
+                            this.selectable_nodes.splice(this.selectable_nodes.indexOf(currentId), 1);
+                            let nextId = path[currentId];
+                            d3.select("#link"+currentId+"_"+nextId).classed("selected", true);
+                            d3.select("#link"+nextId+"_"+currentId).classed("selected", true);
+                            this.highlight_selected(currentId)
+                            currentId = nextId;
+                            kk += 1;
+                        }
+                        this.path_start_id = d.id;
+                    }
+                    this.nodes.forEach(node=>{
+                        if(this.selectable_nodes.indexOf(node.id)===-1 && this.selected_nodes.indexOf(node.id)===-1){
+                            this.highlight_unselectable(node.id);
+                        } else{
+                            this.unhighlight_unselectable(node.id);
+                        }
+                    })
+                    this.draw_hist();
+                }
+                console.log(this.selected_nodes)
+                this.text_cluster_details(this.selected_nodes, this.label_column, this.labels);
+            });
+
+
+
+        ng.append("circle")
+            .classed("viewer-graph__vertex",true)
+            .attr("fill", "#fff")
+            .attr("id",(d)=>"node"+d.id)
+            .attr("r", 12);
+
+        ng.append("text")
+            .classed("viewer-graph__label", true)
+            .attr("fill", "#555")
+            .attr("id",(d)=>"node-label"+d.id)
+            .text((d)=>d.id)
+            .attr("x",d=>-3)
+            .attr("y",d=>4);
+
+        let lg = this.link_group.selectAll("line").data(this.links);
+        lg.exit().remove();
+        lg = lg.enter().append("line").merge(lg);
+        lg
+            .classed("viewer-graph__edge",true)
+            .attr("id",d=>"link"+d.source.id+"_"+d.target.id)
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        let that = this;
+        function ticked() {
+            lg
+                .attr("x1", d => lens_scale(d.source.avgs[selected_lens]))
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => lens_scale(d.target.avgs[selected_lens]))
+                .attr("y2", d => d.target.y);
+        
+            let radius = 8;
+            ng
+                .attr("transform", function (d) {
+                    return "translate(" + lens_scale(d.avgs[selected_lens]) + "," + d.y + ")";
+                });
+    
+            // **** TODO **** how to make the label centered?
+            lbg
+                .attr("x",d=>lens_scale(d.avgs[selected_lens])-3)
+                .attr("y",d=>d.y+4);
+        }
+    
+        function dragstarted(d) {
+            
+            // if (!d3.event.active) {simulation.alphaTarget(0.3).restart();
+            // d.fx = d.x;
+            // d.fy = d.y;}
+        }
+    
+        function dragged(d) {
+            // d.fx = d3.event.x;
+            // d.fy = d3.event.y;
+            // d.x = d3.mouse(this.parentNode)[0];
+            d.y = d3.mouse(this.parentNode)[1];
+            d3.select(`#group${d.id}`).attr("transform", `translate(${d.x}, ${d.y})`)
+            d.links.source.forEach(eid=>{
+                d3.select(`#${eid}`).attr("x1", d.x).attr("y1", d.y);
+            });
+            d.links.target.forEach(eid=>{
+                d3.select(`#${eid}`).attr("x2", d.x).attr("y2", d.y);
+            });
+        }
+    
+        function dragended(d) {
+            // if (!d3.event.active) {simulation.alphaTarget(0);
+            // d.fx = null;
+            // d.fy = null;}
+            d3.select(`#group${d.id}`).attr("transform", `translate(${d.x}, ${d.y})`)
+            d.links.source.forEach(eid=>{
+                d3.select(`#${eid}`).attr("x1", d.x).attr("y1", d.y);
+            });
+            d.links.target.forEach(eid=>{
+                d3.select(`#${eid}`).attr("x2", d.x).attr("y2", d.y);
+            });
         }
 
         const zoom_handler = d3.zoom()
@@ -871,13 +1267,7 @@ class Graph{
                         return "#fff";
                     }
                     else{
-                        // if(d.avgs[col_key] < this.colorScale.domain()[0]){
-                        //     return "rgb(255,255,255)"; // white
-                        // } else if(d.avgs[col_key] > this.colorScale.domain()[1]){
-                        //     return "rgb(169,169,169)"; // grey
-                        // }
                         return this.colorScale(d.avgs[col_key]);
-                        // return d3.interpolateYlGnBu(Math.min(d.avgs[col_key]*1.5,1));
                     }
                 }
                 });
@@ -890,11 +1280,6 @@ class Graph{
             })
     }
 
-    // unfill_vertex(){
-    //     d3.selectAll(".pie-group").remove();
-    //     d3.selectAll(".viewer-graph__vertex").style("fill", "white");
-    //     d3.selectAll(".viewer-graph__label").style("fill", "#555");
-    // }
 
     fill_vertex_categorical(col_key){
         d3.selectAll(".viewer-graph__pie").remove();
@@ -911,6 +1296,25 @@ class Graph{
         //         }
         //     }
         // })
+        d3.selectAll(".viewer-graph__vertex")
+            .style("stroke", d=>{
+                if(this.img_locations.indexOf(d.index)!=-1){
+                    return "magenta"
+                } else {
+                    return "#696969"
+                }
+            })
+            .style("stroke-width", d=>{
+                if(this.img_locations.indexOf(d.index)!=-1){
+                    return 8
+                } else {
+                    return 2
+                }
+            })
+
+           
+
+        
         let idx = 0;
 
         // let that = this;

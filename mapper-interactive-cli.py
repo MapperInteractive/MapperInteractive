@@ -11,6 +11,7 @@ import numpy as np
 from os.path import join
 from tqdm import tqdm
 from sklearn.preprocessing import MinMaxScaler, normalize
+import re
 
 
 def mkdir(f):
@@ -40,11 +41,17 @@ def extract_range(s):
 def get_filter_fn(X, filter, filter_params=None):
     mapper = km.KeplerMapper()
     if type(filter) is not list:
-        filter_fn = MI.compute_lens(filter, X, mapper, filter_params)
+        if filter in X.columns:
+            filter_fn = np.array(X[filter]).reshape(-1,1)
+        else:
+            filter_fn = MI.compute_lens(filter, X, mapper, filter_params)
     else:
         lens = []
         for f in filter:
-            lens_f = MI.compute_lens(filter, X, mapper, filter_params)
+            if f in X.columns:
+                lens_f = np.array(X[f]).reshape(-1,1)
+            else:
+                lens_f = MI.compute_lens(f, X, mapper, filter_params)
             lens.append(lens_f)
         filter_fn = np.concatenate((lens[0], lens[1]), axis=1)
     return filter_fn
@@ -77,13 +84,16 @@ def wrangle_csv(df):
     2. Non-numerical elements in numerical cols
     3. If cols are non-numerical, check if cols are categorical
     '''
-    newdf1 = df.to_numpy()[1:]
+    newdf1 = df.to_numpy().astype("str")
+    cols = df.columns
     rows2delete = np.array([])
     cols2delete = []
+
 
     # ### Delete missing values ###
     for i in range(len(cols)):
         col = newdf1[:, i]
+
         # if more than 20% elements in this column are empty, delete the whole column
         if np.sum(col == "") >= 0.2*len(newdf1):
             cols2delete.append(i)
@@ -125,9 +135,7 @@ def wrangle_csv(df):
                    cols_categorical_idx+cols_others_idx]
     newdf3 = pd.DataFrame(newdf3)
     newdf3.columns = newdf3_cols
-    # write the data frame
-    newdf3.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False)
-    return newdf3
+    return newdf3, cols_numerical_idx, cols_categorical_idx
 
 
 def normalize_data(X, norm_type):
@@ -152,7 +160,7 @@ if __name__ == '__main__':
                         help='Intervals to use in the form START:END:STEP')
     parser.add_argument('-o', '--overlaps', type=str, required=True,
                         help='Overlaps to use in the form START:END:STEP (expects integers)')
-    parser.add_argument('-f', '--filter', type=str,
+    parser.add_argument('-f', '--filter', type=str, required=True,
                         help='Which filter function to use. See docs for choices.')
     parser.add_argument('-output', type=str,
                         help='Output Directory. Defaults to "./graph/"', default='./graph/')
@@ -161,13 +169,13 @@ if __name__ == '__main__':
                         help='Number of threads to allocate')
 
     parser.add_argument('--clusterer', type=str, required=False,
-                        choices=['dbscan', 'agglomerative', 'meanshift', None], default=None)
+                        choices=['dbscan', 'agglomerative', 'meanshift', None], default='dbscan')
 
     # DBSCAN args
     parser.add_argument('--eps', type=float,
-                        help='DBSCAN Epsilon', required=False, default=-1)
+                        help='DBSCAN Epsilon', required=False, default=0.1)
     parser.add_argument('--min_samples', type=int,
-                        help='DBSCAN Min points', required=False, default=-1)
+                        help='DBSCAN Min points', required=False, default=5)
 
     # Agglomerative args
     parser.add_argument('--linkage', help='Type of agglomerative clustering',
@@ -204,19 +212,19 @@ if __name__ == '__main__':
     mkdir(output_dir)
     df = pd.read_csv(fname)
     if preprocess_only:
-        df = wrangle_csv(df)
+        df, cols_numerical_idx, cols_categorical_idx = wrangle_csv(df)
         df.to_csv(join(output_dir, 'wrangled_data.csv'))
         exit()
     elif not no_preprocess:
-        df = wrangle_csv(df)
+        df, cols_numerical_idx, cols_categorical_idx = wrangle_csv(df)
 
     # Regardless, we want to save the data for bookkeeping
-    df.to_csv(join(output_dir, 'wrangled_data.csv'))
-    df_np = df.to_numpy()
+    df.to_csv(join(output_dir, 'wrangled_data.csv'), index=False)
+    df_np = df.iloc[:,cols_numerical_idx].to_numpy()
     df_np = normalize_data(df_np, norm_type=norm)
     overlaps = extract_range(overlaps_str)
     intervals = extract_range(intervals_str)
-    filter_fn = get_filter_fn(df, filter_str, filter_params=None)
+    filter_fn = get_filter_fn(df.iloc[:,cols_numerical_idx].astype("float"), filter_str, filter_params=None)
 
     meta = {'data': fname, 'intervals': intervals_str,
             'overlaps': overlaps_str, 'filter': filter_str, 'normalization': norm}
@@ -252,8 +260,22 @@ if __name__ == '__main__':
     with open(join(output_dir, 'metadata.json'), 'w+') as fp:
         json.dump(meta, fp)
 
+    output_fname = fname.split("/")[-1]
+
     for overlap, interval in tqdm(itertools.product(overlaps, intervals)):
         g = graph_to_dict(mapper_wrapper(
             df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric, use_gpu=gpu))
-        with open(join(output_dir, 'mapper_' + str(fname) + '_' + str(interval) + '_' + str(overlap) + '.json'), 'w+') as fp:
+        if len(cols_categorical_idx) > 0:
+            categorical_cols = df.columns[cols_categorical_idx]
+            for node_id in g['nodes']:
+                vertices = g['nodes'][node_id]
+                node = {'vertices': vertices}
+                node['categorical_cols_summary'] = {}
+                for col in categorical_cols:
+                    data_categorical_i = df[col].iloc[vertices]
+                    node['categorical_cols_summary'][col] = data_categorical_i.value_counts().to_dict()
+                g['nodes'][node_id] = node
+            g['categorical_cols'] = list(categorical_cols)
+
+        with open(join(output_dir, 'mapper_' + str(output_fname) + '_' + str(interval) + '_' + str(overlap) + '.json'), 'w+') as fp:
             json.dump(g, fp)

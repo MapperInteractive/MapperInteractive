@@ -43,7 +43,7 @@ folder.onchange=function(){
                 success: function (response) {
                     response = JSON.parse(response);
                     console.log(response)
-                    that.graph = new Graph(response.mapper, {}, response.connected_components);
+                    that.graph = new Graph(response.mapper, [], response.connected_components, response.categorical_cols);
 
                     // that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
                 },
@@ -314,7 +314,7 @@ d3.select("#mapper_loader")
                 data: JSON.stringify(mapper_data)
             }, function(res){
                 console.log(res);
-                that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols, that.side_bar.other_cols);
+                that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols, that.side_bar.other_cols, that.side_bar.config.filter);
                 that.regression = new Regression(that.side_bar.all_cols);
             })
         } else{
