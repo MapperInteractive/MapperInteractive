@@ -42,7 +42,7 @@ Please refer to a user-guide [here](CLI_README.md) for the command-line API.
 
 ## Video
 
-[![Screenshot of video](app/static/assets/video-teaser.png)](https://www.youtube.com/watch?v=z2VEkv1apF8)
+[![Screenshot of video](app/static/assets/video-teaser.png)](https://www.youtube.com/watch?v=KxHHrCXwGEI)
 
 ## License
 
