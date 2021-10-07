@@ -134,7 +134,13 @@ def load_mapper_data():
     del mapper_graph["edges"]
     mapper_graph_new = _parse_result(mapper_graph, lens_dict={}, data_array=[], if_cli=True)
     connected_components = compute_cc(mapper_graph_new)
-    return jsonify(mapper=mapper_graph_new, connected_components=connected_components, categorical_cols=mapper_graph['categorical_cols'])
+    if 'numerical_col_keys' in mapper_graph.keys():
+        col_keys = mapper_graph['numerical_col_keys']
+    else:
+        col_keys = []
+    cat_cols = ['label', 'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    return jsonify(mapper=mapper_graph_new, connected_components=connected_components, categorical_cols=cat_cols, col_keys=col_keys)
+    # return jsonify(mapper=mapper_graph_new, connected_components=connected_components, categorical_cols=mapper_graph['categorical_cols'])
 
 @app.route('/mapper_loader', methods=['POST','GET'])
 def get_graph():
@@ -414,13 +420,23 @@ def _parse_result(graph, lens_dict, data_array=[], if_cli=False):
                 })
         else:
             if if_cli:
-                data['nodes'].append({
-                    "id": str(i),
-                    "id_orignal": key,
-                    "size": len(graph['nodes'][key]),
-                    "vertices": cluster,
-                    "categorical_cols_summary": graph['nodes'][key]["categorical_cols_summary"]
-                    })
+                if "avgs" in graph['nodes'][key]:
+                    data['nodes'].append({
+                        "id": str(i),
+                        "id_orignal": key,
+                        "size": len(graph['nodes'][key]),
+                        "vertices": cluster,
+                        "categorical_cols_summary": graph['nodes'][key]["categorical_cols_summary"],
+                        "avgs":graph['nodes'][key]["avgs"]
+                        }),
+                else:
+                    data['nodes'].append({
+                        "id": str(i),
+                        "id_orignal": key,
+                        "size": len(graph['nodes'][key]),
+                        "vertices": cluster,
+                        "categorical_cols_summary": graph['nodes'][key]["categorical_cols_summary"],
+                        }),
             else:
                 data['nodes'].append({
                     "id": str(i),

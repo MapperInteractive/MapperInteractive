@@ -45,10 +45,15 @@ class Graph{
 
         // color functions
         this.COLORMAPS = {"- None -":undefined, 
+        "spectral":d3.interpolateSpectral, 
+        "turbo":d3.interpolateTurbo,
+        "BuYlRd":d3.interpolateRdYlBu,
         "Yellow, Red":["yellow", "red"], 
         "Purple, Red":["purple", "red"],
         "Yellow, Blue":["yellow", "blue"], 
-        "Green, Blue":["green", "blue"]};
+        "Green, Blue":["green", "blue"],
+        "Blue, Red":["blue", "red"]
+    };
         this.colorScale = d3.scaleLinear(); 
         
         this.label_column = "row index";
@@ -254,7 +259,8 @@ class Graph{
                 $("#color_function_scale").prop("disabled", false);
             } else if(that.categorical_cols.indexOf(value)!=-1){
                 console.log(value)
-                let color_dict = that.fill_vertex_categorical(value);
+                // let color_dict = that.fill_vertex_categorical(value);
+                let color_dict = that.fill_vertex_categorical_single_class(value);
                 that.draw_color_legend_categorical(color_dict);
                 $("#color_function_maps").prop("disabled", true);
                 $("#color_function_scale").prop("disabled", true);
@@ -270,7 +276,13 @@ class Graph{
         map_dropdown.onchange = function(){
             map = map_dropdown.options[map_dropdown.selectedIndex].text;
             if(that.COLORMAPS[map]){
-                that.colorScale.range(that.COLORMAPS[map]);
+                if(map === 'spectral' || map === 'turbo' || map === 'BuYlRd'){
+                    that.colorScale = d3.scaleSequential(that.COLORMAPS[map]);
+                } else {
+                    that.colorScale = d3.scaleLinear()
+                        .range(that.COLORMAPS[map]);
+                }
+                
                 that.draw_color_legend(that.colorScale);
             } else { 
                 that.colorScale.range([undefined, undefined]); 
@@ -1278,6 +1290,92 @@ class Graph{
                 for (let i = 0; i < rgb.length; i++){ rgb[i] = (i === 3 ? 1 : 255) - rgb[i] };
                 return 'rgb(' + rgb.join(',') + ')';
             })
+    }
+
+    fill_vertex_categorical_single_class(col_key){
+        d3.selectAll(".viewer-graph__pie").remove();
+        d3.selectAll(".viewer-graph__vertex").attr("fill", "#fff");
+        d3.selectAll(".viewer-graph__label").attr("fill", "#555");
+        let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
+        // let color_dict = {};
+        let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f", 'others':'#fff'};
+
+        let width_scale = d3.scaleLinear()
+            .domain([1,1000])
+            .range([2,6])
+
+        d3.selectAll(".viewer-graph__vertex")
+            .style("stroke", d=>{
+                if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
+                    return "magenta"
+                } else {
+                    return "#696969"
+                }
+            })
+            .style("stroke-width", d=>{
+                if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
+                    return width_scale(d.categorical_cols_summary[col_key]['name_noises'])
+                } else {
+                    return 2
+                }
+            })
+
+           
+
+        
+        let idx = 0;
+
+        // let that = this;
+        let pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+
+        let pg = d3.selectAll(".viewer-graph__vertex-group").append("g")
+            .attr("class", "viewer-graph__pie");
+        
+        let arc = d3.arc().innerRadius(0);
+
+        pg.selectAll("path").data(d=>pie(prepare_pie_data(d)))
+            .enter().append("path")
+            .attr("class", "pie-group-piece")
+            .attr("d", d=> {
+                let r = d3.select("#node"+d.data.node_id).attr("r")
+                arc.outerRadius(r);
+                return arc(d);
+            })
+            .attr("fill", d=>d.data.color)
+            .attr("stroke", "#696969")
+            .style("opacity", 0.6);
+
+        function prepare_pie_data(node){
+            let pie_data = [];
+            for(let c in node.categorical_cols_summary[col_key]){
+                if(c!='name_noises'){
+                    let p = {};
+                    p.category_id = c;
+                    p.value = node.categorical_cols_summary[col_key][c];
+                    if(p.value > 0){
+                        p.node_id = node.id;
+                        if(Object.keys(color_dict).indexOf(c)!=-1){
+                        // if(color_dict[c]!=""){
+                            p.color = color_dict[c];
+                        } else {
+                            p.color = color_categorical(idx);
+                            // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                            idx += 1;
+                            color_dict[c] = p.color;
+                        }
+                        pie_data.push(p);
+                    }
+                    
+                }
+                
+            }
+            return pie_data;
+        }
+
+        return color_dict;
+
     }
 
 
