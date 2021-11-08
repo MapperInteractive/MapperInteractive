@@ -259,15 +259,15 @@ class Graph{
                 $("#color_function_scale").prop("disabled", false);
             } else if(that.categorical_cols.indexOf(value)!=-1){
                 console.log(value)
-                let color_dict = that.fill_vertex_categorical(value);
-                // let color_dict;
-                // if(value === "label"){
-                //     color_dict = that.fill_vertex_categorical(value);
-                // }
+                // let color_dict = that.fill_vertex_categorical(value);
+                let color_dict;
+                if(value === "label"){
+                    color_dict = that.fill_vertex_categorical(value);
+                }
                 
-                // else{
-                //     color_dict = that.fill_vertex_categorical_single_class(value);
-                // }
+                else{
+                    color_dict = that.fill_vertex_categorical_single_class(value);
+                }
                 
                 that.draw_color_legend_categorical(color_dict);
                 $("#color_function_maps").prop("disabled", true);
@@ -1302,157 +1302,157 @@ class Graph{
             })
     }
 
-    // fill_vertex_categorical_single_class(col_key){
-    //     d3.selectAll(".viewer-graph__pie").remove();
-    //     d3.selectAll(".viewer-graph__vertex").attr("fill", "#fff");
-    //     d3.selectAll(".viewer-graph__label").attr("fill", "#555");
-    //     let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
-    //     // let color_dict = {};
-    //     let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f", 'others':'#fff'};
+    fill_vertex_categorical_single_class(col_key){
+        d3.selectAll(".viewer-graph__pie").remove();
+        d3.selectAll(".viewer-graph__vertex").attr("fill", "#fff");
+        d3.selectAll(".viewer-graph__label").attr("fill", "#555");
+        let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
+        // let color_dict = {};
+        let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f", 'others':'#fff'};
 
-    //     let width_scale = d3.scaleLinear()
-    //         .domain([1,1000])
-    //         .range([2,6])
+        let width_scale = d3.scaleLinear()
+            .domain([1,1000])
+            .range([2,6])
 
-    //     let size_scale = d3.scaleLinear()
-    //         .domain([1,1000])
-    //         .range([8,18])
+        let size_scale = d3.scaleLinear()
+            .domain([1,1000])
+            .range([8,18])
 
 
-    //     d3.selectAll(".viewer-graph__vertex")
-    //         // .attr("fill", d=>{
-    //         //     if(d.id == "72"){
-    //         //         return "#1f77b4"
-    //         //     }
-    //         //     else if(d.id == "36" && col_key == "horse"){
-    //         //         return "#d62728"
-    //         //     }
-    //         //     else if(d.id == "14" && col_key == "airplane"){
-    //         //         return "#d62728"
-    //         //     }
-    //         //     else if(d.id == "8" && col_key == "bird"){
-    //         //         return "#d62728"
-    //         //     }
-    //         //     else{
-    //         //         return "#fff"
-    //         //     }
-    //         // })
-    //         .style("opacity", 0.6)
-    //         // .attr("r", d=>{
-    //         //     if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
-    //         //         return size_scale(d.categorical_cols_summary[col_key]['name_noises'])
-    //         //     } else{
-    //         //         return 6
-    //         //     }
+        d3.selectAll(".viewer-graph__vertex")
+            // .attr("fill", d=>{
+            //     if(d.id == "72"){
+            //         return "#1f77b4"
+            //     }
+            //     else if(d.id == "36" && col_key == "horse"){
+            //         return "#d62728"
+            //     }
+            //     else if(d.id == "14" && col_key == "airplane"){
+            //         return "#d62728"
+            //     }
+            //     else if(d.id == "8" && col_key == "bird"){
+            //         return "#d62728"
+            //     }
+            //     else{
+            //         return "#fff"
+            //     }
+            // })
+            .style("opacity", 0.6)
+            // .attr("r", d=>{
+            //     if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
+            //         return size_scale(d.categorical_cols_summary[col_key]['name_noises'])
+            //     } else{
+            //         return 6
+            //     }
 
-    //         // })
-    //         .attr("r", d=>{
-    //             if(d.categorical_cols_summary[col_key][col_key] > 0){
-    //                 return size_scale(d.categorical_cols_summary[col_key][col_key])
-    //             } else{
-    //                 return 6
-    //             }
+            // })
+            .attr("r", d=>{
+                if(d.categorical_cols_summary[col_key][col_key] > 0){
+                    return size_scale(d.categorical_cols_summary[col_key][col_key])
+                } else{
+                    return 6
+                }
 
-    //         })
-    //         // .style("stroke", d=>{
-    //         //     if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
-    //         //         return "magenta"
-    //         //     } else {
-    //         //         return "#696969"
-    //         //     }
-    //         // })
-    //         // .style("stroke-width", d=>{
-    //         //     if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
-    //         //         return width_scale(d.categorical_cols_summary[col_key]['name_noises'])
-    //         //     } else {
-    //         //         return 2
-    //         //     }
-    //         // })
-    //     d3.selectAll(".viewer-graph__label").remove();
-
-        
-
+            })
+            // .style("stroke", d=>{
+            //     if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
+            //         return "magenta"
+            //     } else {
+            //         return "#696969"
+            //     }
+            // })
+            // .style("stroke-width", d=>{
+            //     if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
+            //         return width_scale(d.categorical_cols_summary[col_key]['name_noises'])
+            //     } else {
+            //         return 2
+            //     }
+            // })
+        d3.selectAll(".viewer-graph__label").remove();
 
         
 
-        
-    //     let idx = 0;
-
-    //     // let that = this;
-    //     let pie = d3.pie()
-    //             .value(d => d.value)
-    //             .sort(null);
-
-    //     let pg = d3.selectAll(".viewer-graph__vertex-group").append("g")
-    //             .attr("class", "viewer-graph__pie");
-
-    //     d3.selectAll(".viewer-graph__vertex-group")
-    //             .append("text")
-    //             .classed("viewer-graph__label", true)
-    //             // .text(d=>{
-    //             //     if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
-    //             //         return d.categorical_cols_summary[col_key]['name_noises']
-    //             //     } else{
-    //             //         return ""
-    //             //     }
-    //             // })
-    //             .text(d=>{
-    //                 if(d.categorical_cols_summary[col_key][col_key] > 0){
-    //                     return d.categorical_cols_summary[col_key][col_key]
-    //                 } else{
-    //                     return ""
-    //                 }
-    //             })
-    //             .style("font-size", 14)
-    //             // .style("fill", "red")
-    //             .style("fill", "black")
 
         
+
         
-    //     let arc = d3.arc().innerRadius(0);
+        let idx = 0;
 
-    //     pg.selectAll("path").data(d=>pie(prepare_pie_data(d)))
-    //         .enter().append("path")
-    //         .attr("class", "pie-group-piece")
-    //         .attr("d", d=> {
-    //             let r = d3.select("#node"+d.data.node_id).attr("r")
-    //             arc.outerRadius(r);
-    //             return arc(d);
-    //         })
-    //         .attr("fill", d=>d.data.color)
-    //         .attr("stroke", "#696969")
-    //         .style("opacity", 0.6);
+        // let that = this;
+        let pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
 
-    //     function prepare_pie_data(node){
-    //         let pie_data = [];
-    //         for(let c in node.categorical_cols_summary[col_key]){
-    //             if(c!='name_noises'){
-    //                 let p = {};
-    //                 p.category_id = c;
-    //                 p.value = node.categorical_cols_summary[col_key][c];
-    //                 if(p.value > 0){
-    //                     p.node_id = node.id;
-    //                     if(Object.keys(color_dict).indexOf(c)!=-1){
-    //                     // if(color_dict[c]!=""){
-    //                         p.color = color_dict[c];
-    //                     } else {
-    //                         p.color = color_categorical(idx);
-    //                         // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
-    //                         idx += 1;
-    //                         color_dict[c] = p.color;
-    //                     }
-    //                     pie_data.push(p);
-    //                 }
+        let pg = d3.selectAll(".viewer-graph__vertex-group").append("g")
+                .attr("class", "viewer-graph__pie");
+
+        d3.selectAll(".viewer-graph__vertex-group")
+                .append("text")
+                .classed("viewer-graph__label", true)
+                // .text(d=>{
+                //     if(d.categorical_cols_summary[col_key]['name_noises'] > 0){
+                //         return d.categorical_cols_summary[col_key]['name_noises']
+                //     } else{
+                //         return ""
+                //     }
+                // })
+                .text(d=>{
+                    if(d.categorical_cols_summary[col_key][col_key] > 0){
+                        return d.categorical_cols_summary[col_key][col_key]
+                    } else{
+                        return ""
+                    }
+                })
+                .style("font-size", 14)
+                // .style("fill", "red")
+                .style("fill", "black")
+
+        
+        
+        let arc = d3.arc().innerRadius(0);
+
+        pg.selectAll("path").data(d=>pie(prepare_pie_data(d)))
+            .enter().append("path")
+            .attr("class", "pie-group-piece")
+            .attr("d", d=> {
+                let r = d3.select("#node"+d.data.node_id).attr("r")
+                arc.outerRadius(r);
+                return arc(d);
+            })
+            .attr("fill", d=>d.data.color)
+            .attr("stroke", "#696969")
+            .style("opacity", 0.6);
+
+        function prepare_pie_data(node){
+            let pie_data = [];
+            for(let c in node.categorical_cols_summary[col_key]){
+                if(c!='name_noises'){
+                    let p = {};
+                    p.category_id = c;
+                    p.value = node.categorical_cols_summary[col_key][c];
+                    if(p.value > 0){
+                        p.node_id = node.id;
+                        if(Object.keys(color_dict).indexOf(c)!=-1){
+                        // if(color_dict[c]!=""){
+                            p.color = color_dict[c];
+                        } else {
+                            p.color = color_categorical(idx);
+                            // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                            idx += 1;
+                            color_dict[c] = p.color;
+                        }
+                        pie_data.push(p);
+                    }
                     
-    //             }
+                }
                 
-    //         }
-    //         return pie_data;
-    //     }
+            }
+            return pie_data;
+        }
 
-    //     return color_dict;
+        return color_dict;
 
-    // }
+    }
 
 
     fill_vertex_categorical(col_key){
@@ -1461,7 +1461,7 @@ class Graph{
         d3.selectAll(".viewer-graph__label").attr("fill", "#555");
         let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
         // let color_dict = {};
-        // let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f"};
+        let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f"};
         // // get # catogories
         // this.nodes.forEach(node=>{
         //     for(let c in node.categorical_cols_summary[col_key]){
@@ -1470,39 +1470,21 @@ class Graph{
         //         }
         //     }
         // })
-        // d3.selectAll(".viewer-graph__vertex")
-        //     .style("stroke", d=>{
-        //         if(this.img_locations.indexOf(d.index)!=-1){
-        //             return "magenta"
-        //         } else {
-        //             return "#696969"
-        //         }
-        //     })
-        //     .style("stroke-width", d=>{
-        //         if(this.img_locations.indexOf(d.index)!=-1){
-        //             return 8
-        //         } else {
-        //             return 2
-        //         }
-        //     })
-
-        let color_dict = {};
-
-        let categories = [];
-
-        this.nodes.forEach(node=>{
-            for(let c in node.categorical_cols_summary[col_key]){
-                if(categories.indexOf(c)===-1){
-                    categories.push(c);
+        d3.selectAll(".viewer-graph__vertex")
+            .style("stroke", d=>{
+                if(this.img_locations.indexOf(d.index)!=-1){
+                    return "magenta"
+                } else {
+                    return "#696969"
                 }
-            }
-        }) 
-        // ordering categories to make sure the colors are consistent
-        categories.sort((a,b)=>d3.ascending(a,b))
-        for(let i=0; i<categories.length; i++){
-            let c = categories[i];
-            color_dict[c] = color_categorical(i);
-        }
+            })
+            .style("stroke-width", d=>{
+                if(this.img_locations.indexOf(d.index)!=-1){
+                    return 8
+                } else {
+                    return 2
+                }
+            })
 
            
 
