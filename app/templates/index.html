@@ -377,7 +377,7 @@
             </div>
           </div>
         </div>
-        <div id="workspace-img_locations" class="block"> 
+        <!-- <div id="workspace-img_locations" class="block"> 
           <div class="block_title">Image Locations</div>
           <div class="block_body" style="max-height: 1000px"> 
             <div class="block_body-inner" id = "block_body-inner_img">
@@ -389,15 +389,13 @@
               <div class="row" style="padding-top:5px; padding-bottom:5px;">
                   <div class="col-sm-4 col-form-label">Image Id</div>
                   <div class="col-sm-8" id="img-locations-container"> <select class="custom-select"  name="img-locations" id="img-locations">
-                    <!-- <option>horse 13</option> -->
                   </select></div>
               </div>
               <div id="point_purity">
-                <!-- point purity -->
               </div>
             </div>
           </div>  
-        </div>
+        </div> -->
         <div id="workspace-color_functions" class="block"> 
           <div class="block_title">Color Functions</div>
           <div class="block_body" style="max-height: 1000px"> 
@@ -480,6 +478,10 @@
           <div class="block_title">PCA</div>
           <div class="block_body" style="max-height: 1000px">
             <div class="block_body-inner">
+              <div class="row" style="padding-top:5px; padding-bottom:5px;">
+                <div class="col-sm-3 col-form-pca">Column</div>
+                <div class="col-sm-9" id="label-column-container"><select name="pca_column" class="custom-select" id="pca_column_selection"></select></div>
+              </div>
               <input type="button" class="btn btn-outline-dark btn-block ui-form-button" id="pca" value="Run PCA">
             </div>
           </div>

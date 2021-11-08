@@ -11,20 +11,39 @@ class PCA{
     }
 
     draw_PCA(points_dict){
+        console.log(points_dict)
         this.clear_canvas();
 
         let color = d3.scaleOrdinal(d3.schemeCategory10);
 
-        let color_dict = {"airplane": "#1f77b4",
-        "automobile": "#ff7f0e",
-        "bird": "#2ca02c",
-        "cat": "#d62728",
-        "deer": "#9467bd",
-        "dog": "#8c564b",
-        "frog": "#e377c2",
-        "horse": "#7f7f7f",
-        "ship": "#17becf",
-        "truck": "#bcbd22"}
+        // let color_dict = {"airplane": "#1f77b4",
+        // "automobile": "#ff7f0e",
+        // "bird": "#2ca02c",
+        // "cat": "#d62728",
+        // "deer": "#9467bd",
+        // "dog": "#8c564b",
+        // "frog": "#e377c2",
+        // "horse": "#7f7f7f",
+        // "ship": "#17becf",
+        // "truck": "#bcbd22"}
+
+        let color_dict = {};
+
+        // let categories = [];
+
+        // this.nodes.forEach(node=>{
+        //     for(let c in node.categorical_cols_summary[col_key]){
+        //         if(categories.indexOf(c)===-1){
+        //             categories.push(c);
+        //         }
+        //     }
+        // }) 
+        // // ordering categories to make sure the colors are consistent
+        // categories.sort((a,b)=>d3.ascending(a,b))
+        // for(let i=0; i<categories.length; i++){
+        //     let c = categories[i];
+        //     color_dict[c] = color_categorical(i);
+        // }
 
         let margin = {"left":20, "top":20, "right":10, "bottom":15};
         let width = $(d3.select("#PCA-panel").select(".block_body-inner").node()).width();
@@ -47,11 +66,13 @@ class PCA{
         let cg = d3.select("#circle_group").selectAll("circle").data(points_dict);
         cg.exit().remove();
         cg = cg.enter().append("circle").merge(cg)
+            .classed("pca-points", true)
             .attr("cx", d=>xScale(d.pc1))
             .attr("cy", d=>yScale(d.pc2))
             .attr("r", 2)
             .attr("fill", d=>{
-                return color(parseInt(d.kmeans_cluster));
+                // return color(parseInt(d.kmeans_cluster));
+                return "blue"
                 
             })
 

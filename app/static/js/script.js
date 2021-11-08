@@ -444,6 +444,34 @@ label_column_dropdown.onchange = function(){
     }
 }
 
+let pca_column_dropdown = document.getElementById("pca_column_selection");
+pca_column_dropdown.onchange = function(){
+    let pca_column = pca_column_dropdown.options[pca_column_dropdown.selectedIndex].text;
+    console.log(pca_column)
+    if(that.graph){
+        let labels;
+        if(pca_column != "None"){
+            $.ajax({
+                type: "POST",
+                url: "/update_cluster_details",
+                data: pca_column,
+                dataType:'text',
+                success: function (response) {
+                    labels = JSON.parse(response).labels;
+                    that.graph.pca_column = pca_column;
+                    that.graph.pca_vals = labels;        
+                    that.graph.color_pca_results(that.graph.selected_nodes, pca_column, labels);
+
+                },
+                error: function (error) {
+                    console.log("error",error);
+                }
+            })
+        } 
+    }
+}
+
+
 // Extendability
 $.post("/module_extension",{
     data: ""

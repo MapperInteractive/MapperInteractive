@@ -59,7 +59,7 @@ class Graph{
         this.select_view();
         this.draw_mapper_fd();
         this.selection_nodes();
-        this.img_functions();
+        // this.img_functions();
     }
 
     toggle_graph_layout(){
@@ -1286,8 +1286,8 @@ class Graph{
         d3.selectAll(".viewer-graph__vertex").attr("fill", "#fff");
         d3.selectAll(".viewer-graph__label").attr("fill", "#555");
         let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
-        // let color_dict = {};
-        let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f"};
+        let color_dict = {};
+        // let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f"};
         // // get # catogories
         // this.nodes.forEach(node=>{
         //     for(let c in node.categorical_cols_summary[col_key]){
@@ -1296,6 +1296,22 @@ class Graph{
         //         }
         //     }
         // })
+        let categories = [];
+
+        this.nodes.forEach(node=>{
+            for(let c in node.categorical_cols_summary[col_key]){
+                if(categories.indexOf(c)===-1){
+                    categories.push(c);
+                }
+            }
+        }) 
+        // ordering categories to make sure the colors are consistent
+        categories.sort((a,b)=>d3.ascending(a,b))
+        for(let i=0; i<categories.length; i++){
+            let c = categories[i];
+            color_dict[c] = color_categorical(i);
+        }
+
         d3.selectAll(".viewer-graph__vertex")
             .style("stroke", d=>{
                 if(this.img_locations.indexOf(d.index)!=-1){
@@ -1361,6 +1377,41 @@ class Graph{
         }
 
         return color_dict;
+    }
+
+
+    color_pca_results(nodes, pca_column, pca_vals){
+        console.log(pca_vals)
+        console.log(Math.min(...pca_vals), Math.max(...pca_vals))
+        let vertices_list = [];
+        // if(nodes.length === 0){
+        //     nodes = this.nodes;
+        // }
+        nodes.forEach(nId => {
+            let node_index = parseInt(nId)-1;
+            let node = this.nodes[node_index];
+            node.vertices.forEach(v=>{
+                if(vertices_list.indexOf(v)===-1){
+                    vertices_list.push(parseInt(v));
+                }
+            })
+        })
+        if (this.categorical_cols.indexOf(pca_column) != -1){
+
+        } else {
+            console.log(nodes)
+            console.log(vertices_list)
+            let colorScale = d3.scaleLinear()
+                .domain([Math.min(...pca_vals), Math.max(...pca_vals)])
+                .range(["yellow", "red"])
+            d3.selectAll(".pca-points")
+            .attr("fill", (d,i)=>{
+                // if (vertices_list.indexOf(i) != -1){
+                    return colorScale(-pca_vals[i])
+                // }
+            })
+        }
+        
     }
 
 

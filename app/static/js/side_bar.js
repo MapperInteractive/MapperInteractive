@@ -14,6 +14,7 @@ class DataLoader{
         this.draw_filter_dropdown();
         this.draw_filter_dropdown2();
         this.draw_label_dropdown();
+        this.draw_pca_dropdown();
         this.initialize_config();
         this.edit_param();
     }
@@ -378,6 +379,17 @@ class DataLoader{
         if(this.all_cols.length > 0){
             let label_cols = ["row index"].concat(this.categorical_cols.concat(this.all_cols).concat(this.other_cols));
             let cg = d3.select("#label_column_selection").selectAll("option").data(label_cols);
+            cg.exit().remove();
+            cg = cg.enter().append("option").merge(cg)
+                .classed("select-items", true)
+                .html(d=>d);
+        }
+    }
+
+    draw_pca_dropdown(){
+        if(this.all_cols.length > 0){
+            let label_cols = ["None"].concat(this.categorical_cols.concat(this.all_cols).concat(this.other_cols));
+            let cg = d3.select("#pca_column_selection").selectAll("option").data(label_cols);
             cg.exit().remove();
             cg = cg.enter().append("option").merge(cg)
                 .classed("select-items", true)
