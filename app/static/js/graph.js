@@ -1312,21 +1312,21 @@ class Graph{
             color_dict[c] = color_categorical(i);
         }
 
-        d3.selectAll(".viewer-graph__vertex")
-            .style("stroke", d=>{
-                if(this.img_locations.indexOf(d.index)!=-1){
-                    return "magenta"
-                } else {
-                    return "#696969"
-                }
-            })
-            .style("stroke-width", d=>{
-                if(this.img_locations.indexOf(d.index)!=-1){
-                    return 8
-                } else {
-                    return 2
-                }
-            })
+        // d3.selectAll(".viewer-graph__vertex")
+        //     .style("stroke", d=>{
+        //         if(this.img_locations.indexOf(d.index)!=-1){
+        //             return "magenta"
+        //         } else {
+        //             return "#696969"
+        //         }
+        //     })
+        //     .style("stroke-width", d=>{
+        //         if(this.img_locations.indexOf(d.index)!=-1){
+        //             return 8
+        //         } else {
+        //             return 2
+        //         }
+        //     })
 
            
 
