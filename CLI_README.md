@@ -14,7 +14,7 @@
 To only perform data wrangling:
 
 ```bash
-python data.csv --preprocess-only
+python3 mapper-interactive-cli.py data.csv --preprocess-only
 ```
 
 Example mapper graph computation with parameters:
@@ -27,7 +27,7 @@ Example mapper graph computation with parameters:
 * Graphs stored in ./`CLI_examples/`
 
 ```bash
-python data.csv --intervals 10:50:10 --overlaps 25:35:5 --clusterer dbscan --eps 0.5 --num_pts 5 --filter l2norm --output ./CLI_examples
+python3 mapper-interactive-cli.py data.csv --intervals 10:50:10 --overlaps 25:35:5 --clusterer dbscan --eps 0.5 --num_pts 5 --filter l2norm --output ./CLI_examples
 ```
 
 ---
