@@ -59,8 +59,10 @@ def get_filter_fn(X, filter, filter_params=None):
 
 def mapper_wrapper(X, overlap, intervals, filter_fn, clusterer, **mapper_args):
     mapper = km.KeplerMapper()
-    graph = mapper.map_parallel(filter_fn, X, clusterer=clusterer, cover=km_cover.Cover(
-        n_cubes=intervals, perc_overlap=overlap / 100), **mapper_args)
+    # graph = mapper.map_parallel(filter_fn, X, clusterer=clusterer, cover=km_cover.Cover(
+    #     n_cubes=intervals, perc_overlap=overlap / 100), **mapper_args)
+    graph = mapper.map(filter_fn, X, clusterer=clusterer, cover=km_cover.Cover(
+        n_cubes=intervals, perc_overlap=overlap / 100))
     return graph
 
 

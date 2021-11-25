@@ -408,7 +408,7 @@ def _parse_result(graph, lens_dict, data_array=[], if_cli=False):
                 cluster_avg_dict[col_names[j]] = cluster_avg[j]
             data['nodes'].append({
                 "id": str(i),
-                "size": len(graph['nodes'][key]),
+                "size": len(cluster),
                 "avgs": cluster_avg_dict,
                 "vertices": cluster
                 })
@@ -417,9 +417,9 @@ def _parse_result(graph, lens_dict, data_array=[], if_cli=False):
                 data['nodes'].append({
                     "id": str(i),
                     "id_orignal": key,
-                    "size": len(graph['nodes'][key]),
-                    "vertices": cluster,
-                    "categorical_cols_summary": graph['nodes'][key]["categorical_cols_summary"]
+                    "size": len(cluster["vertices"]),
+                    "vertices": cluster["vertices"],
+                    "categorical_cols_summary": cluster["categorical_cols_summary"]
                     })
             else:
                 data['nodes'].append({
