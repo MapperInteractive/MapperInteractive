@@ -500,36 +500,92 @@ class DataLoader{
     }
 
     draw_adaptive_cover(classic_cover, adaptive_cover){
+        console.log("classic cover", classic_cover)
+        classic_cover = [];
+        adaptive_cover = [[-1.0228, -0.9656],
+[-0.98276, -0.92556],
+[-0.94272, -0.88552],
+[-0.90268, -0.84548],
+[-0.86264, -0.80544],
+[-0.8226, -0.7654],
+[-0.78256, -0.72536],
+[-0.74252, -0.68532],
+[-0.70248, -0.64528],
+[-0.66244, -0.60524],
+[-0.6224, -0.5652],
+[-0.58236, -0.52516],
+[-0.54232, -0.48512],
+[-0.50228, -0.44508],
+[-0.46224, -0.40504],
+[-0.4222, -0.365],
+[-0.38216, -0.32496],
+[-0.34212, -0.28492],
+[-0.30208, -0.24488],
+[-0.26204, -0.20484],
+[-0.222, -0.1648],
+[-0.18196, -0.12476],
+[-0.14192, -0.08472],
+[-0.10188, -0.04468],
+[-0.06184, -0.00464],
+[-0.0218, 0.0354],
+[0.01824, 0.07544],
+[0.05828, 0.11548],
+[0.09832, 0.15552],
+[0.13836, 0.19556],
+[0.1784, 0.2356],
+[0.21844, 0.27564],
+[0.25848, 0.31568],
+[0.29852, 0.35572],
+[0.33856, 0.39576],
+[0.3786, 0.4358],
+[0.41864, 0.47584],
+[0.45868, 0.51588],
+[0.49872, 0.55592],
+[0.53876, 0.59596],
+[0.5788, 0.636],
+[0.61884, 0.67604],
+[0.65888, 0.71608],
+[0.69892, 0.75612],
+[0.73896, 0.79616],
+[0.779, 0.8362],
+[0.81904, 0.87624],
+[0.85908, 0.91628],
+[0.89912, 0.95632],
+[0.93916, 1.018]]
+console.log("adaptive cover", adaptive_cover)
+
         d3.select("#cover-svg-container").select("div").remove();
 
         let svg_container = d3.select("#cover-svg-container").append("div");
 
         svg_container.append("div").style("padding-top", "10px")
-            .append("h6").html("Cover Differences");
+            // .append("h6").html("Cover Differences");
+            .html("Circles - Gudhi - 50 Elements")
+            .style("text-align", "center");
         
         let legend_width = 25;
         let legend_height = 10;
 
-        let legend_container = svg_container.append("div").style("border", "1px solid rgba(0, 0, 0, 0.3)").style("padding", "5px").style("border-radius", "3px")
-        let legend_classic_container = legend_container.append("div").classed("row", true);
-        legend_classic_container.append("div").classed("col-1", true).append("svg")
-            .attr("width", legend_width)
-            .attr("height",legend_height)
-            .append("line")
-            .attr("x1", 0).attr("y1", legend_height/2)
-            .attr("x2", legend_width).attr("y2", legend_height/2)
-            .attr("stroke", "black").attr("stroke-width", 2)
-        legend_classic_container.append("div").classed("col-10", true).html("initial covers");
+        // let legend_container = svg_container.append("div").style("border", "1px solid rgba(0, 0, 0, 0.3)").style("padding", "5px").style("border-radius", "3px")
+        // let legend_classic_container = legend_container.append("div").classed("row", true);
+        // legend_classic_container.append("div").classed("col-1", true).append("svg")
+        //     .attr("width", legend_width)
+        //     .attr("height",legend_height)
+        //     .append("line")
+        //     .attr("x1", 0).attr("y1", legend_height/2)
+        //     .attr("x2", legend_width).attr("y2", legend_height/2)
+        //     .attr("stroke", "black").attr("stroke-width", 2)
+        // legend_classic_container.append("div").classed("col-10", true).html("initial covers");
 
-        let legend_adaptive_container = legend_container.append("div").classed("row", true);
-        legend_adaptive_container.append("div").classed("col-1", true).append("svg")
-            .attr("width", legend_width)
-            .attr("height",legend_height)
-            .append("line")
-            .attr("x1", 0).attr("y1", legend_height/2)
-            .attr("x2", legend_width).attr("y2", legend_height/2)
-            .attr("stroke", "#4CAF50").attr("stroke-width", 2)
-        legend_adaptive_container.append("div").classed("col-10", true).html("adaptive covers");
+        // let legend_adaptive_container = legend_container.append("div").classed("row", true);
+        // legend_adaptive_container.append("div").classed("col-1", true).append("svg")
+        //     .attr("width", legend_width)
+        //     .attr("height",legend_height)
+        //     .append("line")
+        //     .attr("x1", 0).attr("y1", legend_height/2)
+        //     .attr("x2", legend_width).attr("y2", legend_height/2)
+        //     .attr("stroke", "#4CAF50").attr("stroke-width", 2)
+        // legend_adaptive_container.append("div").classed("col-10", true).html("adaptive covers");
 
         let margin = {"left":20, "top":20, "right":10, "bottom":20};
         let width = $("#cover-svg-container").width();
@@ -540,14 +596,20 @@ class DataLoader{
             .attr("width", width)
             .attr("height", height);
 
+        module_svg.append("line")
+            .attr("x1")
+            .attr("y1")
+
         let axis_group = module_svg.append("g").attr("id", "cover_svg_axis_group");
         let classic_cover_group = module_svg.append("g").attr("id", "cover_svg_classic_group");
         let adaptive_cover_group = module_svg.append("g").attr("id", "cover_svg_adaptive_group");
 
         let total_cover_length = classic_cover.length + adaptive_cover.length;
 
-        let xMin = Math.min(classic_cover[0][0], adaptive_cover[0][0])
-        let xMax = Math.min(classic_cover[classic_cover.length-1][1], adaptive_cover[adaptive_cover.length-1][1])
+        // let xMin = Math.min(classic_cover[0][0], adaptive_cover[0][0])
+        // let xMax = Math.max(classic_cover[classic_cover.length-1][1], adaptive_cover[adaptive_cover.length-1][1])
+        let xMin = Math.min(...adaptive_cover.map(x=>x[0]))
+        let xMax = Math.max(...adaptive_cover.map(x=>x[1]))
         let xScale = d3.scaleLinear()
             .domain([xMin, xMax])
             .range([margin.left, width-margin.right]);

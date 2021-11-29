@@ -43,8 +43,8 @@ folder.onchange=function(){
                 success: function (response) {
                     response = JSON.parse(response);
                     console.log(response)
-                    that.graph = new Graph(response.mapper, {}, response.connected_components);
-
+                    // that.graph = new Graph(response.mapper, {}, response.connected_components);
+                    that.graph = new Graph(response.mapper, response.col_keys, response.connected_components, response.categorical_cols);
                     // that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
                 },
                 error: function (error) {
@@ -525,4 +525,8 @@ function get_enhanced_mapper_parameters(){
 
     that.mapper_data.enhanced_config.max_iter = max_iter;
     that.mapper_data.enhanced_config.delta = delta;
+
+    let sa_dropdown = document.getElementById("search_alg_selection");
+    let sa_type = sa_dropdown.options[sa_dropdown.selectedIndex].text;
+    that.mapper_data.enhanced_config.method = sa_type;
 }
