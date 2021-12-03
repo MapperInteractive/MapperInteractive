@@ -388,7 +388,7 @@ class Graph{
 
         console.log(color_array)
 
-        let lg = svg.selectAll("g").data(color_array);
+        let lg = svg.selectAll("g").data(color_array.filter(d=>d.value!="#fff"));
         lg.exit().remove();
         lg = lg.enter().append("g").merge(lg)
             .attr("transform", "translate("+margin+","+margin+")")
@@ -1536,21 +1536,52 @@ class Graph{
             .style("opacity", 0.6);
 
         function prepare_pie_data(node){
+            let coarse_label = 'aquatic_mammals'
+            let coarse_label2 = 'fish'
             let pie_data = [];
             for(let c in node.categorical_cols_summary[col_key]){
                 let p = {};
                 p.category_id = c;
                 p.value = node.categorical_cols_summary[col_key][c];
                 p.node_id = node.id;
-                if(Object.keys(color_dict).indexOf(c)!=-1){
-                // if(color_dict[c]!=""){
-                    p.color = color_dict[c];
+                if(col_key === "fine_label"){
+                    if(coarse_label in node.categorical_cols_summary['coarse_label'] || coarse_label2 in node.categorical_cols_summary['coarse_label']){
+                        if(Object.keys(color_dict).indexOf(c)!=-1){
+                            // if(color_dict[c]!=""){
+                                p.color = color_dict[c];
+                            } else {
+                                p.color = color_categorical(idx);
+                                // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                                idx += 1;
+                                color_dict[c] = p.color;
+                            }
+                    } else {
+                        p.color = "#fff";
+                        color_dict[c] = p.color;
+                    }
                 } else {
-                    p.color = color_categorical(idx);
-                    // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
-                    idx += 1;
-                    color_dict[c] = p.color;
+                    if(Object.keys(color_dict).indexOf(c)!=-1){
+                    // if(color_dict[c]!=""){
+                        p.color = color_dict[c];
+                    } else {
+                        p.color = color_categorical(idx);
+                        // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                        idx += 1;
+                        color_dict[c] = p.color;
+                    }
+                    if(c != coarse_label && c != coarse_label2){
+                        p.color = "#fff"
+                    }
                 }
+                // if(Object.keys(color_dict).indexOf(c)!=-1){
+                // // if(color_dict[c]!=""){
+                //     p.color = color_dict[c];
+                // } else {
+                //     p.color = color_categorical(idx);
+                //     // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                //     idx += 1;
+                //     color_dict[c] = p.color;
+                // }
                 pie_data.push(p);
             }
             if(pie_data.length > 12){
