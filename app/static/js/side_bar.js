@@ -388,7 +388,7 @@ class DataLoader{
 
     draw_pca_dropdown(){
         if(this.all_cols.length > 0){
-            let label_cols = ["None"].concat(this.categorical_cols.concat(this.all_cols).concat(this.other_cols));
+            let label_cols = ["None"].concat(this.categorical_cols.concat(this.all_cols));
             let cg = d3.select("#pca_column_selection").selectAll("option").data(label_cols);
             cg.exit().remove();
             cg = cg.enter().append("option").merge(cg)

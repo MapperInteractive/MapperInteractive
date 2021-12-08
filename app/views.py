@@ -233,8 +233,8 @@ def pca():
     print(cols)
     with open(APP_STATIC+"/uploads/nodes_detail.json") as f:
         nodes_detail = json.load(f)
+    selected_rows = []
     if len(selected_nodes) > 0:
-        selected_rows = []
         for node in selected_nodes:
             selected_rows += nodes_detail[node]
         selected_rows = list(set(selected_rows))
@@ -253,7 +253,26 @@ def pca():
         # data_new['kmeans_cluster'] = KMeans(n_clusters=10, random_state=0).fit(data_new).labels_
         data_new['kmeans_cluster'] = KMeans(n_clusters=6, random_state=0).fit(data_new).labels_
     data_new = data_new.to_json(orient='records')
-    return jsonify(pca=data_new)
+    return jsonify(pca=data_new, selected_rows=selected_rows)
+
+@app.route('/update_pca_coloring', methods=['POST','GET'])
+def update_pca_coloring():
+    json_data = json.loads(request.form.get('data'))
+    pca_column = json_data['color_col']
+    pca_dict = json_data['pca_dict']
+    selected_rows = json_data['selected_rows']
+    df = pd.read_csv(APP_STATIC+"/uploads/processed_data.csv") 
+    with open(APP_STATIC+"/uploads/cols_info.json") as f:
+        cols_dict = json.load(f)
+    color_vals = df[pca_column]
+    color_type = "categorical"
+    if pca_column in cols_dict['cols_numerical']:
+        color_type = "numerical"
+    if len(selected_rows) > 0:
+        color_vals = [color_vals[idx] for idx in selected_rows]
+    for i in range(len(pca_dict)):
+        pca_dict[i]['color_val'] = str(color_vals[i])
+    return jsonify(pca_dict=pca_dict, color_type=color_type)
 
 @app.route('/update_cluster_details', methods=['POST','GET'])
 def update_cluster_details():

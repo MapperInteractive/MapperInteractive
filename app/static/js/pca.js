@@ -10,40 +10,46 @@ class PCA{
         $("#pca_svg").remove();
     }
 
-    draw_PCA(points_dict){
-        console.log(points_dict)
+    draw_PCA(points_dict, color_type=undefined){
         this.clear_canvas();
+        this.points_dict = points_dict;
+        if(color_type === "categorical"){
+            let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
+            let color_dict = {};
 
-        let color = d3.scaleOrdinal(d3.schemeCategory10);
+            let categories = [];
+    
+            this.points_dict.forEach(pt=>{
+                if(categories.indexOf(pt.color_val)===-1){
+                    categories.push(pt.color_val);
+                }
+            }) 
+            // ordering categories to make sure the colors are consistent
+            categories.sort((a,b)=>d3.ascending(a,b))
+            for(let i=0; i<categories.length; i++){
+                let c = categories[i];
+                color_dict[c] = color_categorical(i);
+            }
+            this.points_dict.forEach(pt=>{
+                pt.color = color_dict[pt.color_val];
+            })
 
-        // let color_dict = {"airplane": "#1f77b4",
-        // "automobile": "#ff7f0e",
-        // "bird": "#2ca02c",
-        // "cat": "#d62728",
-        // "deer": "#9467bd",
-        // "dog": "#8c564b",
-        // "frog": "#e377c2",
-        // "horse": "#7f7f7f",
-        // "ship": "#17becf",
-        // "truck": "#bcbd22"}
+        } else if(color_type === "numerical"){
+            let color_vals = points_dict.map(d=>parseFloat(d.color_val))
+            console.log(color_vals)
+            let colorScale = d3.scaleLinear()
+                        .domain([Math.min(...color_vals), Math.max(...color_vals)])
+                        .range(["yellow", "red"]);
+            this.points_dict.forEach(pt=>{
+                pt.color = colorScale(parseFloat(pt.color_val));
+            })
+        } else{
+            this.points_dict.forEach(pt=>{
+                pt.color = "gray";
+            })
+        }
 
-        let color_dict = {};
-
-        // let categories = [];
-
-        // this.nodes.forEach(node=>{
-        //     for(let c in node.categorical_cols_summary[col_key]){
-        //         if(categories.indexOf(c)===-1){
-        //             categories.push(c);
-        //         }
-        //     }
-        // }) 
-        // // ordering categories to make sure the colors are consistent
-        // categories.sort((a,b)=>d3.ascending(a,b))
-        // for(let i=0; i<categories.length; i++){
-        //     let c = categories[i];
-        //     color_dict[c] = color_categorical(i);
-        // }
+        
 
         let margin = {"left":20, "top":20, "right":10, "bottom":15};
         let width = $(d3.select("#PCA-panel").select(".block_body-inner").node()).width();
@@ -70,11 +76,7 @@ class PCA{
             .attr("cx", d=>xScale(d.pc1))
             .attr("cy", d=>yScale(d.pc2))
             .attr("r", 2)
-            .attr("fill", d=>{
-                // return color(parseInt(d.kmeans_cluster));
-                return "blue"
-                
-            })
+            .attr("fill", d=>d.color);
 
         // x-axis
         d3.select("#axis_group").append("g") 

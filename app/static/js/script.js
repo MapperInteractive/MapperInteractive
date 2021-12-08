@@ -18,7 +18,6 @@ folder.onchange=function(){
             mapper_files.push(filename_i)
         }
     }
-    console.log(mapper_files);
     let mapper_list_container = document.getElementById("mapper-list-container-inner");
     mapper_list_container.style.maxHeight = "450px";
     // draw sliders
@@ -42,7 +41,6 @@ folder.onchange=function(){
                 dataType:'text',
                 success: function (response) {
                     response = JSON.parse(response);
-                    console.log(response)
                     that.graph = new Graph(response.mapper, [], response.connected_components, response.categorical_cols);
 
                     // that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
@@ -55,7 +53,7 @@ folder.onchange=function(){
     })
 
 function draw_mapper_param_sliders(){
-    console.log("draw sliders")
+    // console.log("draw sliders")
     let intervals = [10, 20, 30, 40, 50];
     let overlaps = [0.25, 0.30, 0.35];
 
@@ -213,7 +211,7 @@ function draw_mapper_param_sliders(){
 d3.select("#load-raw-data")
     .on("click", ()=>{
         let file_name = "3d-horse.csv";
-        console.log(file_name)
+        // console.log(file_name)
         $.ajax({
             type: "POST",
             url: "/data_process",
@@ -289,7 +287,7 @@ d3.select("#files")
 d3.select("#mapper_loader")
     .on("click",()=>{
         if(that.side_bar.all_cols.length>0){
-            console.log(that.side_bar.config.filter)
+            // console.log(that.side_bar.config.filter)
             if(that.side_bar.config.filter[0] === "Density"){
                 that.side_bar.config.density_bandwidth = parseFloat(d3.select("#density_bandwidth_values").node().value);
                 let density_kernel_dropdown = document.getElementById("density_kernel_selection");
@@ -313,7 +311,7 @@ d3.select("#mapper_loader")
             $.post("/mapper_loader",{
                 data: JSON.stringify(mapper_data)
             }, function(res){
-                console.log(res);
+                // console.log(res);
                 that.graph = new Graph(res.mapper, that.side_bar.all_cols, res.connected_components, that.side_bar.categorical_cols, that.side_bar.other_cols, that.side_bar.config.filter);
                 that.regression = new Regression(that.side_bar.all_cols);
             })
@@ -342,18 +340,19 @@ d3.select("#linear_regression")
 
 d3.select("#pca")
     .on("click", ()=>{
+        let pca_column_dropdown = document.getElementById("pca_column_selection");
+        pca_column_dropdown.selectedIndex = 0;
         if(that.graph){
             let selected_nodes = [...that.graph.selected_nodes];
-            // if(that.graph.selected_nodes.length===0){
-            //     selected_nodes = that.graph.nodes.map(d=>d.id);
-            // } 
             $.post("/pca", {
                 data: JSON.stringify({"nodes":selected_nodes})
             }, function(res){
                 that.pca = new PCA(that.side_bar.selected_cols, selected_nodes);
+                that.pca.selected_rows = res.selected_rows
                 that.pca.draw_PCA(JSON.parse(res.pca));
             })
         }
+        
     })
 
 let coll  = document.getElementsByClassName("block_title");
@@ -361,7 +360,6 @@ for(let i=0; i<coll.length; i++){
     coll[i].addEventListener("click", function(){
         this.classList.toggle("collapsed")
         let block_body = this.nextElementSibling;
-        console.log(block_body.id)
         if (block_body.style.maxHeight){
             block_body.style.maxHeight = null;
         } else {
@@ -416,7 +414,7 @@ clustering_para_range.addEventListener("click", function(){
 let label_column_dropdown = document.getElementById("label_column_selection");
 label_column_dropdown.onchange = function(){
     let label_column = label_column_dropdown.options[label_column_dropdown.selectedIndex].text;
-    console.log(label_column)
+    // console.log(label_column)
     if(that.graph){
         let labels;
         if(label_column != "row index"){
@@ -446,31 +444,22 @@ label_column_dropdown.onchange = function(){
 
 let pca_column_dropdown = document.getElementById("pca_column_selection");
 pca_column_dropdown.onchange = function(){
-    let pca_column = pca_column_dropdown.options[pca_column_dropdown.selectedIndex].text;
-    console.log(pca_column)
+    let color_col = pca_column_dropdown.options[pca_column_dropdown.selectedIndex].text;
+    let pca_info = {"color_col": color_col, "pca_dict":that.pca.points_dict, "selected_rows":that.pca.selected_rows}
+    console.log(that.pca.points_dict)
+    console.log(that.pca.selected_rows)
     if(that.graph){
-        let labels;
-        if(pca_column != "None"){
-            $.ajax({
-                type: "POST",
-                url: "/update_cluster_details",
-                data: pca_column,
-                dataType:'text',
-                success: function (response) {
-                    labels = JSON.parse(response).labels;
-                    that.graph.pca_column = pca_column;
-                    that.graph.pca_vals = labels;        
-                    that.graph.color_pca_results(that.graph.selected_nodes, pca_column, labels);
-
-                },
-                error: function (error) {
-                    console.log("error",error);
-                }
+        if(color_col != "None"){
+            $.post("/update_pca_coloring", {
+                data: JSON.stringify(pca_info)
+            }, function(res){
+                pca_dict = res.pca_dict;
+                color_type = res.color_type;
+                that.pca.draw_PCA(pca_dict, color_type);
             })
         } 
     }
 }
-
 
 // Extendability
 $.post("/module_extension",{
@@ -484,14 +473,11 @@ $.post("/module_extension",{
             let module_i = new New_Module(m_info);
             d3.select("#"+module_i.module_id+"_button")
                 .on("click", ()=>{
-                    console.log(module_i.module_name)
                     if(that.graph){
                         let selected_nodes = [...that.graph.selected_nodes];
-                        console.log(selected_nodes);
                         $.post("/module_computing",{
                             data: JSON.stringify({"nodes":selected_nodes, "module_info": m_info})
                         }, function(res){
-                            console.log(res)
                             module_i.data = res.s_dist.map(x=>+x);
                             // module_i.data = JSON.parse(res.module_result);
                             module_i.components.forEach(c=>{

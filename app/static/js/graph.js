@@ -1378,41 +1378,4 @@ class Graph{
 
         return color_dict;
     }
-
-
-    color_pca_results(nodes, pca_column, pca_vals){
-        console.log(pca_vals)
-        console.log(Math.min(...pca_vals), Math.max(...pca_vals))
-        let vertices_list = [];
-        // if(nodes.length === 0){
-        //     nodes = this.nodes;
-        // }
-        nodes.forEach(nId => {
-            let node_index = parseInt(nId)-1;
-            let node = this.nodes[node_index];
-            node.vertices.forEach(v=>{
-                if(vertices_list.indexOf(v)===-1){
-                    vertices_list.push(parseInt(v));
-                }
-            })
-        })
-        if (this.categorical_cols.indexOf(pca_column) != -1){
-
-        } else {
-            console.log(nodes)
-            console.log(vertices_list)
-            let colorScale = d3.scaleLinear()
-                .domain([Math.min(...pca_vals), Math.max(...pca_vals)])
-                .range(["yellow", "red"])
-            d3.selectAll(".pca-points")
-            .attr("fill", (d,i)=>{
-                // if (vertices_list.indexOf(i) != -1){
-                    return colorScale(-pca_vals[i])
-                // }
-            })
-        }
-        
-    }
-
-
 }
