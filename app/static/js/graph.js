@@ -68,13 +68,15 @@ class Graph{
     }
 
     toggle_graph_layout(){
+        $("#graph_layout_filter-container").remove();
         this.layout_alg = "fd";
         let layout_dropdown = document.getElementById("graph_layout_dropdown");
+        layout_dropdown.selectedIndex = 0;
         let that = this;
         layout_dropdown.onchange = function(){
             that.layout_alg = layout_dropdown.options[layout_dropdown.selectedIndex].value;
             if(that.layout_alg === "fd"){
-                $("#graph_layout_filter-container").remove()
+                $("#graph_layout_filter-container").remove();
                 that.draw_mapper_fd();
             } else if(that.layout_alg === "sorted"){
                 let filter_row = d3.select("#workspace-graph_layout").select(".block_body-inner").append("div")
@@ -333,7 +335,6 @@ class Graph{
                 }
             })
     }
-
 
     draw_color_legend(color_scale){
         // reset svg 
@@ -1536,52 +1537,52 @@ class Graph{
             .style("opacity", 0.6);
 
         function prepare_pie_data(node){
-            let coarse_label = 'aquatic_mammals'
-            let coarse_label2 = 'fish'
+            // let coarse_label = 'aquatic_mammals'
+            // let coarse_label2 = 'fish'
             let pie_data = [];
             for(let c in node.categorical_cols_summary[col_key]){
                 let p = {};
                 p.category_id = c;
                 p.value = node.categorical_cols_summary[col_key][c];
                 p.node_id = node.id;
-                if(col_key === "fine_label"){
-                    if(coarse_label in node.categorical_cols_summary['coarse_label'] || coarse_label2 in node.categorical_cols_summary['coarse_label']){
-                        if(Object.keys(color_dict).indexOf(c)!=-1){
-                            // if(color_dict[c]!=""){
-                                p.color = color_dict[c];
-                            } else {
-                                p.color = color_categorical(idx);
-                                // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
-                                idx += 1;
-                                color_dict[c] = p.color;
-                            }
-                    } else {
-                        p.color = "#fff";
-                        color_dict[c] = p.color;
-                    }
-                } else {
-                    if(Object.keys(color_dict).indexOf(c)!=-1){
-                    // if(color_dict[c]!=""){
-                        p.color = color_dict[c];
-                    } else {
-                        p.color = color_categorical(idx);
-                        // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
-                        idx += 1;
-                        color_dict[c] = p.color;
-                    }
-                    if(c != coarse_label && c != coarse_label2){
-                        p.color = "#fff"
-                    }
-                }
-                // if(Object.keys(color_dict).indexOf(c)!=-1){
-                // // if(color_dict[c]!=""){
-                //     p.color = color_dict[c];
+                // if(col_key === "fine_label"){
+                //     if(coarse_label in node.categorical_cols_summary['coarse_label'] || coarse_label2 in node.categorical_cols_summary['coarse_label']){
+                //         if(Object.keys(color_dict).indexOf(c)!=-1){
+                //             // if(color_dict[c]!=""){
+                //                 p.color = color_dict[c];
+                //             } else {
+                //                 p.color = color_categorical(idx);
+                //                 // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                //                 idx += 1;
+                //                 color_dict[c] = p.color;
+                //             }
+                //     } else {
+                //         p.color = "#fff";
+                //         color_dict[c] = p.color;
+                //     }
                 // } else {
-                //     p.color = color_categorical(idx);
-                //     // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
-                //     idx += 1;
-                //     color_dict[c] = p.color;
+                //     if(Object.keys(color_dict).indexOf(c)!=-1){
+                //     // if(color_dict[c]!=""){
+                //         p.color = color_dict[c];
+                //     } else {
+                //         p.color = color_categorical(idx);
+                //         // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                //         idx += 1;
+                //         color_dict[c] = p.color;
+                //     }
+                //     if(c != coarse_label && c != coarse_label2){
+                //         p.color = "#fff"
+                //     }
                 // }
+                if(Object.keys(color_dict).indexOf(c)!=-1){
+                // if(color_dict[c]!=""){
+                    p.color = color_dict[c];
+                } else {
+                    p.color = color_categorical(idx);
+                    // p.color = d3.interpolateRainbow((idx+1)/Object.keys(color_dict).length);
+                    idx += 1;
+                    color_dict[c] = p.color;
+                }
                 pie_data.push(p);
             }
             if(pie_data.length > 12){
