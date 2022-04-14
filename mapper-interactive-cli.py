@@ -183,13 +183,15 @@ def get_mapper_graph(df, clusterer, filter_str = "l2norm", interval=5, overlap=5
     df: pd.DataFrame
     """
     if len(selected_cols) == 0:
-        try:
-            df_np = df.to_numpy().astype("float")
-        except:
-            print("ERROR: Unable to convert input data to float!")
-            exit()
+        df_np = df.to_numpy()
     else:
-        df_np = df[selected_cols].to_numpy().astype("float")
+        df_np = df[selected_cols].to_numpy()
+    try:
+        df_np = df_np.astype("float")
+    except:
+        print("ERROR: Unable to convert input data to float!")
+        exit()
+
     if normalization:
         df_np = normalize_data(df_np, norm_type=normalization) 
     filter_fn = get_filter_fn(df[selected_cols].astype("float"), filter_str)
@@ -208,8 +210,6 @@ def get_mapper_graph(df, clusterer, filter_str = "l2norm", interval=5, overlap=5
 
     if is_enhanced_cover:
         cover = enhanced_Cover(interval, overlap / 100)
-        print(df_np)
-        print(filter_fn)
         multipass_cover = mapper_xmeans_centroid(df_np, filter_fn, cover, clusterer, iterations, max_intervals, BIC=BIC, delta=delta, method=method)
         g_multipass = generate_mapper_graph(df_np, filter_fn, multipass_cover, clusterer, refit_cover=False)
         g = graph_to_dict_enhanced(g_multipass)
@@ -376,7 +376,7 @@ if __name__ == '__main__':
     output_fname = fname.split("/")[-1]
 
     for overlap, interval in tqdm(itertools.product(overlaps, intervals)):
-        get_mapper_graph(df, clusterer, filter_str = filter_str, interval=interval, overlap=overlap, normalization=norm, output_dir=output_dir, output_fname=output_fname , selected_cols=cols_numerical, categorical_cols=cols_categorical,is_parallel=True, is_enhanced_cover=is_enhanced_cover, enhanced_parameters=None, n_threads=threads, metric=metric, use_gpu=gpu)
+        get_mapper_graph(df, clusterer, filter_str = filter_str, interval=interval, overlap=overlap, normalization=norm, output_dir=output_dir, output_fname=output_fname , selected_cols=cols_numerical, categorical_cols=cols_categorical,is_parallel=True, is_enhanced_cover=is_enhanced_cover, enhanced_parameters=enhanced_parameters, n_threads=threads, metric=metric, use_gpu=gpu)
         # g = graph_to_dict(mapper_wrapper(
         #     df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric, use_gpu=gpu))
         # if len(cols_categorical_idx) > 0:
