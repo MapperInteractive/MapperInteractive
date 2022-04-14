@@ -12,7 +12,9 @@ from os.path import join
 from tqdm import tqdm
 from sklearn.preprocessing import MinMaxScaler, normalize
 import re
-
+from app.enhanced_mapper.cover import Cover as enhanced_Cover
+from app.enhanced_mapper.mapper import generate_mapper_graph
+from app.enhanced_mapper.AdaptiveCover import mapper_xmeans_centroid
 
 def mkdir(f):
     if not os.path.exists(f):
@@ -22,8 +24,7 @@ def mkdir(f):
 
 def extract_range(s):
     s = s.strip().split(':')
-    assert len(
-        s) == 3, 'Invalid input format to either overlaps or intervals argument'
+    assert len(s) == 3 or len(s) == 1, 'Invalid input format to either overlaps or intervals argument'
     try:
         params = [int(x) for x in s]
     except:
@@ -32,9 +33,12 @@ def extract_range(s):
         exit()
     for x in params:
         assert x > 0, 'Can not have non-positive values for overlaps or intervals argument'
-    choices = [params[0] + params[-1] *
-               i for i in range((params[1]-params[0]) // params[-1])]
-    choices.append(params[1])
+    if len(s) == 1:
+        choices = [int(s[0])]
+    elif len(s) == 3:
+        choices = [params[0] + params[-1] *
+                i for i in range((params[1]-params[0]) // params[-1])]
+        choices.append(params[1])
     return choices
 
 
@@ -56,13 +60,12 @@ def get_filter_fn(X, filter, filter_params=None):
         filter_fn = np.concatenate((lens[0], lens[1]), axis=1)
     return filter_fn
 
-
-def mapper_wrapper(X, overlap, intervals, filter_fn, clusterer, **mapper_args):
+def mapper_wrapper(X, filter_fn, clusterer, cover, is_parallel=True, **mapper_args):
     mapper = km.KeplerMapper()
-    # graph = mapper.map_parallel(filter_fn, X, clusterer=clusterer, cover=km_cover.Cover(
-    #     n_cubes=intervals, perc_overlap=overlap / 100), **mapper_args)
-    graph = mapper.map(filter_fn, X, clusterer=clusterer, cover=km_cover.Cover(
-        n_cubes=intervals, perc_overlap=overlap / 100))
+    if is_parallel:
+        graph = mapper.map_parallel(filter_fn, X, clusterer=clusterer, cover=cover, **mapper_args)
+    else:
+        graph = mapper.map(filter_fn, X, clusterer=clusterer, cover=cover, **mapper_args)
     return graph
 
 
@@ -74,6 +77,29 @@ def graph_to_dict(g, **kwargs):
         d['nodes'][k] = g['nodes'][k]
     for k in g['links']:
         d['edges'][k] = g['links'][k]
+    for k in kwargs.keys():
+        d[k] = kwargs[k]
+    return d
+
+def get_node_id(node):
+    interval_idx = node.interval_index
+    cluster_idx = node.cluster_index
+    node_id = "node"+str(interval_idx)+str(cluster_idx)
+    return node_id
+
+def graph_to_dict_enhanced(g, **kwargs):
+    d = {}
+    d['nodes'] = {}
+    d['edges'] = {}
+    print(g)
+    for node in g.nodes:
+        node_id = get_node_id(node)
+        d['nodes'][node_id] = [int(m) for m in list(node.members)]
+    for k in g.edges:
+        node1_id, node2_id = get_node_id(k[0]), get_node_id(k[1])
+        if node1_id not in d['edges']:
+            d['edges'][node1_id] = []
+        d['edges'][node1_id].append(node2_id)
     for k in kwargs.keys():
         d[k] = kwargs[k]
     return d
@@ -152,6 +178,71 @@ def normalize_data(X, norm_type):
                             copy=False, return_norm=False)
     return X_prime
 
+def get_mapper_graph(df, clusterer, filter_str = "l2norm", interval=5, overlap=50, normalization=None, output_dir="./", output_fname="output", selected_cols=[], categorical_cols=[],is_parallel=True, is_enhanced_cover=False, enhanced_parameters=None, **mapper_args):
+    """
+    df: pd.DataFrame
+    """
+    if len(selected_cols) == 0:
+        try:
+            df_np = df.to_numpy().astype("float")
+        except:
+            print("ERROR: Unable to convert input data to float!")
+            exit()
+    else:
+        df_np = df[selected_cols].to_numpy().astype("float")
+    if normalization:
+        df_np = normalize_data(df_np, norm_type=normalization) 
+    filter_fn = get_filter_fn(df[selected_cols].astype("float"), filter_str)
+
+    max_intervals = 100
+    if enhanced_parameters!=None:
+        iterations = enhanced_parameters['iterations']
+        delta = enhanced_parameters['delta']
+        method = enhanced_parameters['method'] # ["BFS", "DFS", "randomized"]
+        BIC = enhanced_parameters['bic'] # ["BIC, "AIC"]
+    else:
+        iterations = 100
+        delta = 0.1
+        method = "BFS"
+        BIC = "BIC" 
+
+    if is_enhanced_cover:
+        cover = enhanced_Cover(interval, overlap / 100)
+        print(df_np)
+        print(filter_fn)
+        multipass_cover = mapper_xmeans_centroid(df_np, filter_fn, cover, clusterer, iterations, max_intervals, BIC=BIC, delta=delta, method=method)
+        g_multipass = generate_mapper_graph(df_np, filter_fn, multipass_cover, clusterer, refit_cover=False)
+        g = graph_to_dict_enhanced(g_multipass)
+
+    else:
+        cover = km_cover.Cover(n_cubes=interval, perc_overlap=overlap / 100)
+        g = graph_to_dict(mapper_wrapper(
+                df_np, filter_fn, clusterer, cover, is_parallel=is_parallel, **mapper_args))
+    for node_id in g['nodes']:
+        vertices = g['nodes'][node_id]
+        node = {}
+        node['categorical_cols_summary'] = {}
+        node['vertices'] = vertices
+        node['avgs'] = {}
+        node['avgs']['lens'] = np.mean(filter_fn[vertices])
+        for col in categorical_cols:
+            data_categorical_i = df[col].iloc[vertices]
+            node['categorical_cols_summary'][col] = data_categorical_i.value_counts().to_dict()
+        g['nodes'][node_id] = node
+    g['categorical_cols'] = list(categorical_cols)
+    numerical_col_keys = ['lens']
+    g['numerical_col_keys'] = list(numerical_col_keys)  
+    
+    if is_enhanced_cover:
+        filename = 'mapper_' + str(output_fname) + '_' + str(interval) + '_' + str(overlap) + '_enhanced.json'
+    else:
+        filename = 'mapper_' + str(output_fname) + '_' + str(interval) + '_' + str(overlap) + '.json'
+
+    with open(join(output_dir, filename), 'w') as fp:
+        json.dump(g, fp)
+
+    
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -159,9 +250,9 @@ if __name__ == '__main__':
     parser.add_argument('input', type=str,
                         help='Specific input (must be CSV file)')
     parser.add_argument('-i', '--intervals', type=str, required=True,
-                        help='Intervals to use in the form START:END:STEP')
+                        help='Intervals to use in the form INTERVAL_NUM or START:END:STEP')
     parser.add_argument('-o', '--overlaps', type=str, required=True,
-                        help='Overlaps to use in the form START:END:STEP (expects integers)')
+                        help='Overlaps to use in the form OVERLAP_VAL or START:END:STEP (expects integers)')
     parser.add_argument('-f', '--filter', type=str, required=True,
                         help='Which filter function to use. See docs for choices.')
     parser.add_argument('-output', type=str,
@@ -195,6 +286,19 @@ if __name__ == '__main__':
     parser.add_argument('--metric', default='euclidean',
                         help='Metric for DBSCAN')
     parser.add_argument('--preprocess_only', action='store_true')
+
+    # Enhanced Mapper args
+    parser.add_argument(
+        '--enhanced_cover', type=bool, help='If true, optimization will be applied to compute the enhanced cover', default=False, required=False)
+    parser.add_argument(
+        '--iterations', type=int, help='Number of iterations', default=100, required=False)
+    parser.add_argument(
+        '--delta', type=float, help='The convergence threshold', default=0.1, required=False)
+    parser.add_argument(
+        '--method', type=str, help='BFS, DFS or randomized', default="BFS", required=False)
+    parser.add_argument(
+        '--bic', type=str, help='BIC or AIC', default="BIC", required=False)
+    
     args = parser.parse_args()
 
     fname = args.input
@@ -209,24 +313,31 @@ if __name__ == '__main__':
     metric = args.metric
     norm = args.norm
     preprocess_only = args.preprocess_only
+    is_enhanced_cover = args.enhanced_cover
+    enhanced_parameters = {"iterations": args.iterations, "delta": args.delta, "method": args.method, "bic": args.bic}
+    print(enhanced_parameters)
 
     # Setup
     mkdir(output_dir)
     df = pd.read_csv(fname)
+    cols = df.columns
+    cols_numerical = []
+    cols_categorical = []
     if preprocess_only:
         df, cols_numerical_idx, cols_categorical_idx = wrangle_csv(df)
         df.to_csv(join(output_dir, 'wrangled_data.csv'))
         exit()
     elif not no_preprocess:
         df, cols_numerical_idx, cols_categorical_idx = wrangle_csv(df)
+    if cols_numerical_idx:
+        cols_numerical = cols[cols_numerical_idx]
+    if cols_categorical_idx:
+        cols_categorical = cols[cols_categorical_idx]
 
     # Regardless, we want to save the data for bookkeeping
     df.to_csv(join(output_dir, 'wrangled_data.csv'), index=False)
-    df_np = df.iloc[:,cols_numerical_idx].to_numpy()
-    df_np = normalize_data(df_np, norm_type=norm)
     overlaps = extract_range(overlaps_str)
     intervals = extract_range(intervals_str)
-    filter_fn = get_filter_fn(df.iloc[:,cols_numerical_idx].astype("float"), filter_str, filter_params=None)
 
     meta = {'data': fname, 'intervals': intervals_str,
             'overlaps': overlaps_str, 'filter': filter_str, 'normalization': norm}
@@ -265,19 +376,20 @@ if __name__ == '__main__':
     output_fname = fname.split("/")[-1]
 
     for overlap, interval in tqdm(itertools.product(overlaps, intervals)):
-        g = graph_to_dict(mapper_wrapper(
-            df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric, use_gpu=gpu))
-        if len(cols_categorical_idx) > 0:
-            categorical_cols = df.columns[cols_categorical_idx]
-            for node_id in g['nodes']:
-                vertices = g['nodes'][node_id]
-                node = {'vertices': vertices}
-                node['categorical_cols_summary'] = {}
-                for col in categorical_cols:
-                    data_categorical_i = df[col].iloc[vertices]
-                    node['categorical_cols_summary'][col] = data_categorical_i.value_counts().to_dict()
-                g['nodes'][node_id] = node
-            g['categorical_cols'] = list(categorical_cols)
+        get_mapper_graph(df, clusterer, filter_str = filter_str, interval=interval, overlap=overlap, normalization=norm, output_dir=output_dir, output_fname=output_fname , selected_cols=cols_numerical, categorical_cols=cols_categorical,is_parallel=True, is_enhanced_cover=is_enhanced_cover, enhanced_parameters=None, n_threads=threads, metric=metric, use_gpu=gpu)
+        # g = graph_to_dict(mapper_wrapper(
+        #     df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric, use_gpu=gpu))
+        # if len(cols_categorical_idx) > 0:
+        #     categorical_cols = df.columns[cols_categorical_idx]
+        #     for node_id in g['nodes']:
+        #         vertices = g['nodes'][node_id]
+        #         node = {'vertices': vertices}
+        #         node['categorical_cols_summary'] = {}
+        #         for col in categorical_cols:
+        #             data_categorical_i = df[col].iloc[vertices]
+        #             node['categorical_cols_summary'][col] = data_categorical_i.value_counts().to_dict()
+        #         g['nodes'][node_id] = node
+        #     g['categorical_cols'] = list(categorical_cols)
 
-        with open(join(output_dir, 'mapper_' + str(output_fname) + '_' + str(interval) + '_' + str(overlap) + '.json'), 'w+') as fp:
-            json.dump(g, fp)
+        # with open(join(output_dir, 'mapper_' + str(output_fname) + '_' + str(interval) + '_' + str(overlap) + '.json'), 'w+') as fp:
+        #     json.dump(g, fp)
