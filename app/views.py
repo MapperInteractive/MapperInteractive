@@ -357,7 +357,7 @@ def _call_kmapper(data, col_names, interval, overlap, clustering_alg, clustering
     print(np.max(np.max(data_new)))
     print(np.mean(np.mean(data_new)))
     if clustering_alg == "DBSCAN":
-        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=float(clustering_alg_params["eps"]), min_samples=float(clustering_alg_params["min_samples"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
+        graph = mapper.map_parallel(lens, data_new, clusterer=cluster.DBSCAN(eps=float(clustering_alg_params["eps"]), min_samples=int(clustering_alg_params["min_samples"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
     elif clustering_alg == "Agglomerative Clustering":
         graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering(n_clusters=None, linkage=clustering_alg_params["linkage"], distance_threshold=float(clustering_alg_params["dist"])), cover=Cover(n_cubes=interval, perc_overlap=overlap))
         # graph = mapper.map_parallel(lens, data_new, clusterer=cluster.AgglomerativeClustering( linkage=clustering_alg_params["linkage"]), cover=Cover(n_cubes=interval, perc_overlap=overlap))
