@@ -10,4 +10,4 @@ app.config['DEBUG'] = True
 app.config['ASSETS_DEBUG'] = True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 from .util import assets
-from app import views
+from . import views

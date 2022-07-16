@@ -1,6 +1,4 @@
-# Mapper Interactive
-
-
+# Mapper interactive
 
 Mapper Interactive is a web-based framework for interactive analysis and visualization of high-dimensional point cloud data  built upon the Mapper algorithm. It is an open source software released under the MIT License.
 
