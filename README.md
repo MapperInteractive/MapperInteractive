@@ -8,32 +8,19 @@ The Mapper algorithm is a tool from topological data analysis first introduced b
 ## Installation
 
 ```bash
-git clone https://github.com/MapperInteractive/MapperInteractive.git (or git clone git@github.com:MapperInteractive/MapperInteractive.git)
-cd MapperInteractive
-python3 run.py
+pip install mapper-interactive
+python -m  mapper_interactive
 ```
 
-After running the above commands, you can run Mapper Interactive by visiting http://127.0.0.1:8080/ on the local machine (If possible, please use Chrome).
+After running the above commands, a web browser should open with MapperInteractive running.
 
-## Dependencies
-This software requires [Kepler Mapper](https://kepler-mapper.scikit-tda.org/), [scikit-learn](https://scikit-learn.org/stable/), [NetworkX](https://networkx.github.io/) and [flask](https://flask.palletsprojects.com/en/1.1.x/) to run.
+## Optional Dependencies
 
-If you do not have these packages installed, please use the following command to intall them.
+To perform linear regression please install `mapper-interactive` with optional dependencies.
 
-```bash
-pip install scikit-learn
-pip install networkx
-pip install flask
-pip install flask_assets
+```sh
+pip install mapper_interactive[linear]
 ```
-
-To perform linear regression, please also make sure you have [statsmodels](https://www.statsmodels.org/stable/index.html) installed.
-```bash
-pip install statsmodels
-```
-
-## Loading a dataset
-When loading a dataset into the interface, please make sure to put the data file to be loaded in the folder ``app/static/uploads/``.
 
 ## Command-line API
 Please refer to a user-guide [here](CLI_README.md) for the command-line API.
