@@ -1,37 +1,35 @@
 from __future__ import division
 
-from collections import defaultdict
-from datetime import datetime
 import inspect
 import itertools
 import os
+
 # from platform import dist
 import sys
 import warnings
+from collections import defaultdict
+from datetime import datetime
 
-from jinja2 import Environment, FileSystemLoader, Template
 import numpy as np
 import sklearn
-from sklearn import cluster, preprocessing, manifold, decomposition
-from sklearn.model_selection import StratifiedKFold, KFold
+from jinja2 import Environment, FileSystemLoader, Template
+from scipy.sparse import hstack, issparse
 from scipy.spatial import distance
-from scipy.sparse import issparse, hstack
+from sklearn import cluster, decomposition, manifold, preprocessing
+from sklearn.model_selection import KFold, StratifiedKFold
 
 from .cover import Cover
 from .nerve import GraphNerve
 from .visuals import (
-    init_color_function,
-    format_meta,
-    format_mapper_data,
     build_histogram,
-    graph_data_distribution,
     colorscale_default,
+    format_mapper_data,
+    format_meta,
+    graph_data_distribution,
+    init_color_function,
 )
 
-__all__ = [
-    "KeplerMapper",
-    "cluster"  # expose this to make examples and usage tidier
-]
+__all__ = ["KeplerMapper", "cluster"]  # expose this to make examples and usage tidier
 
 
 class KeplerMapper(object):
@@ -48,7 +46,7 @@ class KeplerMapper(object):
 
     KM has a number of nice features, some which get forgotten.
         - ``project``: Some projections it makes sense to use a distance matrix, such as knn_distance_#. Using ``distance_matrix = <metric>`` for a custom metric.
-        - ``fit_transform``: Applies a sequence of projections. Currently, this API is a little confusing and might be changed in the future. 
+        - ``fit_transform``: Applies a sequence of projections. Currently, this API is a little confusing and might be changed in the future.
 
 
 
@@ -99,7 +97,7 @@ class KeplerMapper(object):
             Scaler of the data applied after mapping. Use None for no scaling. Default = preprocessing.MinMaxScaler() if None, do no scaling, else apply scaling to the projection. Default: Min-Max scaling
 
         distance_matrix : Either str or None
-            If not None, then any of ["braycurtis", "canberra", "chebyshev", "cityblock", "correlation", "cosine", "dice", "euclidean", "hamming", "jaccard", "kulsinski", "mahalanobis", "matching", "minkowski", "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", "sokalsneath", "sqeuclidean", "yule"]. 
+            If not None, then any of ["braycurtis", "canberra", "chebyshev", "cityblock", "correlation", "cosine", "dice", "euclidean", "hamming", "jaccard", "kulsinski", "mahalanobis", "matching", "minkowski", "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", "sokalsneath", "sqeuclidean", "yule"].
             If False do nothing, else create a squared distance matrix with the chosen metric, before applying the projection.
 
         Returns
@@ -163,7 +161,9 @@ class KeplerMapper(object):
 
         # Sae original values off so they can be referenced by later functions in the pipeline
         self.inverse = X
-        scaler = preprocessing.MinMaxScaler() if scaler == "default:MinMaxScaler" else scaler
+        scaler = (
+            preprocessing.MinMaxScaler() if scaler == "default:MinMaxScaler" else scaler
+        )
         self.scaler = scaler
         self.projection = str(projection)
         self.distance_matrix = distance_matrix
@@ -244,8 +244,7 @@ class KeplerMapper(object):
             }
 
             if projection in projection_funcs.keys():
-                X = projection_funcs[projection](
-                    X, axis=1).reshape((X.shape[0], 1))
+                X = projection_funcs[projection](X, axis=1).reshape((X.shape[0], 1))
 
             if "knn_distance_" in projection:
                 n_neighbors = int(projection.split("_")[2])
@@ -298,7 +297,7 @@ class KeplerMapper(object):
 
         Examples
         --------
-        >>> # Stack / chain projections. You could do this manually, 
+        >>> # Stack / chain projections. You could do this manually,
         >>> # or pipeline with `.fit_transform()`. Works the same as `.project()`,
         >>> # but accepts lists. f(raw text) -> f(tfidf) -> f(isomap 100d) -> f(umap 2d)
         >>> projected_X = mapper.fit_transform(
@@ -321,7 +320,9 @@ class KeplerMapper(object):
         """
 
         projections = projection
-        scaler = preprocessing.MinMaxScaler() if scaler == "default:MinMaxScaler" else scaler
+        scaler = (
+            preprocessing.MinMaxScaler() if scaler == "default:MinMaxScaler" else scaler
+        )
         scalers = scaler
         distance_matrices = distance_matrix
 
@@ -348,11 +349,9 @@ class KeplerMapper(object):
             distance_matrices = [distance_matrices[0]] * len(projections)
 
         if self.verbose > 0:
-            print("..Composing projection pipeline of length %s:" %
-                  (len(projections)))
+            print("..Composing projection pipeline of length %s:" % (len(projections)))
             print("\tProjections: %s" % ("\n\t\t".join(map(str, projections))))
-            print("\tDistance matrices: %s" %
-                  ("\n".join(map(str, distance_matrices))))
+            print("\tDistance matrices: %s" % ("\n".join(map(str, distance_matrices))))
             print("\tScalers: %s" % ("\n".join(map(str, scalers))))
 
         # Pipeline Stack the projection functions
@@ -374,20 +373,20 @@ class KeplerMapper(object):
     """
 
     def map_parallel(
-            self,
-            lens,
-            X=None,
-            clusterer=cluster.DBSCAN(eps=0.5, min_samples=3),
-            cover=Cover(n_cubes=10, perc_overlap=0.1),
-            nerve=GraphNerve(),
-            precomputed=False,
-            remove_duplicate_nodes=False,
-            metric='euclidean',
-            use_gpu=False,
-            # These arguments are all deprecated
-            overlap_perc=None,
-            nr_cubes=None,
-            n_threads=16,
+        self,
+        lens,
+        X=None,
+        clusterer=cluster.DBSCAN(eps=0.5, min_samples=3),
+        cover=Cover(n_cubes=10, perc_overlap=0.1),
+        nerve=GraphNerve(),
+        precomputed=False,
+        remove_duplicate_nodes=False,
+        metric="euclidean",
+        use_gpu=False,
+        # These arguments are all deprecated
+        overlap_perc=None,
+        nr_cubes=None,
+        n_threads=16,
     ):
         """Apply Mapper algorithm on this projection and build a simplicial complex. Returns a dictionary with nodes and links.
 
@@ -541,13 +540,15 @@ class KeplerMapper(object):
 
         # define a helper function that takes a hypercube and clusterer and returns cluster predictions
         from sklearn.metrics.pairwise import pairwise_distances
-        if use_gpu and metric == 'euclidean':
+
+        if use_gpu and metric == "euclidean":
             import torch
+
             out_of_memory = -1
             cuda_avail = torch.cuda.is_available()
 
             def torch_cdist(X):
-                tensor = torch.from_numpy(X).to(torch.device('cuda'))
+                tensor = torch.from_numpy(X).to(torch.device("cuda"))
                 d = torch.cdist(tensor, tensor, p=2)
                 d = d.cpu().numpy()
                 return d
@@ -562,19 +563,26 @@ class KeplerMapper(object):
                     fit_data = fit_data[:, ids]
 
                 c = sklearn.base.clone(clusterer)
-                c.metric = 'precomputed'
+                c.metric = "precomputed"
                 c.n_jobs = n_threads
 
-                if use_gpu and metric == 'euclidean' and cuda_avail and (out_of_memory == -1 or fit_data.shape[0] < out_of_memory):
+                if (
+                    use_gpu
+                    and metric == "euclidean"
+                    and cuda_avail
+                    and (out_of_memory == -1 or fit_data.shape[0] < out_of_memory)
+                ):
                     try:
                         dist_mat = torch_cdist(fit_data)
                     except RuntimeError:
                         out_of_memory = fit_data.shape[0]
                         dist_mat = pairwise_distances(
-                            fit_data, n_jobs=n_threads, metric=metric)
+                            fit_data, n_jobs=n_threads, metric=metric
+                        )
                 else:
                     dist_mat = pairwise_distances(
-                        fit_data, n_jobs=n_threads, metric=metric)
+                        fit_data, n_jobs=n_threads, metric=metric
+                    )
 
                 # if self.verbose > 1:
                 #     print(f'Computed distance matrix of shape{dist_mat.shape} in {datetime.now() - start}')
@@ -591,6 +599,7 @@ class KeplerMapper(object):
                 return None
 
         from joblib import Parallel, delayed
+
         hypercubes = self.cover.transform(lens)
         # cluster_predictions_precomputed = [cluster_helper(hypercube, idx) for idx, hypercube in enumerate(hypercubes)]
         # cluster_predictions_precomputed = Parallel(n_jobs=4, prefer='threads')(delayed(cluster_helper)(hypercube)
@@ -608,7 +617,8 @@ class KeplerMapper(object):
 
                 if self.verbose > 1:
                     print(
-                        f'[{i}]: Completed clustering in {datetime.now() - clustering_start} for num_points={hypercube.shape[0]}')
+                        f"[{i}]: Completed clustering in {datetime.now() - clustering_start} for num_points={hypercube.shape[0]}"
+                    )
                     print(
                         "   > Found %s clusters.\n"
                         % (
@@ -695,7 +705,7 @@ class KeplerMapper(object):
         precomputed : Boolean
             Tell Mapper whether the data that you are clustering on is a precomputed distance matrix. If set to
             `True`, the assumption is that you are also telling your `clusterer` that `metric='precomputed'` (which
-            is an argument for DBSCAN among others), which 
+            is an argument for DBSCAN among others), which
             will then cause the clusterer to expect a square distance matrix for each hypercube. `precomputed=True` will give a square matrix
             to the clusterer to fit on for each hypercube.
 
@@ -714,9 +724,9 @@ class KeplerMapper(object):
         overlap_perc: Float
             .. deprecated:: 1.1.6
 
-                define Cover explicitly in future versions    
+                define Cover explicitly in future versions
 
-            The percentage of overlap "between" the intervals/hypercubes. Default = 0.1. 
+            The percentage of overlap "between" the intervals/hypercubes. Default = 0.1.
 
 
 
@@ -735,10 +745,10 @@ class KeplerMapper(object):
         >>> graph = mapper.map(X_projected)
 
         >>> # Use 20 cubes/intervals per projection dimension, with a 50% overlap
-        >>> graph = mapper.map(X_projected, X_inverse, 
+        >>> graph = mapper.map(X_projected, X_inverse,
         >>>                    cover=kmapper.Cover(n_cubes=20, perc_overlap=0.5))
 
-        >>> # Use multiple different cubes/intervals per projection dimension, 
+        >>> # Use multiple different cubes/intervals per projection dimension,
         >>> # And vary the overlap
         >>> graph = mapper.map(X_projected, X_inverse,
         >>>                    cover=km.Cover(n_cubes=[10,20,5],
@@ -787,7 +797,7 @@ class KeplerMapper(object):
         ids = np.array([x for x in range(lens.shape[0])])
         lens = np.c_[ids, lens]
         if issparse(X):
-            X = hstack([ids[np.newaxis].T, X], format='csr')
+            X = hstack([ids[np.newaxis].T, X], format="csr")
         else:
             X = np.c_[ids, X]
 
@@ -812,7 +822,8 @@ class KeplerMapper(object):
         if self.verbose > 1:
             print(
                 "Minimal points in hypercube before clustering: {}".format(
-                    min_cluster_samples)
+                    min_cluster_samples
+                )
             )
 
         # Subdivide the projected data X in intervals/hypercubes with overlap
@@ -842,7 +853,8 @@ class KeplerMapper(object):
                         % (
                             np.unique(
                                 cluster_predictions[cluster_predictions > -1]
-                            ).shape[0], i
+                            ).shape[0],
+                            i,
                         )
                     )
 
@@ -851,8 +863,11 @@ class KeplerMapper(object):
                     if pred != -1 and not np.isnan(pred):
                         cluster_id = "cube{}_cluster{}".format(i, int(pred))
 
-                        nodes[cluster_id] = hypercube[:, 0][cluster_predictions == pred].astype(
-                            int).tolist()
+                        nodes[cluster_id] = (
+                            hypercube[:, 0][cluster_predictions == pred]
+                            .astype(int)
+                            .tolist()
+                        )
             elif self.verbose > 1:
                 print("Cube_%s is empty.\n" % (i))
 
@@ -910,8 +925,7 @@ class KeplerMapper(object):
         nodes = graph["nodes"]
         nr_links = sum(len(v) for k, v in links.items())
 
-        print("\nCreated %s edges and %s nodes in %s." %
-              (nr_links, len(nodes), time))
+        print("\nCreated %s edges and %s nodes in %s." % (nr_links, len(nodes), time))
 
     def visualize(
         self,
@@ -943,7 +957,7 @@ class KeplerMapper(object):
             file name for outputing the resulting html.
 
         custom_meta: dict
-            Render (key, value) in the Mapper Summary pane. 
+            Render (key, value) in the Mapper Summary pane.
 
         custom_tooltip: list or array like
             Value to display for each entry in the node. The cluster data pane will display entry for all values in the node. Default is index of data.
@@ -987,7 +1001,7 @@ class KeplerMapper(object):
 
         >>> # Customizing the output text
         >>> html = mapper.visualize(
-        >>>     graph, 
+        >>>     graph,
         >>>     path_html="kepler-mapper-output.html",
         >>>     title="Fashion MNIST with UMAP",
         >>>     custom_meta={"Description":"A short description.",
@@ -1010,7 +1024,7 @@ class KeplerMapper(object):
         >>> # Customizing the tooltips with binary target variables
         >>> X, y = split_data(df)
         >>> html = mapper.visualize(
-        >>>     graph, 
+        >>>     graph,
         >>>     path_html="kepler-mapper-output.html",
         >>>     title="Fashion MNIST with UMAP",
         >>>     custom_tooltips=y
@@ -1018,7 +1032,7 @@ class KeplerMapper(object):
 
         >>> # Customizing the tooltips with html-strings: locally stored images of an image dataset
         >>> html = mapper.visualize(
-        >>>     graph, 
+        >>>     graph,
         >>>     path_html="kepler-mapper-output.html",
         >>>     title="Fashion MNIST with UMAP",
         >>>     custom_tooltips=np.array(
@@ -1068,13 +1082,11 @@ class KeplerMapper(object):
         mapper_summary = format_meta(graph, custom_meta)
 
         # Find the absolute module path and the static files
-        js_path = os.path.join(os.path.dirname(
-            __file__), "static", "kmapper.js")
+        js_path = os.path.join(os.path.dirname(__file__), "static", "kmapper.js")
         with open(js_path, "r") as f:
             js_text = f.read()
 
-        css_path = os.path.join(os.path.dirname(
-            __file__), "static", "style.css")
+        css_path = os.path.join(os.path.dirname(__file__), "static", "style.css")
         with open(css_path, "r") as f:
             css_text = f.read()
 
@@ -1167,8 +1179,7 @@ class KeplerMapper(object):
 
             if estimator_type == "classifier":
                 X_blend = np.zeros((X_data.shape[0], np.unique(y).shape[0]))
-                skf = StratifiedKFold(
-                    n_splits=5, shuffle=True, random_state=1729)
+                skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1729)
 
                 blend(X_blend, model.predict_proba, skf, X_data, y)
             elif estimator_type == "regressor":

@@ -1,8 +1,9 @@
-import numpy as np
 import math
 from abc import ABC, abstractmethod
-from sklearn.metrics import pairwise_distances
 from functools import cmp_to_key
+
+import numpy as np
+from sklearn.metrics import pairwise_distances
 
 
 class AbstractCover(ABC):
@@ -16,7 +17,9 @@ class AbstractCover(ABC):
     overlap_mapping = None
 
     @abstractmethod
-    def compute_intervals(self, bound_min: int, bound_max: int, lens: np.ndarray = None):
+    def compute_intervals(
+        self, bound_min: int, bound_max: int, lens: np.ndarray = None
+    ):
         pass
 
     def fit_intervals(self, lens: np.ndarray):
@@ -34,7 +37,7 @@ class AbstractCover(ABC):
     def fit_overlaps(self, lens: np.ndarray):
         # Generator bodies are not run when created. Exception will only occur when looping.
         if not self.enhanced:
-            raise AttributeError('Cover was not set to enhanced mapper cover.')
+            raise AttributeError("Cover was not set to enhanced mapper cover.")
 
         # Lens must be shaped (N,) np array
         if not self.fitted:
@@ -71,7 +74,7 @@ class AbstractCover(ABC):
         len = interval[1] - interval[0]
         new_len = len / (2 - self.percent_overlap)
         interval[1] = interval[0] + new_len
-        intervals_list.insert(idx+1, [end - new_len, end])
+        intervals_list.insert(idx + 1, [end - new_len, end])
         self.intervals = np.asarray(intervals_list)
         self.num_intervals += 1
 
@@ -80,7 +83,9 @@ class AbstractCover(ABC):
         # print('merge', i, j)
         if self.enhanced:
             raise NotImplementedError()
-        assert j == i+1 and j < self.intervals.shape[0] and i < self.intervals.shape[0]
+        assert (
+            j == i + 1 and j < self.intervals.shape[0] and i < self.intervals.shape[0]
+        )
         intervals_list = self.intervals.tolist()
         end = intervals_list[j][1]
         start = intervals_list[i][0]
@@ -93,6 +98,7 @@ class AbstractCover(ABC):
     def remove_duplicate_cover_elements(self):
         # Sort the cover elements by starting element
         intervals_list = self.intervals.tolist()
+
         def c(a, b):
             if a[0] < b[0]:
                 return -1
@@ -118,7 +124,7 @@ class AbstractCover(ABC):
                 # Contained case
                 elif a[0] <= b[0] and a[1] >= b[1]:
                     marked_for_deletion.append(b)
-        print(f'Deleted {len(marked_for_deletion)} intervals')
+        print(f"Deleted {len(marked_for_deletion)} intervals")
         for d in marked_for_deletion:
             if d in intervals_list:  # Might have duplicates due to numerical quirks
                 intervals_list.remove(d)
@@ -128,33 +134,42 @@ class AbstractCover(ABC):
         self.num_intervals = len(intervals_list)
 
 
-
 class Cover(AbstractCover):
-
-    def __init__(self, num_intervals: int, percent_overlap: float, enhanced: bool = False):
-        assert num_intervals > 1 and percent_overlap > 0 and percent_overlap < 1, 'Bad params for Cover.'
-        self.num_intervals, self.percent_overlap, self.enhanced = num_intervals, percent_overlap, enhanced
+    def __init__(
+        self, num_intervals: int, percent_overlap: float, enhanced: bool = False
+    ):
+        assert (
+            num_intervals > 1 and percent_overlap > 0 and percent_overlap < 1
+        ), "Bad params for Cover."
+        self.num_intervals, self.percent_overlap, self.enhanced = (
+            num_intervals,
+            percent_overlap,
+            enhanced,
+        )
         self.intervals, self.interval_mapping = None, None
         self.fitted = False
         self.enhanced = enhanced
         if self.enhanced:
             self.overlaps, self.overlap_mapping = None, None
 
-    def compute_intervals(self, bound_min: float, bound_max: float, lens: np.ndarray = None):
+    def compute_intervals(
+        self, bound_min: float, bound_max: float, lens: np.ndarray = None
+    ):
         self.fitted = True
         total_length: float = bound_max - bound_min
 
         # Total length = num_cover * length_each_cover_element * (1-percent_overlap) + length_each_cover_element * percent_overlap
         # => interval_length = total / (n*(1-p) + p)
-        interval_length: float = total_length / \
-                                 (self.num_intervals * (1 - self.percent_overlap) + self.percent_overlap)
+        interval_length: float = total_length / (
+            self.num_intervals * (1 - self.percent_overlap) + self.percent_overlap
+        )
 
         # Amount overlap in absolute value terms
         overlap_length: float = interval_length * self.percent_overlap
 
         # Num intervals x 2 - bounds intervals
         intervals: np.ndarray = np.zeros((self.num_intervals, 2))
-        start_of_interval: float = 0.
+        start_of_interval: float = 0.0
         for i in range(self.num_intervals):
             end_of_interval: float = start_of_interval + interval_length
             intervals[i][0], intervals[i][1] = start_of_interval, end_of_interval
@@ -174,15 +189,22 @@ class Cover(AbstractCover):
             self.overlaps = overlaps.astype(int)
 
 
-
 class UniformCover(AbstractCover):
     """
     Ensures each interval has an equal number of points.
     """
 
-    def __init__(self, num_intervals: int, percent_overlap: float, enhanced: bool = False):
-        assert num_intervals > 1 and percent_overlap > 0 and percent_overlap < 1, 'Bad params for Cover.'
-        self.num_intervals, self.percent_overlap, self.enhanced = num_intervals, percent_overlap, enhanced
+    def __init__(
+        self, num_intervals: int, percent_overlap: float, enhanced: bool = False
+    ):
+        assert (
+            num_intervals > 1 and percent_overlap > 0 and percent_overlap < 1
+        ), "Bad params for Cover."
+        self.num_intervals, self.percent_overlap, self.enhanced = (
+            num_intervals,
+            percent_overlap,
+            enhanced,
+        )
         self.intervals, self.interval_mapping = None, None
         self.fitted = False
         self.enhanced = enhanced
@@ -202,7 +224,9 @@ class UniformCover(AbstractCover):
         # Compute points per interval and overlap
         self.sorted_lens_idx = np.argsort(lens.flatten())
         sorted_lens = lens.flatten()[self.sorted_lens_idx]
-        points_per_interval = num_pts / (self.num_intervals - ((self.num_intervals - 1) * self.percent_overlap))
+        points_per_interval = num_pts / (
+            self.num_intervals - ((self.num_intervals - 1) * self.percent_overlap)
+        )
         # Round both since we can't have a fraction of a point
         points_per_overlap = math.floor(self.percent_overlap * points_per_interval)
         points_per_interval = math.floor(points_per_interval)
@@ -262,7 +286,9 @@ class CentroidCover(AbstractCover):
                 modified = a
                 length = a_len
                 other_length = b_len
-            extension = (total_length - length - other_length + min_overlap * length) / (1 - min_overlap)
+            extension = (
+                total_length - length - other_length + min_overlap * length
+            ) / (1 - min_overlap)
             if modified == b:
                 modified[0] = modified[0] - extension
             else:
@@ -294,9 +320,13 @@ class CentroidCover(AbstractCover):
 
         cluster_intervals.sort(key=cmp_to_key(c))
         cluster_intervals = self._remove_duplicate_intervals(cluster_intervals)
-        cluster_intervals = self._ensure_min_overlap(cluster_intervals, self.percent_overlap)
+        cluster_intervals = self._ensure_min_overlap(
+            cluster_intervals, self.percent_overlap
+        )
         self.intervals = cluster_intervals
         self.num_intervals = len(cluster_intervals)
 
-    def compute_intervals(self, bound_min: int, bound_max: int, lens: np.ndarray = None):
+    def compute_intervals(
+        self, bound_min: int, bound_max: int, lens: np.ndarray = None
+    ):
         pass

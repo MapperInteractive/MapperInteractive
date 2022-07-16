@@ -1,10 +1,10 @@
 # A small helper class to house functions needed by KeplerMapper.visualize
+import json
+from ast import literal_eval
+from collections import defaultdict
+
 import numpy as np
 from sklearn import preprocessing
-import json
-from collections import defaultdict
-from ast import literal_eval
-
 
 colorscale_default = [
     [0.0, "rgb(68, 1, 84)"],  # Viridis
@@ -58,8 +58,8 @@ palette = [
 
 
 def _colors_to_rgb(colorscale):
-    """ Ensure that the color scale is formatted in rgb strings. 
-        If the colorscale is a hex string, then convert to rgb.
+    """Ensure that the color scale is formatted in rgb strings.
+    If the colorscale is a hex string, then convert to rgb.
     """
     if colorscale[0][1][0] == "#":
         plotly_colors = np.array(colorscale)[:, 1].tolist()
@@ -79,9 +79,9 @@ def _to_html_format(st):
 
 
 def _map_val2color(val, vmin, vmax, colorscale=None):
-    """ Maps a value val in [vmin, vmax] to the corresponding color in
-        the colorscale
-        returns the rgb color code of that color
+    """Maps a value val in [vmin, vmax] to the corresponding color in
+    the colorscale
+    returns the rgb color code of that color
     """
     colorscale = colorscale or colorscale_default
 
@@ -210,8 +210,7 @@ def format_mapper_data(
 
 
 def build_histogram(data, colorscale=None, nbins=10):
-    """ Build histogram of data based on values of color_function
-    """
+    """Build histogram of data based on values of color_function"""
 
     if colorscale is None:
         colorscale = colorscale_default

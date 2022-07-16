@@ -7,6 +7,7 @@ except:
 
 import warnings
 from itertools import product
+
 import numpy as np
 
 # TODO: Incorporate @pablodecm's cover API.
@@ -14,22 +15,23 @@ import numpy as np
 
 __all__ = ["Cover", "CubicalCover"]
 
+
 class Cover:
     """Helper class that defines the default covering scheme
 
     It calculates the cover based on the following formula for overlap. (https://arxiv.org/pdf/1706.00204.pdf)
 
-    ::   
+    ::
 
                      |cube[i] intersection cube[i+1]|
         overlap = --------------------------------------
                               |cube[i]|
-    
+
 
     Parameters
     ============
 
-    n_cubes: int 
+    n_cubes: int
         Number of hypercubes along each dimension. Sometimes referred to as resolution.
 
     perc_overlap: float
@@ -40,7 +42,7 @@ class Cover:
         If a value is set to `np.float('inf')`, the bound will be assumed to be the min/max value of the dimension
         Also, if `limits == None`, the limits are defined by the maximum and minimum value of the lens for all dimensions.
         i.e. `[[min_1, max_1], [min_2, max_2], [min_3, max_3]]`
-    
+
     Example
     ---------
 
@@ -133,7 +135,7 @@ class Cover:
         return bounds
 
     def fit(self, data):
-        """ Fit a cover on the data. This method constructs centers and radii in each dimension given the `perc_overlap` and `n_cube`.
+        """Fit a cover on the data. This method constructs centers and radii in each dimension given the `perc_overlap` and `n_cube`.
 
         Parameters
         ============
@@ -148,7 +150,6 @@ class Cover:
             A list of centers for each cube
 
         """
-
 
         # TODO: support indexing into any columns
         di = np.array(range(1, data.shape[1]))
@@ -214,7 +215,7 @@ class Cover:
         return centers
 
     def transform_single(self, data, center, i=0):
-        """ Compute entries of `data` in hypercube centered at `center`
+        """Compute entries of `data` in hypercube centered at `center`
 
         Parameters
         ===========
@@ -244,8 +245,8 @@ class Cover:
         return hypercube
 
     def transform(self, data, centers=None):
-        """ Find entries of all hypercubes. If `centers=None`, then use `self.centers_` as computed in `self.fit`.
-            
+        """Find entries of all hypercubes. If `centers=None`, then use `self.centers_` as computed in `self.fit`.
+
             Empty hypercubes are removed from the result
 
         Parameters

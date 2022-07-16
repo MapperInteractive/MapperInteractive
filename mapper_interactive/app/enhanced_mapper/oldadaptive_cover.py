@@ -1,22 +1,30 @@
+import math
+from math import log, log2, pi
+from typing import Dict, List, Tuple
+
 import numpy as np
 import numpy.linalg as LA
-from typing import List, Dict, Tuple
-from math import log2, log, pi
 from sklearn.cluster import KMeans
-import math
 
-from .graph import Graph, AbstractGraph
-from .node import Node
-from .cover import Cover, UniformCover, AbstractCover, CentroidCover
-from .oracle import _check_clustering_object, map_overlap_cluster_to_interval
-from .mapper import generate_mapper_graph
 from .converter import graph_to_networkx
+from .cover import AbstractCover, CentroidCover, Cover, UniformCover
+from .graph import AbstractGraph, Graph
+from .mapper import generate_mapper_graph
+from .node import Node
+from .oracle import _check_clustering_object, map_overlap_cluster_to_interval
 
-def adaptive_cover_graph(X: np.ndarray, lens: np.ndarray, cover: Cover, clusterer: object, per_interval_aggregator):
+
+def adaptive_cover_graph(
+    X: np.ndarray,
+    lens: np.ndarray,
+    cover: Cover,
+    clusterer: object,
+    per_interval_aggregator,
+):
     # Quick checks to fail if input is malformed
     _check_clustering_object(clusterer)
     if len(lens.shape) == 2:
-        assert lens.shape[1] == 1, 'Only 1D mapper is supported!'
+        assert lens.shape[1] == 1, "Only 1D mapper is supported!"
         lens = lens.reshape(-1)
 
     interval_clusterings: List[List[int]] = []
@@ -29,8 +37,12 @@ def adaptive_cover_graph(X: np.ndarray, lens: np.ndarray, cover: Cover, clustere
         if len(interval_members) == 0:
             continue
         assignments: np.ndarray = clusterer.fit_predict(X[interval_members])
-        graph_loss += per_interval_aggregator(X[interval_members], assignments, clusterer)
-        num_clusters: int = assignments.max() + 1  # if 3 is a cluster, then there are 4 clusters: see dbscan sklearn docs
+        graph_loss += per_interval_aggregator(
+            X[interval_members], assignments, clusterer
+        )
+        num_clusters: int = (
+            assignments.max() + 1
+        )  # if 3 is a cluster, then there are 4 clusters: see dbscan sklearn docs
 
         for cluster in range(num_clusters):
             cluster_members = interval_members[assignments == cluster]
@@ -41,12 +53,15 @@ def adaptive_cover_graph(X: np.ndarray, lens: np.ndarray, cover: Cover, clustere
             graph.add_node(node)
             if i > 0:  # beyond first interval
                 lower_interval_clusters = interval_clusterings[i - 1]
-                map_down = map_overlap_cluster_to_interval(cluster_members, lower_interval_clusters)
+                map_down = map_overlap_cluster_to_interval(
+                    cluster_members, lower_interval_clusters
+                )
                 for down in map_down:
                     node2 = graph.get_node(i - 1, down)
                     graph.add_edge(node, node2)
 
     return len(graph.nodes), graph_loss
+
 
 def compute_centroids(X, graph):
     hard_cluster = graph.to_hard_clustering_set(X)
@@ -63,13 +78,15 @@ def compute_centroids(X, graph):
         if val == -1 and len(centroids) != 0:
             min_dist = np.linalg.norm(centroids[0] - X[m]) ** 2
             for centroid in centroids:
-                min_dist = min(min_dist, np.linalg.norm(centroid - X[m]) )
+                min_dist = min(min_dist, np.linalg.norm(centroid - X[m]))
             dists += min_dist
 
     return centroids, dists
 
 
-def AIC_Cover_Centroid(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer):
+def AIC_Cover_Centroid(
+    X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer
+):
     print("DEPRECATED - INCORRECT AIC CALCULATION")
     # Returns optimal cover object, costs, num_clusters
     costs = []
@@ -77,33 +94,42 @@ def AIC_Cover_Centroid(X, lens, perc_overlap, min_intervals, max_intervals, inte
     num_clusters = []
 
     def _aic(p, llh):
-        return 2* p - 2 * llh
+        return 2 * p - 2 * llh
 
     for interval in intervals:
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
+        current_cover = Cover(
+            num_intervals=interval, percent_overlap=perc_overlap, enhanced=False
+        )
         graph = generate_mapper_graph(X, lens, current_cover, clusterer)
         n_clusters = len(graph.nodes)
         num_clusters.append(n_clusters)
         centroids, var = compute_centroids(X, graph)
         k = len(centroids)
         var = var / (X.shape[0] - k)
-        p = (k-1) + (k * X.shape[1]) + 1
+        p = (k - 1) + (k * X.shape[1]) + 1
         membership = assign_membership(X, centroids)
         llh = 0
         for c in range(len(centroids)):
             cluster_membership = X[membership == c]
             if cluster_membership.shape[0] == 0:
                 continue
-            llh += xmeans_log_likelyhood(cluster_membership.shape[0], X.shape[1], var, k, X.shape[0])
+            llh += xmeans_log_likelyhood(
+                cluster_membership.shape[0], X.shape[1], var, k, X.shape[0]
+            )
         costs.append(_aic(p, llh))
     return costs, intervals
 
-def AIC_normal_pdf(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer):
+
+def AIC_normal_pdf(
+    X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer
+):
     costs = []
     intervals = [i for i in range(min_intervals, max_intervals, interval_step)]
 
     for interval in intervals:
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
+        current_cover = Cover(
+            num_intervals=interval, percent_overlap=perc_overlap, enhanced=False
+        )
         graph = generate_mapper_graph(X, lens, current_cover, clusterer)
 
         cost = 0
@@ -123,12 +149,17 @@ def AIC_normal_pdf(X, lens, perc_overlap, min_intervals, max_intervals, interval
         costs.append(cost)
     return costs, intervals
 
-def BIC_normal_pdf(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer):
+
+def BIC_normal_pdf(
+    X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer
+):
     costs = []
     intervals = [i for i in range(min_intervals, max_intervals, interval_step)]
 
     for interval in intervals:
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
+        current_cover = Cover(
+            num_intervals=interval, percent_overlap=perc_overlap, enhanced=False
+        )
         graph = generate_mapper_graph(X, lens, current_cover, clusterer)
 
         cost = 0
@@ -148,12 +179,24 @@ def BIC_normal_pdf(X, lens, perc_overlap, min_intervals, max_intervals, interval
         costs.append(cost)
     return costs, intervals
 
-def Adj_Entropy(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer, weighted=True):
+
+def Adj_Entropy(
+    X,
+    lens,
+    perc_overlap,
+    min_intervals,
+    max_intervals,
+    interval_step,
+    clusterer,
+    weighted=True,
+):
     entropies = []
     intervals = [i for i in range(min_intervals, max_intervals, interval_step)]
 
     for interval in intervals:
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
+        current_cover = Cover(
+            num_intervals=interval, percent_overlap=perc_overlap, enhanced=False
+        )
         graph = generate_mapper_graph(X, lens, current_cover, clusterer)
         edges = list(graph.edges)
         probabilities = []
@@ -174,13 +217,25 @@ def Adj_Entropy(X, lens, perc_overlap, min_intervals, max_intervals, interval_st
         entropies.append(entropy)
     return entropies, intervals
 
-def Adj_Entropy_Pointwise(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer, weighted=True):
+
+def Adj_Entropy_Pointwise(
+    X,
+    lens,
+    perc_overlap,
+    min_intervals,
+    max_intervals,
+    interval_step,
+    clusterer,
+    weighted=True,
+):
     entropies = []
     intervals = [i for i in range(min_intervals, max_intervals, interval_step)]
 
     for interval in intervals:
         print(interval)
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
+        current_cover = Cover(
+            num_intervals=interval, percent_overlap=perc_overlap, enhanced=False
+        )
         graph = generate_mapper_graph(X, lens, current_cover, clusterer)
         edges = list(graph.edges)
         probabilities = np.zeros((X.shape[0], X.shape[0]))
@@ -206,11 +261,15 @@ def Adj_Entropy_Pointwise(X, lens, perc_overlap, min_intervals, max_intervals, i
         entropies.append(entropy)
     return entropies, intervals
 
-def KL_adj(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer):
+
+def KL_adj(
+    X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer
+):
     divergences = []
     intervals = [i for i in range(min_intervals, max_intervals, interval_step)]
     prev = None
     current = None
+
     def _kl(a, b):
         entropy = 0
         for i in range(a.shape[0]):
@@ -220,7 +279,9 @@ def KL_adj(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, c
         return entropy * -1
 
     for interval in intervals:
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
+        current_cover = Cover(
+            num_intervals=interval, percent_overlap=perc_overlap, enhanced=False
+        )
         graph = generate_mapper_graph(X, lens, current_cover, clusterer)
         edges = list(graph.edges)
         probabilities = np.zeros((X.shape[0], X.shape[0]))
@@ -243,12 +304,17 @@ def KL_adj(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, c
             divergences.append(_kl(prev, current))
     return divergences, intervals
 
-def f_Entropy(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer):
+
+def f_Entropy(
+    X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer
+):
     entropies = []
     intervals = [i for i in range(min_intervals, max_intervals, interval_step)]
 
     for interval in intervals:
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
+        current_cover = Cover(
+            num_intervals=interval, percent_overlap=perc_overlap, enhanced=False
+        )
         graph = generate_mapper_graph(X, lens, current_cover, clusterer)
         edges = list(graph.edges)
         total = 0
@@ -278,12 +344,16 @@ def f_Entropy(X, lens, perc_overlap, min_intervals, max_intervals, interval_step
     return entropies, intervals
 
 
-def f_unique_Entropy(X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer):
+def f_unique_Entropy(
+    X, lens, perc_overlap, min_intervals, max_intervals, interval_step, clusterer
+):
     entropies = []
     intervals = [i for i in range(min_intervals, max_intervals, interval_step)]
 
     for interval in intervals:
-        current_cover = Cover(num_intervals=interval, percent_overlap=perc_overlap, enhanced=False)
+        current_cover = Cover(
+            num_intervals=interval, percent_overlap=perc_overlap, enhanced=False
+        )
         graph = generate_mapper_graph(X, lens, current_cover, clusterer)
         edges = list(graph.edges)
         total = X.shape[0]
