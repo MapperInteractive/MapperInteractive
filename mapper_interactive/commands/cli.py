@@ -1,4 +1,3 @@
-import argparse
 import itertools
 import json
 import os
@@ -15,7 +14,6 @@ from app.enhanced_mapper.cover import Cover as enhanced_Cover
 from app.enhanced_mapper.mapper import generate_mapper_graph
 from sklearn.cluster import DBSCAN, AgglomerativeClustering, MeanShift
 from sklearn.preprocessing import MinMaxScaler, normalize
-from tqdm import tqdm
 
 
 def mkdir(f):
@@ -310,10 +308,7 @@ def get_mapper_graph(
         json.dump(g, fp)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Mapper Interactive Command Line Tool. \nSee CLI_README.md for details."
-    )
+def add_arguments(parser):
     parser.add_argument("input", type=str, help="Specific input (must be CSV file)")
     parser.add_argument(
         "-i",
@@ -428,8 +423,8 @@ if __name__ == "__main__":
         "--bic", type=str, help="BIC or AIC", default="BIC", required=False
     )
 
-    args = parser.parse_args()
 
+def run(args):
     fname = args.input
     intervals_str = args.intervals
     overlaps_str = args.overlaps
@@ -522,6 +517,10 @@ if __name__ == "__main__":
 
     output_fname = fname.split("/")[-1]
 
+
+    # Import here so as to not cause issues when calling serve
+    from tqdm import tqdm
+
     for overlap, interval in tqdm(itertools.product(overlaps, intervals)):
         get_mapper_graph(
             df,
@@ -541,19 +540,3 @@ if __name__ == "__main__":
             metric=metric,
             use_gpu=gpu,
         )
-        # g = graph_to_dict(mapper_wrapper(
-        #     df_np, overlap, interval, filter_fn, clusterer, n_threads=threads, metric=metric, use_gpu=gpu))
-        # if len(cols_categorical_idx) > 0:
-        #     categorical_cols = df.columns[cols_categorical_idx]
-        #     for node_id in g['nodes']:
-        #         vertices = g['nodes'][node_id]
-        #         node = {'vertices': vertices}
-        #         node['categorical_cols_summary'] = {}
-        #         for col in categorical_cols:
-        #             data_categorical_i = df[col].iloc[vertices]
-        #             node['categorical_cols_summary'][col] = data_categorical_i.value_counts().to_dict()
-        #         g['nodes'][node_id] = node
-        #     g['categorical_cols'] = list(categorical_cols)
-
-        # with open(join(output_dir, 'mapper_' + str(output_fname) + '_' + str(interval) + '_' + str(overlap) + '.json'), 'w+') as fp:
-        #     json.dump(g, fp)
