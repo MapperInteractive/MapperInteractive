@@ -6,18 +6,10 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import sklearn
-from flask import (
-    Response,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    send_from_directory,
-    url_for,
-)
+from flask import jsonify, render_template, request
 from sklearn import cluster
 
-from . import APP_ROOT, APP_STATIC, app
+from . import APP_STATIC, app
 
 # from kmapper import KeplerMapper, Cover
 from .kmapper import Cover, KeplerMapper
@@ -29,11 +21,24 @@ except:
     print("No statsmodel found")
 import importlib
 
+from platformdirs import user_cache_dir
 from scipy.spatial import distance
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KernelDensity
 from sklearn.preprocessing import MinMaxScaler
+
+appname = "MapperInteractive"
+appauthor = False
+
+cache_dir = user_cache_dir(appname, appauthor)
+
+# Make sure this directory actually exists
+os.makedirs(cache_dir, exist_ok=True)
+
+processed_data_file = os.path.join(cache_dir, "processed_data.csv")
+col_info_file = os.path.join(cache_dir, "cols_info.json")
+node_detail_file = os.path.join(cache_dir, "nodes_detail.json")
 
 
 @app.route("/")
@@ -107,7 +112,7 @@ def process_text_data():
     newdf3 = pd.DataFrame(newdf3)
     newdf3.columns = newdf3_cols
     # write the data frame
-    newdf3.to_csv(APP_STATIC + "/uploads/processed_data.csv", index=False)
+    newdf3.to_csv(processed_data_file, index=False)  # CACHE
     # write the cols info
     cols_numerical = [cols[idx] for idx in cols_numerical_idx]
     cols_categorical = [cols[idx] for idx in cols_categorical_idx]
@@ -117,7 +122,7 @@ def process_text_data():
         "cols_categorical": cols_categorical,
         "cols_others": cols_others,
     }
-    with open(APP_STATIC + "/uploads/cols_info.json", "w") as f:
+    with open(col_info_file, "w") as f:
         f.write(json.dumps(cols_dict, indent=4))
     return jsonify(
         columns=cols_numerical,
@@ -126,43 +131,10 @@ def process_text_data():
     )
 
 
-# @app.route('/data_process', methods=['POST','GET'])
-# def load_data():
-#     filename = request.get_data().decode('utf-8').splitlines()[0]
-#     print(filename)
-#     df = pd.read_csv(APP_STATIC+"/uploads/"+filename)
-#     cols = list(df.columns)
-#     df_0 = df.iloc[0,:]
-#     cols_numerical_idx = []
-#     cols_categorical_idx = []
-#     cols_others_idx = []
-#     rows2delete = np.array([])
-#     for i in range(len(cols)):
-#         c = df_0.iloc[i]
-#         try:
-#             float(c)
-#             cols_numerical_idx.append(i)
-#         except ValueError:
-#             cols_categorical_idx.append(i)
-#         # if isinstance(c,int) or isinstance(c,float):
-#             # cols_numerical_idx.append(i)
-#         # else:
-#             # cols_categorical_idx.append(i)
-#     df.to_csv(APP_STATIC+"/uploads/processed_data.csv", index=False)
-#     cols_numerical = [cols[idx] for idx in cols_numerical_idx]
-#     cols_categorical = [cols[idx] for idx in cols_categorical_idx]
-#     cols_others = [cols[idx] for idx in cols_others_idx]
-#     cols_dict = {'cols_numerical':cols_numerical, 'cols_categorical':cols_categorical, 'cols_others':cols_others}
-#     print(cols_dict)
-#     with open(APP_STATIC+"/uploads/cols_info.json", 'w') as f:
-#         f.write(json.dumps(cols_dict, indent=4))
-#     return jsonify(columns=cols_numerical, categorical_columns=cols_categorical, other_columns=cols_others)
-
-
 @app.route("/mapper_data_process", methods=["POST", "GET"])
 def load_mapper_data():
     filename = request.get_data().decode("utf-8").splitlines()[0]
-    with open(APP_STATIC + "/uploads/" + filename) as f:
+    with open(os.path.join(cache_dir, filename)) as f:
         mapper_graph = json.load(f)
     mapper_graph["links"] = mapper_graph["edges"]
     del mapper_graph["edges"]
@@ -184,7 +156,7 @@ def get_graph():
     selected_cols = mapper_data["cols"]
     all_cols = mapper_data["all_cols"]  # all numerical cols
     categorical_cols = mapper_data["categorical_cols"]
-    data = pd.read_csv(APP_STATIC + "/uploads/processed_data.csv")
+    data = pd.read_csv(processed_data_file)
     data_categorical = data[categorical_cols]
     data = data[all_cols]
 
@@ -250,9 +222,9 @@ def linear_regression():
     y_name = json_data["dep_var"]
     X_names = json_data["indep_vars"]
     print(y_name, X_names)
-    with open(APP_STATIC + "/uploads/nodes_detail.json") as f:
+    with open() as f:  # CACHE
         nodes_detail = json.load(f)
-    data = pd.read_csv(APP_STATIC + "/uploads/processed_data.csv")
+    data = pd.read_csv(processed_data_file)
     if len(selected_nodes) > 0:
         selected_rows = []
         for node in selected_nodes:
@@ -287,12 +259,12 @@ def pca():
     """
     selected_nodes = json.loads(request.form.get("data"))["nodes"]
     print(selected_nodes)
-    data = pd.read_csv(APP_STATIC + "/uploads/processed_data.csv")
-    with open(APP_STATIC + "/uploads/cols_info.json") as f:
+    data = pd.read_csv(processed_data_file)
+    with open(col_info_file) as f:
         cols_dict = json.load(f)
     cols = cols_dict["cols_numerical"]
     print(cols)
-    with open(APP_STATIC + "/uploads/nodes_detail.json") as f:
+    with open(node_detail_file) as f:
         nodes_detail = json.load(f)
     selected_rows = []
     if len(selected_nodes) > 0:
@@ -329,8 +301,8 @@ def update_pca_coloring():
     pca_column = json_data["color_col"]
     pca_dict = json_data["pca_dict"]
     selected_rows = json_data["selected_rows"]
-    df = pd.read_csv(APP_STATIC + "/uploads/processed_data.csv")
-    with open(APP_STATIC + "/uploads/cols_info.json") as f:
+    df = pd.read_csv(processed_data_file)
+    with open(col_info_file) as f:
         cols_dict = json.load(f)
     color_vals = df[pca_column]
     color_type = "categorical"
@@ -346,8 +318,8 @@ def update_pca_coloring():
 @app.route("/update_cluster_details", methods=["POST", "GET"])
 def update_cluster_details():
     label_column = request.get_data().decode("utf-8")
-    df = pd.read_csv(APP_STATIC + "/uploads/processed_data.csv")
-    with open(APP_STATIC + "/uploads/cols_info.json") as f:
+    df = pd.read_csv(processed_data_file)
+    with open(col_info_file) as f:
         cols_dict = json.load(f)
     labels = df[label_column]
     if label_column in cols_dict["cols_numerical"]:
@@ -574,7 +546,7 @@ def _parse_result(graph, lens_dict, data_array=[], if_cli=False):
                 )
         i += 1
 
-    with open(APP_STATIC + "/uploads/nodes_detail.json", "w") as f:
+    with open(node_detail_file, "w") as f:
         json.dump(nodes_detail, f)
 
     # links
@@ -611,12 +583,12 @@ def compute_cc(graph):
 
 
 def get_selected_data(selected_nodes):
-    data = pd.read_csv(APP_STATIC + "/uploads/processed_data.csv")
-    with open(APP_STATIC + "/uploads/cols_info.json") as f:
+    data = pd.read_csv(processed_data_file)
+    with open(col_info_file) as f:
         cols_dict = json.load(f)
     cols = cols_dict["cols_numerical"]
     print(cols)
-    with open(APP_STATIC + "/uploads/nodes_detail.json") as f:
+    with open(node_detail_file) as f:
         nodes_detail = json.load(f)
     if len(selected_nodes) > 0:
         selected_rows = []
@@ -651,7 +623,7 @@ def module_computing():
     # kNN graph
     from pynndescent import NNDescent
 
-    df = pd.read_csv(APP_STATIC + "/uploads/processed_data.csv")
+    df = pd.read_csv(processed_data_file)
     activations_shape = df.shape[1] - 1
     activations = df.iloc[:, 0:activations_shape]
     k = 5

@@ -517,7 +517,6 @@ def run(args):
 
     output_fname = fname.split("/")[-1]
 
-
     # Import here so as to not cause issues when calling serve
     from tqdm import tqdm
 

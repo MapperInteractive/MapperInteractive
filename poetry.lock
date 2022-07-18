@@ -672,7 +672,7 @@ python-versions = "*"
 name = "platformdirs"
 version = "2.5.2"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -1202,7 +1202,7 @@ linear = ["statsmodels"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "a5a1692379ed1f96a24f69fb64b1cffbe88da1f2124ed2cbc49f1cfc5e617441"
+content-hash = "31999afdfdf9614339fcd67a655b40dbef6ae5c42386a988fe766e526b6ed788"
 
 [metadata.files]
 alabaster = []
