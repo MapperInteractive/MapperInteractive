@@ -9,7 +9,7 @@ The Mapper algorithm is a tool from topological data analysis first introduced b
 
 ```bash
 pip install mapper-interactive
-python -m  mapper_interactive
+python -m  mapper_interactive serve
 ```
 
 After running the above commands, a web browser should open with MapperInteractive running.

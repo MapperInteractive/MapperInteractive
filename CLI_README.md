@@ -7,6 +7,12 @@
 * [tqdm](https://github.com/tqdm/tqdm)
 * [PyTorch](https://pytorch.org/) (If GPU acceleration is desired. CUDA device required.)
 
+To install everything run
+
+```sh
+pip install mapper_interactive[all]
+```
+
 ---
 
 ### Quickstart
@@ -14,7 +20,7 @@
 To only perform data wrangling:
 
 ```bash
-python3 mapper-interactive-cli.py data.csv --preprocess-only
+python -m mapper_interactive cli data.csv --preprocess-only
 ```
 
 Example mapper graph computation with parameters:
@@ -27,7 +33,7 @@ Example mapper graph computation with parameters:
 * Graphs stored in ./`CLI_examples/`
 
 ```bash
-python3 mapper-interactive-cli.py data.csv --intervals 10:50:10 --overlaps 25:35:5 --clusterer dbscan --eps 0.5 --min_samples 5 --filter l2norm -output ./CLI_examples
+python -m mapper_interactive cli data.csv --intervals 10:50:10 --overlaps 25:35:5 --clusterer dbscan --eps 0.5 --min_samples 5 --filter l2norm -output ./CLI_examples
 ```
 
 ---
