@@ -141,8 +141,8 @@ def load_mapper_data():
         col_keys = mapper_graph['numerical_col_keys']
     else:
         col_keys = []
-    # cat_cols = ['label', 'predictions', 'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-    cat_cols = ['fine_label', 'coarse_label', 'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    cat_cols = ['ground', 'label', 'predictions', 'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    # cat_cols = ['fine_label', 'coarse_label', 'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     return jsonify(mapper=mapper_graph_new, connected_components=connected_components, categorical_cols=cat_cols, col_keys=col_keys)
     # return jsonify(mapper=mapper_graph_new, connected_components=connected_components, categorical_cols=mapper_graph['categorical_cols'])
 

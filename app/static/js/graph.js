@@ -1460,9 +1460,9 @@ class Graph{
         d3.selectAll(".viewer-graph__pie").remove();
         d3.selectAll(".viewer-graph__vertex").attr("fill", "#fff");
         d3.selectAll(".viewer-graph__label").attr("fill", "#555");
-        // let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
-        let color_categorical = d3.scaleOrdinal()
-            .range(['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#696969', '#F5F5F5']);
+        let color_categorical = d3.scaleOrdinal(d3.schemeCategory10);
+        // let color_categorical = d3.scaleOrdinal()
+        //     .range(['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#696969', '#F5F5F5']);
         // let color_dict = {};
         // let color_dict = {"airplane": "#1f77b4", "automobile": "#ff7f0e", "bird": "#2ca02c", "cat": "#d62728", "deer": "#9467bd", "dog": "#8c564b", "frog": "#e377c2", "horse": "#bcbd22", "ship": "#17becf", "truck": "#7f7f7f", "false": "#1f77b4", "true": "#ff7f0e"};
         // // get # catogories
