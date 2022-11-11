@@ -1489,6 +1489,63 @@ class Graph{
         //         }
         //     })
 
+        // ############ tmp ################
+        let weak_nodes = [
+            "node170",
+            "node490",
+            "node262",
+            "node171",
+            "node174",
+            "node172",
+            "node173",
+            "node481",
+            "node222",
+            "node223",
+            "node491",
+            "node422",
+            "node182",
+            "node232",
+            "node180",
+            "node253",
+            "node241",
+            "node204",
+            "node190",
+            "node183",
+            "node193",
+            "node194",
+            "node205",
+            "node244",
+            "node233",
+            "node428",
+            "node195",
+            "node255"
+        ]
+
+        let oldid2idx = {}
+        for(let i=0; i<this.nodes.length; i++){
+            oldid2idx[this.nodes[i].id_original] = i
+        }
+        let weak_indices = []
+        for(let i=0; i<weak_nodes.length; i++){
+            weak_indices.push(oldid2idx[weak_nodes[i]])
+        }
+        d3.selectAll(".viewer-graph__vertex")
+            .style("stroke", d=>{
+                if(weak_indices.indexOf(d.index)!=-1){
+                    return "magenta"
+                } else {
+                    return "#696969"
+                }
+            })
+            .style("stroke-width", d=>{
+                if(weak_indices.indexOf(d.index)!=-1){
+                    return 8
+                } else {
+                    return 2
+                }
+            })
+
+
         let color_dict = {};
 
         let categories = [];

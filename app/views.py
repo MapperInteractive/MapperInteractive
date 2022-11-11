@@ -427,9 +427,9 @@ def _parse_result(graph, lens_dict, data_array=[], if_cli=False):
                 if "avgs" in graph['nodes'][key]:
                     data['nodes'].append({
                         "id": str(i),
-                        "id_orignal": key,
-                        "size": len(graph['nodes'][key]),
-                        "vertices": cluster,
+                        "id_original": key,
+                        "size": len(graph['nodes'][key]['vertices']),
+                        "vertices": graph['nodes'][key]['vertices'],
                         "categorical_cols_summary": graph['nodes'][key]["categorical_cols_summary"],
                         "avgs":graph['nodes'][key]["avgs"]
                         }),
@@ -437,8 +437,8 @@ def _parse_result(graph, lens_dict, data_array=[], if_cli=False):
                     data['nodes'].append({
                         "id": str(i),
                         "id_orignal": key,
-                        "size": len(graph['nodes'][key]),
-                        "vertices": cluster,
+                        "size": len(graph['nodes'][key]['vertices']),
+                        "vertices": graph['nodes'][key]['vertices'],
                         "categorical_cols_summary": graph['nodes'][key]["categorical_cols_summary"],
                         }),
             else:
