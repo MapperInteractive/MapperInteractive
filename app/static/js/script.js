@@ -43,7 +43,7 @@ folder.onchange=function(){
                 success: function (response) {
                     response = JSON.parse(response);
                     console.log(response)
-                    that.graph = new Graph(response.mapper, response.col_keys, response.connected_components, response.categorical_cols);
+                    that.graph = new Graph(response.mapper, response.col_keys, response.connected_components, response.categorical_cols, other_cols=undefined, filter_functions=['lens']);
                     // that.graph = new Graph(response.mapper, [], response.connected_components, response.categorical_cols);
 
                     // that.side_bar = new DataLoader(response.columns, response.categorical_columns, response.other_columns);
