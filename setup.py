@@ -15,7 +15,7 @@ setup(
     install_requires=[
         'gunicorn',
         'Flask',
-        'Flask-HTTPAuth==3.2.4',
+        'Flask-HTTPAuth==4.8.1',
         'kmapper==1.2.0',
         'scikit-learn',
         'numpy',
